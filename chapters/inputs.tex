@@ -17,9 +17,11 @@ order of the indices; each distinct set of indices must appear once.
 
 \begin{description}
 \item[\file{freqsfile}] One line per mode: $\omega$, then
-  $\partial\mu/\partial q$ ($x$, $y$, $z$). Two further columns, a legacy
-  scale factor and a legacy flag, are ignored: the bands are chosen in
-  \file{bandlist}.
+  $\partial\mu/\partial q$ ($x$, $y$, $z$), then two optional columns: a
+  legacy scale factor (unused) and a flag. In the release, a flag of 1
+  computes the fundamental of that mode and 0 disables it; a disabled mode
+  also has its dipole derivative set to zero. \devonly{} The flag is
+  ignored, with a warning, and the bands are chosen in \file{bandlist}.
 \item[\file{phi3file}, \file{phi4file}] Lines \texttt{i j k value} and
   \texttt{i j k l value}. Entries below \opt{phi3threshold} and
   \opt{phi4threshold} (cm$^{-1}$) are dropped.
@@ -31,7 +33,7 @@ order of the indices; each distinct set of indices must appear once.
   then the repetition count.
 \item[\opt{gradientfile}] Optional: the classical gradient at the reference
   geometry, lines \texttt{i g\_i} (written by \opt{shiftgeometry}).
-\item[\opt{bandlistfile}, \opt{resonanceoverrides}] Edited copies of
+\item[\opt{bandlistfile}, \opt{resonanceoverrides}] \devonly{} Edited copies of
   \file{bandlist} and \file{resonancecandidates}
   (Chapter~\ref{ch:tut-review}).
 \end{description}
@@ -46,8 +48,8 @@ order of the indices; each distinct set of indices must appear once.
 \optentry{ddthres}{0.2}{1}{The same for quartic (Darling--Dennison) resonances.}
 \optentry{samesignresonances}{0}{1}{Also accept terms whose detuning is a single frequency.}
 \optentry{closureterms}{0}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}.}
-\optentry{rescriterion}{0}{1}{1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta.}
-\optentry{resonanceoverrides}{""}{1}{Force resonances on or off (Chapter~\ref{ch:tut-review}).}
+\optentry{rescriterion}{0}{1}{\devonly{} 1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta.}
+\optentry{resonanceoverrides}{""}{1}{\devonly{} Force resonances on or off (Chapter~\ref{ch:tut-review}).}
 \end{description}
 \subsection*{Geometry and dipole}
 \begin{description}
@@ -57,8 +59,8 @@ order of the indices; each distinct set of indices must appear once.
 \subsection*{Bands}
 \begin{description}
 \optentry{bandthres}{see README}{1}{Default activation of overtone, combination and difference bands, by $|\partial^2\tilde\mu|$.}
-\optentry{fundthres}{1e-6}{1}{Default activation of fundamentals, by $|\partial\mu|$.}
-\optentry{bandlistfile}{""}{1}{Edited band list.}
+\optentry{fundthres}{1e-6}{1}{\devonly{} Default activation of fundamentals, by $|\partial\mu|$.}
+\optentry{bandlistfile}{""}{1}{\devonly{} Edited band list.}
 \end{description}
 \subsection*{Checks}
 \begin{description}

@@ -43,8 +43,9 @@ thermal_anharmonicity_fase1 > fase1.log
 thermal_anharmonicity_fase2a > fase2a.log
 mpirun -np 4 thermal_anharmonicity_fase2b > fase2b.log
 \end{lstlisting}
-Phase 1 takes about 45~s. It finds 1785 resonances and selects 31
-fundamentals and 1264 other bands. Phase 2b takes about 3 minutes on 4
+Phase 1 takes about 45~s. It finds 1785 resonances. It selects 31 fundamentals (the modes with flag 1
+in \file{freqsfile}; in the development version, those with a nonzero
+dipole derivative) and 1264 other bands. Phase 2b takes about 3 minutes on 4
 cores; the largest polyad has 3582 states.
 
 \section{What to look at}
