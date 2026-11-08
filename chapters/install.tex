@@ -52,10 +52,16 @@ which is set by the PETSc option \texttt{--with-64-bit-indices}.
   must use the same integer size as \texttt{PetscBLASInt}. A library of the
   other size links without errors, but receives indices of the wrong width:
   the results are wrong, or the program crashes.
-\item \emph{What \prog{configure} checks.} \devonly{} \prog{configure}
-  reads the size of \texttt{PetscBLASInt} and runs a small test program
-  for BLAS, LAPACK and ScaLAPACK, linked with the same libraries as the
-  programs. It stops if one of them uses the other size, and names it.
+\item \emph{What \prog{configure} does.} \devonly{} \prog{configure}
+  reads the size of \texttt{PetscBLASInt}. For BLAS, LAPACK and ScaLAPACK
+  not given with \opt{--with-\ldots} or \texttt{NAME\_LIBS}, it tries the
+  pkg-config modules available (for example \texttt{blas64},
+  \texttt{lapack64}, \texttt{scalapack64-openmpi} on Debian and Ubuntu,
+  or \texttt{mkl-dynamic-ilp64-gomp} for MKL, tried first when
+  \texttt{MKLROOT} is set) and keeps the first one that passes a small
+  test of its integer size; it lists the ones it skipped. It then tests
+  the libraries actually used, including those given by the user, and
+  stops if one of them uses the other size, and names it.
   \opt{--disable-int-check} turns the error into a warning. BLACS and ELPA
   are not checked: make sure they were built for the same integer size
   (for ELPA, a 64-bit build is usually configured with
