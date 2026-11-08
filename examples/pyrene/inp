@@ -1,0 +1,40 @@
+## Variables ##
+
+## System definition ##
+nmodes = 72
+
+verbosity = 31
+
+## Limits ##
+cutcorrflag = 0
+cutintensity = 1.e-8
+tolerance = 1.e-4
+vectolerance = 5.e-3
+vectolerance3 = 5.e-2
+fermithres = 0.20
+ddthres = 0.20
+hsizescalepar = 8
+maxtothops = 4
+maxfhops = 4
+maxddhops = 4
+diophantineiter = 0
+eigensolver = 2
+bandthres = 1e-3
+ltokeep=1
+computeground=1
+
+## Histograms ##
+#histoutprefix = hist
+Ehistmin = -12.5
+Ehistmax = 12.5
+Ehiststep = 5
+wnumhistmin = 0
+wnumhistmax = 9000
+wnumhiststep = 0.01
+danharmhistmin = -1000
+danharmhistmax = 1000
+danharmhiststep = 5.
+
+maxlapack = 100
+
+modepopfile = "quantafile"

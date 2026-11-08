@@ -1,0 +1,25 @@
+% AnharmoniCaOs user manual. Single source for the PDF (pdflatex/latexmk,
+% e.g. on Overleaf) and the HTML version (LaTeXML, see Makefile and
+% docker/). Keep to standard LaTeX and the packages loaded here: both
+% toolchains must understand every construct.
+\documentclass[11pt,a4paper]{report}
+\input{macros}
+\title{AnharmoniCaOs\\[1ex]\large User manual}
+\author{Giacomo Mulas, Cyril Falvo, Patrick Cassam-Chena\"i, Christine Joblin}
+\date{Version for \acversion}
+\begin{document}
+\maketitle
+\tableofcontents
+\include{chapters/intro}
+\include{chapters/install}
+\include{chapters/workflow}
+\include{chapters/tutorial-pyrene}
+\include{chapters/tutorial-gaussian}
+\include{chapters/tutorial-thermal}
+\include{chapters/tutorial-review}
+\include{chapters/inputs}
+\include{chapters/outputs}
+\include{chapters/troubleshooting}
+\bibliographystyle{unsrt}
+\bibliography{manual}
+\end{document}

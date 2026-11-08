@@ -1,0 +1,39 @@
+\chapter{Installation}\label{ch:install}
+
+\section{Requirements}
+
+\begin{itemize}
+\item A C compiler with OpenMP, MPI, LAPACK and GSL.
+\item PETSc and SLEPc, built with 64-bit indices and the same MPI. They are
+  needed by phases 2a and 2b.
+\item ScaLAPACK, and optionally ELPA, for the distributed diagonalisation.
+\item PARI/GP, for the optional search of hidden resonances
+  (\opt{diophantineiter}).
+\item The \texttt{oct\_parser} library, which reads the input file. It is
+  included as the submodule \file{external/oct-parser}.
+\end{itemize}
+
+\section{Building}
+
+\begin{lstlisting}
+git clone --recursive <repository URL> AnharmoniCaOs
+cd AnharmoniCaOs
+./configure --with-petsc=PREFIX --with-slepc=PREFIX ...
+make
+\end{lstlisting}
+\opt{./configure --help} lists the options that point to each library.
+Building produces three programs:
+\begin{itemize}
+\item \prog{thermal\_anharmonicity\_fase1};
+\item \prog{thermal\_anharmonicity\_fase2a};
+\item \prog{thermal\_anharmonicity\_fase2b}.
+\end{itemize}
+
+\section{Checking the build}
+
+The directory \file{tests/claude\_check} contains checks that compare the
+code with exact reference implementations; each \file{run.sh} ends with
+\texttt{OK}. Phase 1 alone can also be built without MPI, PETSc or PARI,
+with \file{tests/claude\_check/fase1\_standalone/build.sh}. This is useful
+on a laptop, to inspect the resonances before running phases 2a and 2b on
+a cluster.

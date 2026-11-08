@@ -1,0 +1,64 @@
+\chapter{Introduction}\label{ch:intro}
+
+\ac{} computes anharmonic infrared spectra of molecules, in absorption and
+in emission. It covers the fundamentals and the overtone, combination and
+difference bands, and the hot bands of vibrationally excited molecules. It
+is designed for large molecules, such as polycyclic aromatic hydrocarbons
+(PAHs), and for spectra of molecules with a given internal energy or
+temperature. The input is the same quartic force field and second-order
+dipole that an anharmonic frequency calculation with an electronic
+structure code provides; Gaussian output can be converted directly
+(Chapter~\ref{ch:tut-gaussian}).
+
+\section{What it does, compared with VPT2}
+
+A VPT2 calculation, such as \texttt{freq=anharmonic} in Gaussian, gives
+anharmonic fundamentals, overtones and combinations from the ground state.
+Resonances are treated by deperturbation and small variational blocks.
+\ac{} proceeds in three steps.
+\begin{enumerate}
+\item The \emph{same perturbation theory}, in its canonical (Van Vleck)
+  form, removes the anharmonic terms except those that couple nearly
+  degenerate states: the Fermi and Darling--Dennison resonances. This gives
+  the deperturbed anharmonic constants, the effective resonant couplings
+  and the dipole transformed to second order \notes{§3--6}.
+\item For each starting state, the states connected by the resonant
+  couplings are collected into \emph{polyads}. These are finite blocks of
+  harmonic states, truncated by an energy and coupling criterion
+  \notes{§11.3}.
+\item The polyad Hamiltonians are \emph{diagonalised}, or treated
+  spectrally for very large polyads. The transitions between the resulting
+  states are accumulated into histograms, binned in wavenumber and in the
+  energy of the starting state.
+\end{enumerate}
+Since any starting state can be used, not only the ground state, averaging
+over a thermal or microcanonical sample of starting states gives band
+positions, widths and shapes as a function of temperature or internal
+energy. A plain VPT2 calculation does not give this.
+
+\section{When to use it}
+
+\begin{itemize}
+\item Spectra of vibrationally hot molecules, for example the infrared
+  emission of PAHs heated by the absorption of a UV photon.
+\item Large molecules with many accidental resonances, where the
+  variational treatment of the polyads matters.
+\item Temperature-dependent band profiles.
+\end{itemize}
+For the fundamentals of a small molecule at 0~K, a VPT2 calculation is
+usually enough; \ac{} then reproduces it, as a check
+(Chapter~\ref{ch:tut-gaussian}).
+
+\section{How to read this manual}
+
+Chapters~\ref{ch:install} and~\ref{ch:workflow} explain how to build the
+code and how a calculation is organised. Chapters~\ref{ch:tut-pyrene}
+to~\ref{ch:tut-review} are tutorials with complete, reproducible
+examples. Chapters~\ref{ch:inputs} and~\ref{ch:outputs} are the
+reference for the input and output files. Chapter~\ref{ch:trouble}
+explains the warnings and errors.
+
+The theory behind the code, with all the derivations, is in the companion
+notes \emph{Anharmonic oscillations with the Van Vleck method}, cited here
+as ``theory notes''. The method is described in~\cite{mulas2018}; the public release is on
+SourceForge~\cite{anharmonicasf}.

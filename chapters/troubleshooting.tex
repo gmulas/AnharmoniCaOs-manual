@@ -1,0 +1,23 @@
+\chapter{Warnings and errors}\label{ch:trouble}
+
+\begin{description}
+\item[\texttt{steps of the deperturbed Dunham ladders are <= 0}] An
+  excited level lies at or below a lower one. The log (\texttt{\#
+  dunhamcheck:}) names the responsible constant and the cubic terms behind
+  it.
+  \begin{itemize}
+  \item Type a (near Fermi resonance): use \opt{dunhamfix}~$=1$.
+  \item Type b (a low-frequency, large-amplitude mode): use
+    \opt{shiftgeometry}~$=1$ or \opt{samesignresonances}~$=1$.
+  \end{itemize}
+  See \notes{§11.8}.
+\item[\texttt{rotatedcomp is ... > .5}] With \opt{shiftgeometry}, the
+  rotation of the normal modes strongly mixes some modes. The intensities
+  of those bands are less accurate.
+\item[\texttt{freqsfile disables N modes in its 6th column}] That column is
+  ignored. Choose the bands in \file{bandlist}.
+\item[\texttt{error reading updown for band}] \file{dumpedparams} was
+  written by an older phase 1. Rerun phase 1.
+\item[\texttt{resintensitythres is no longer used}] Replace it by
+  \opt{resintensityrel}.
+\end{description}

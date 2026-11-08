@@ -1,0 +1,24 @@
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\lstset{basicstyle=\ttfamily\small,columns=fullflexible,keepspaces=true,
+  frame=single,breaklines=true}
+% names
+\newcommand{\ac}{AnharmoniCaOs}
+\newcommand{\acversion}{2026.11}
+% an input option, a file name, a program name
+\newcommand{\opt}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\prog}[1]{\texttt{#1}}
+% pointer to the theory notes ("Anharmonic oscillations with the Van Vleck
+% method"); #1 is the section or equation, as text
+\newcommand{\notes}[1]{(theory notes, #1)}
+% an option-reference entry: name, default, phase, description
+\newcommand{\optentry}[4]{\item[\opt{#1}] \emph{default} \texttt{#2}, \emph{phase} #3.\ #4}

@@ -1,0 +1,72 @@
+\chapter{How a calculation is organised}\label{ch:workflow}
+
+A calculation runs three programs in sequence, in the same directory. All
+three read the input file \file{inp}.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+program & does & writes \\
+\midrule
+\prog{fase1} & resonances, coefficients, band list & \file{resonanceslist}, \file{dunhamparams}, \\
+ & & \file{bandlist}, \file{resonancecandidates}, \file{dumpedparams} \\
+\prog{fase2a} & polyads of each starting state & \file{dir\_n*}, \file{polyadsizes} \\
+\prog{fase2b} & diagonalisation, transitions & \file{hist\_*}, \file{proclog\_n*} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Phase 1: perturbation theory}
+
+Phase 1 reads the harmonic frequencies, the cubic and quartic force
+constants and the dipole derivatives (Chapter~\ref{ch:inputs}). It then
+does three things:
+\begin{itemize}
+\item it decides which terms are resonant;
+\item it computes all the coefficients of the transformed Hamiltonian and
+  dipole;
+\item it writes them to \file{dumpedparams}, a binary file read by the next
+  phases.
+\end{itemize}
+It takes less than a minute for a molecule with about 100 modes. It also
+writes three readable files that you should look at before going on:
+\begin{itemize}
+\item \file{resonanceslist}: the resonances found, with coupling, detuning
+  and their ratio;
+\item \file{dunhamparams}: the deperturbed anharmonic constants, in the
+  same convention as Gaussian's X matrix (Section~\ref{sec:dunham});
+\item \file{bandlist}: all the bands of the spectrum, with an intensity
+  estimate and a column saying whether, and in which direction, each band
+  is computed.
+\end{itemize}
+
+\section{Reviewing and adjusting (optional)}
+
+The automatic choices of phase 1 can be changed by editing two files and
+running phase 1 again. Chapter~\ref{ch:tut-review} gives an example.
+\begin{itemize}
+\item In \file{bandlist}, each band can be set to \texttt{both},
+  \texttt{up} (absorption only), \texttt{down} (emission only) or
+  \texttt{off}. Then rerun phase 1 with \opt{bandlistfile}.
+\item In \file{resonancecandidates}, each candidate resonance, grouped by
+  its change of quantum numbers, can be forced \texttt{on} or
+  \texttt{off}. Then rerun phase 1 with \opt{resonanceoverrides}.
+\end{itemize}
+
+\section{Phase 2a: polyads}
+
+For each starting state listed in \opt{modepopfile}, phase 2a collects the
+states connected to it, and to the destinations of its bands, by the
+resonant couplings into polyads. It writes their Hamiltonian matrices to
+\file{dir\_n00000}, \file{dir\_n00001}, \ldots, one directory per starting
+state. Its cost grows with the size of the polyads, controlled mainly by
+\opt{hsizescalepar} and \opt{maxtothops}.
+
+\section{Phase 2b: diagonalisation and spectra}
+
+Phase 2b diagonalises the polyads (\opt{eigensolver}), or treats them
+spectrally (\opt{spectral}~$=1$, for very large ones). It computes the
+transitions and adds them to the histograms \file{hist\_abs\_*} and
+\file{hist\_ems\_*}. These are binned in wavenumber (\opt{wnumhiststep})
+and in the energy of the starting state (\opt{Ehiststep}). This is the
+expensive phase. It runs with MPI and is the one to submit to a cluster.
