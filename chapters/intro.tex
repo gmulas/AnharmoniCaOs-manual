@@ -49,6 +49,16 @@ For the fundamentals of a small molecule at 0~K, a VPT2 calculation is
 usually enough; \ac{} then reproduces it, as a check
 (Chapter~\ref{ch:tut-gaussian}).
 
+\section{Versions}
+
+This manual describes the release \ac{}~\acversion{} and the development
+version (branch \texttt{dev/polyad-jobs}). Options, files and behaviours
+that exist only in the development version are marked \devonly. The most
+visible difference concerns the choice of the bands. In the release, the
+fundamentals are chosen with the last column of \file{freqsfile}, and the
+other bands by \opt{bandthres}. In the development version, all the bands
+are chosen in \file{bandlist}, separately for absorption and emission.
+
 \section{How to read this manual}
 
 Chapters~\ref{ch:install} and~\ref{ch:workflow} explain how to build the
