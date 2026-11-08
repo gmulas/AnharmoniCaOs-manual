@@ -10,12 +10,23 @@ dipole that an anharmonic frequency calculation with an electronic
 structure code provides; Gaussian output can be converted directly
 (Chapter~\ref{ch:tut-gaussian}).
 
-\section{What it does, compared with VPT2}
+\section{What it does, compared with VPT2 and GVPT2}
 
-A VPT2 calculation, such as \texttt{freq=anharmonic} in Gaussian, gives
+Plain second-order vibrational perturbation theory (VPT2) gives the
 anharmonic fundamentals, overtones and combinations from the ground state.
-Resonances are treated by deperturbation and small variational blocks.
-\ac{} proceeds in three steps.
+Near resonances spoil it, through small denominators. Gaussian's
+\texttt{freq=anharmonic} therefore uses its generalised form, GVPT2:
+\begin{itemize}
+\item the resonant terms are first removed from the perturbative sums
+  (deperturbed VPT2, DVPT2);
+\item the states they couple, from the Fermi and Darling--Dennison
+  resonances, are then treated variationally in small blocks.
+\end{itemize}
+
+These blocks are built around the states reached from the ground state,
+with one, two or three quanta.
+
+\ac{} follows the same idea, generalised in three steps.
 \begin{enumerate}
 \item The \emph{same perturbation theory}, in its canonical (Van Vleck)
   form, removes the anharmonic terms except those that couple nearly
@@ -34,7 +45,9 @@ Resonances are treated by deperturbation and small variational blocks.
 Since any starting state can be used, not only the ground state, averaging
 over a thermal or microcanonical sample of starting states gives band
 positions, widths and shapes as a function of temperature or internal
-energy. A plain VPT2 calculation does not give this.
+energy. The polyads also follow chains of resonances, which can be long
+in large molecules, instead of stopping at the states directly coupled
+to a band. GVPT2, which starts from the ground state, gives neither.
 
 \section{When to use it}
 
@@ -45,9 +58,11 @@ energy. A plain VPT2 calculation does not give this.
   variational treatment of the polyads matters.
 \item Temperature-dependent band profiles.
 \end{itemize}
-For the fundamentals of a small molecule at 0~K, a VPT2 calculation is
-usually enough; \ac{} then reproduces it, as a check
-(Chapter~\ref{ch:tut-gaussian}).
+For the fundamentals of a small molecule at 0~K, a GVPT2 calculation is
+usually enough. \ac{} then gives comparable results and can be used as a
+check (Chapter~\ref{ch:tut-gaussian}). The deperturbed anharmonic constants
+agree with Gaussian's, apart from its Coriolis terms; the resonant blocks
+can differ, because the two codes choose the resonances differently.
 
 \section{Versions}
 
