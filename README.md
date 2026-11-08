@@ -4,7 +4,7 @@ There is one LaTeX source and two outputs:
 
 - **PDF**: `make pdf`, or compile `manual.tex` on Overleaf.
 - **HTML**: `make html`, which uses [LaTeXML](https://math.nist.gov/~BMiller/LaTeXML/).
-- **Docker image** serving the HTML, with the PDF linked from it:
+- **Docker image** (Debian slim + Apache) serving the HTML, with the PDF next to it:
   ```
   docker build -f docker/Dockerfile -t anharmonicaos-manual .
   docker run -p 8080:80 anharmonicaos-manual

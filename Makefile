@@ -1,7 +1,7 @@
 # One source, two outputs.
 #   make pdf    -> manual.pdf (pdflatex via latexmk; Overleaf does the same)
 #   make html   -> html/ (LaTeXML: latexmlc, MathML + MathJax fallback)
-#   make docker -> image serving html/ (see docker/Dockerfile)
+#   make docker -> image serving html/ with Apache (see docker/Dockerfile)
 MAIN = manual
 SRC  = $(MAIN).tex macros.tex $(MAIN).bib $(wildcard chapters/*.tex)
 
