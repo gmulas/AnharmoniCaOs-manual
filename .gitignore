@@ -1,0 +1,15 @@
+*.aux
+*.log
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+manual.pdf
+html/
+examples/*/phi3file
+examples/*/phi4file
+examples/*/dmu2file
+examples/*/dir_n*
+examples/*/hist_*

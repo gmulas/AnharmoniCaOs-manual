@@ -1,0 +1,20 @@
+\chapter{Tutorial 4: aiming at one band}\label{ch:tut-review}
+
+Suppose that a weak observed band could be a dark band of the calculation,
+but the computed intensity does not match. This tutorial shows how to
+recompute only what concerns that band, more accurately, without
+repeating the whole calculation.
+\begin{enumerate}
+\item In \file{resonancecandidates}, find the quantum-number changes that
+  involve the dark state. Lines marked \texttt{near} are close to a
+  threshold. Set their last column to \texttt{on}.
+\item In \file{bandlist}, leave active only the band of interest (and the
+  bright band it borrows from), setting the others to \texttt{off}.
+\item Rerun phase 1 with
+\begin{lstlisting}
+resonanceoverrides = "resonancecandidates"
+bandlistfile = "bandlist"
+\end{lstlisting}
+  then phases 2a and 2b, only for the starting states that matter.
+\end{enumerate}
+% TODO: worked example on pyrene with numbers.

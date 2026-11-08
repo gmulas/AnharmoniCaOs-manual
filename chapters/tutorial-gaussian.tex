@@ -1,0 +1,38 @@
+\chapter{Tutorial 2: from a Gaussian anharmonic calculation}\label{ch:tut-gaussian}
+
+This tutorial starts from the output of a Gaussian
+\texttt{freq=(anharmonic,...)} calculation, here for
+1,2,3,6,7,8-hexahydropyrene (90 modes, B3LYP-D3/6-31G). The Gaussian input
+and the compressed output are in \file{examples/hexahydropyrene}. The
+route section is
+\begin{lstlisting}
+#p geom=check freq=(ReadFC,anharm,PrintDerivatives) b3lyp/gen/auto
+   int=(grid=superfine) cphf=(grid=superfine) densityfit
+   empiricaldispersion=gd3 iop(7/33=1,99/5=0) scf=xqc
+\end{lstlisting}
+The essential keywords are \texttt{freq=(anharm,PrintDerivatives)}, which
+prints the cubic and quartic force constants and the dipole derivatives
+in normal coordinates. \texttt{ReadFC} and \texttt{geom=check} reuse a
+previous optimisation and frequency calculation.
+
+\section{Converting the Gaussian output}
+
+\begin{lstlisting}
+xz -dk 1_2_3_6_7_8-hexahydropyrene_distort1b.log.xz
+python3 tools/gaussian2ac.py 1_2_3_6_7_8-hexahydropyrene_distort1b.log
+\end{lstlisting}
+The script writes \file{freqsfile}, \file{phi3file}, \file{phi4file},
+\file{dmu2file} and, when the log contains them, the semidiagonal third
+derivatives of the dipole (\file{dmu3file}, used with \opt{dipole3}). The
+modes are renumbered by increasing wavenumber.
+
+\section{Comparing with Gaussian}
+
+\file{dunhamparams} uses the same convention as Gaussian's
+``Total Anharmonic X Matrix'': each pair $i\le j$ is counted once.
+Gaussian's matrix includes the Coriolis contributions, which \ac{}
+neglects. Once these are subtracted, the two agree to the printed
+precision, except for the entries that Gaussian deperturbs for its Fermi
+resonances (129 of 4095 for this molecule). The zero-point energy agrees
+to 0.03~cm$^{-1}$.
+% TODO: script for this comparison; tables of fundamentals vs GVPT2.

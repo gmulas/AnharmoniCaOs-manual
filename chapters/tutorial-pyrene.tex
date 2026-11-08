@@ -1,0 +1,73 @@
+\chapter{Tutorial 1: the absorption spectrum of pyrene at 0~K}\label{ch:tut-pyrene}
+
+This tutorial computes the absorption spectrum of pyrene
+(C$_{16}$H$_{10}$, 72 modes) from the ground state, with the DFT
+quartic force field of the reference test case.
+% TODO(maintainer): level of theory of the pyrene force field. The input files are in
+\file{examples/pyrene}.
+% TODO(maintainer): confirm that the pyrene force field may be distributed
+% with the manual.
+
+\section{Input files}
+
+\begin{description}
+\item[\file{freqsfile}] One line per mode: harmonic wavenumber (cm$^{-1}$)
+  and the three components of $\partial\mu/\partial q$ (atomic units).
+\item[\file{phi3file}, \file{phi4file}] Cubic and quartic force constants
+  (cm$^{-1}$, dimensionless normal coordinates), one per line, with 1-based
+  indices.
+\item[\file{dmu2file}] Second derivatives of the dipole (a.u.).
+\item[\file{quantafile}] The starting states: one line per state, with the
+  quantum numbers of all the modes and a repetition count. Here it contains
+  only the ground state.
+\item[\file{inp}] The options. The essential ones for this tutorial:
+\end{description}
+\begin{lstlisting}
+nmodes = 72
+fermithres = 0.20        # resonance thresholds (|W/D|)
+ddthres = 0.20
+hsizescalepar = 8        # polyad size
+maxtothops = 4
+bandthres = 1e-3         # which overtone/combination bands to compute
+computeground = 1
+wnumhistmin = 0          # spectral grid (cm-1)
+wnumhistmax = 9000
+wnumhiststep = 0.01
+modepopfile = "quantafile"
+\end{lstlisting}
+
+\section{Running}
+
+\begin{lstlisting}
+thermal_anharmonicity_fase1 > fase1.log
+thermal_anharmonicity_fase2a > fase2a.log
+mpirun -np 4 thermal_anharmonicity_fase2b > fase2b.log
+\end{lstlisting}
+Phase 1 takes about 45~s. It finds 1785 resonances and selects 31
+fundamentals and 1264 other bands. Phase 2b takes about 3 minutes on 4
+cores; the largest polyad has 3582 states.
+
+\section{What to look at}
+
+\begin{itemize}
+\item \file{resonanceslist}: the Fermi (B3) and Darling--Dennison (E4, D4)
+  resonances.
+\item \file{dunhamparams}: the deperturbed fundamentals $\nu_i$ and
+  anharmonic constants $x_{ij}$.
+\item The histograms \file{hist\_abs\_0}, \file{\_1} and \file{\_2}: the
+  $x$, $y$ and $z$ components of the absorption spectrum.
+\end{itemize}
+% TODO: script to sum and plot the histograms (tools/), figure of the
+% spectrum, table of the strongest bands (from the 2026-11-06 runs:
+% 844.8, 711.9, 202.2 cm-1, ...).
+
+\section{Variations}
+
+The same run with the options of Chapter~\ref{ch:inputs}:
+\begin{itemize}
+\item \opt{shiftgeometry}: lines shift by up to about 3~cm$^{-1}$, and some
+  intensities change by 10--30\%;
+\item \opt{closureterms}: only weak lines change;
+\item \opt{dipole3}: the CH stretches go from 7.5\% to 10.3\% of the total
+  intensity.
+\end{itemize}

@@ -1,0 +1,45 @@
+\chapter{Output reference}\label{ch:outputs}
+
+\section{Phase 1}
+\begin{description}
+\item[\file{resonanceslist}] One line per resonant term: type (B3, D4, E4,
+  G2, \ldots), modes, coupling, detuning and their ratio.
+\item[\file{dunhamparams}]\label{sec:dunham} The deperturbed expansion
+  $E(n)=E_0+\sum_i w_i(n_i+\frac12)+\sum_{i\le j}x_{ij}(n_i+\frac12)(n_j+\frac12)$,
+  with each pair counted once, as in Gaussian's X matrix. It gives $E_0$,
+  the zero-point energy, $\omega_i$, $w_i$, the deperturbed fundamentals
+  $\nu_i$, and all the $x_{ij}$. In the theory notes the sum runs over
+  ordered pairs, so $x_{ij}=2\chi_{ij}$ for $i\ne j$ \notes{§6.6}.
+\item[\file{bandlist}] All bands with their dipole derivative, harmonic
+  wavenumber, intensity estimate and direction (\texttt{both}, \texttt{up},
+  \texttt{down}, \texttt{off}).
+\item[\file{resonancecandidates}] All candidate resonances with their
+  metrics, decision and reason, grouped by change of quantum numbers.
+\item[\file{*.shifted}, \file{gradient.shifted}, \file{shiftgeometry.out}]
+  With \opt{shiftgeometry}.
+\item[\file{dumpedparams}] Binary, read by phases 2a and 2b. It must come
+  from the same version of phase 1.
+\end{description}
+\section{Phase 2a}
+\begin{description}
+\item[\file{dir\_nNNNNN}] One directory per starting state, with the
+  polyad structures and Hamiltonians.
+\item[\file{processedquantas}, \file{processeddirs}] The starting states
+  and their directories.
+\item[\file{polyadsizes}] The polyad sizes.
+\end{description}
+\section{Phase 2b}
+\begin{description}
+\item[\file{hist\_abs\_0}, \file{\_1}, \file{\_2}, \file{hist\_ems\_*}]
+  Absorption and emission histograms, one file per Cartesian component of
+  the dipole, binned in wavenumber and in the harmonic energy of the
+  starting state. The total spectrum is the sum of the three files.
+\item[\file{hist\_anh\_*}] The same, binned in the anharmonic energy of the
+  starting state.
+\item[\file{hist\_energy}, \file{hist\_anhenergy}] Number of starting
+  states per energy bin.
+\item[\file{proclog\_n*}] Logs of each process, with the truncation
+  estimates when \opt{residualcheck} is on.
+\end{description}
+% TODO: units and normalisation of the histograms; script to convert them
+% into a spectrum in km/mol.

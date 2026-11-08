@@ -1,0 +1,80 @@
+\chapter{Input reference}\label{ch:inputs}
+
+\section{Conventions}
+
+The code uses the following conventions \notes{§2}:
+\begin{itemize}
+\item dimensionless normal coordinates, $q=(a+a^\dagger)/\sqrt2$;
+\item energies in cm$^{-1}$;
+\item $H=\sum\omega(p^2+q^2)/2+\frac{1}{3!}\sum\Phi_{ijk}q_iq_jq_k
+  +\frac{1}{4!}\sum\Phi_{ijkl}q_iq_jq_kq_l$;
+\item dipole derivatives in atomic units.
+\end{itemize}
+Indices in the files are 1-based. Force constants can be given for any
+order of the indices; each distinct set of indices must appear once.
+
+\section{Files}
+
+\begin{description}
+\item[\file{freqsfile}] One line per mode: $\omega$, then
+  $\partial\mu/\partial q$ ($x$, $y$, $z$). Two further columns, a legacy
+  scale factor and a legacy flag, are ignored: the bands are chosen in
+  \file{bandlist}.
+\item[\file{phi3file}, \file{phi4file}] Lines \texttt{i j k value} and
+  \texttt{i j k l value}. Entries below \opt{phi3threshold} and
+  \opt{phi4threshold} (cm$^{-1}$) are dropped.
+\item[\file{dmu2file}] Lines \texttt{i j dx dy dz}: second derivatives of
+  the dipole.
+\item[\file{dmu3file}] Optional, with \opt{dipole3}: lines
+  \texttt{i j k dx dy dz}. Missing entries are taken as zero.
+\item[\opt{modepopfile}] Starting states: the quantum numbers of all modes,
+  then the repetition count.
+\item[\opt{gradientfile}] Optional: the classical gradient at the reference
+  geometry, lines \texttt{i g\_i} (written by \opt{shiftgeometry}).
+\item[\opt{bandlistfile}, \opt{resonanceoverrides}] Edited copies of
+  \file{bandlist} and \file{resonancecandidates}
+  (Chapter~\ref{ch:tut-review}).
+\end{description}
+
+\section{Options}
+
+% TODO: generate this section from a single machine-readable table, shared
+% with README.md, so that the two cannot diverge.
+\subsection*{Resonances}
+\begin{description}
+\optentry{fermithres}{0.2}{1}{Threshold on $|W/\Delta|$ for cubic (Fermi) resonances.}
+\optentry{ddthres}{0.2}{1}{The same for quartic (Darling--Dennison) resonances.}
+\optentry{samesignresonances}{0}{1}{Also accept terms whose detuning is a single frequency.}
+\optentry{closureterms}{0}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}.}
+\optentry{rescriterion}{0}{1}{1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta.}
+\optentry{resonanceoverrides}{""}{1}{Force resonances on or off (Chapter~\ref{ch:tut-review}).}
+\end{description}
+\subsection*{Geometry and dipole}
+\begin{description}
+\optentry{shiftgeometry}{0}{1}{Move the reference geometry to remove the linear terms; writes the shifted force field (\file{*.shifted}).}
+\optentry{dipole3}{0}{1}{Third-order transformed dipole for fundamentals and hot bands.}
+\end{description}
+\subsection*{Bands}
+\begin{description}
+\optentry{bandthres}{see README}{1}{Default activation of overtone, combination and difference bands, by $|\partial^2\tilde\mu|$.}
+\optentry{fundthres}{1e-6}{1}{Default activation of fundamentals, by $|\partial\mu|$.}
+\optentry{bandlistfile}{""}{1}{Edited band list.}
+\end{description}
+\subsection*{Checks}
+\begin{description}
+\optentry{dunhamcheck}{1}{1}{Stop if a deperturbed level falls at or below a lower one (Chapter~\ref{ch:trouble}).}
+\optentry{dunhamfix}{0}{1}{Make the near Fermi resonances responsible explicit.}
+\optentry{residualcheck}{0}{2b}{Estimate the truncation error of the polyads.}
+\end{description}
+\subsection*{Polyads and diagonalisation}
+\begin{description}
+\optentry{hsizescalepar}{see README}{2a}{Scale of the polyad growth.}
+\optentry{maxtothops}{see README}{2a}{Maximum number of resonant steps.}
+\optentry{eigensolver}{see README}{2b}{Diagonalisation library.}
+\optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method for large polyads; resolution \opt{spectraldelta}.}
+\end{description}
+\subsection*{Histograms}
+\begin{description}
+\optentry{wnumhistmin, wnumhistmax, wnumhiststep}{}{2b}{Wavenumber grid (cm$^{-1}$).}
+\optentry{Ehistmin, Ehistmax, Ehiststep}{}{2b}{Bins of the energy of the starting state.}
+\end{description}
