@@ -9,3 +9,5 @@ $B/thermal_anharmonicity_fase1 > fase1.log; cp out.oct out.fase1.oct
 $B/thermal_anharmonicity_fase2a > fase2a.log; cp out.oct out.fase2a.oct
 mpirun -np $NP $B/thermal_anharmonicity_fase2b > fase2b.log; cp out.oct out.fase2b.oct
 echo "done: see resonanceslist, dunhamparams, bandlist and hist_abs_*"
+# strongest lines and figure (needs numpy; matplotlib for the figure)
+python3 "$(dirname "$0")/plot_spectrum.py" . 8 || echo "plot_spectrum.py failed (numpy/matplotlib missing?)"
