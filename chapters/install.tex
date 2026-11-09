@@ -4,8 +4,9 @@
 
 \begin{itemize}
 \item A C compiler with OpenMP, MPI, LAPACK and GSL.
-\item PETSc and SLEPc, built with 64-bit indices and the same MPI. They are
-  needed by phases 2a and 2b.
+\item PETSc and SLEPc, built with the same MPI. They are needed by phases
+  2a and 2b. 64-bit indices are needed only for very large polyads
+  (section~\ref{sec:intsize}).
 \item ScaLAPACK, and optionally ELPA, for the distributed diagonalisation.
 \item PARI/GP, for the optional search of hidden resonances
   (\opt{diophantineiter}).
@@ -27,6 +28,44 @@ Building produces three programs:
 \item \prog{thermal\_anharmonicity\_fase1};
 \item \prog{thermal\_anharmonicity\_fase2a};
 \item \prog{thermal\_anharmonicity\_fase2b}.
+\end{itemize}
+
+\section{32-bit and 64-bit indices}\label{sec:intsize}
+
+The integers passed to BLAS, LAPACK, ScaLAPACK, BLACS and ELPA have the
+type \texttt{PetscBLASInt}. PETSc defines it as 32 or 64 bits, consistently
+with the BLAS and LAPACK it was built with (\texttt{PETSC\_USE\_64BIT\_BLAS\_INDICES}
+in \file{petscconf.h}). It is a different type from \texttt{PetscInt},
+which is set by the PETSc option \texttt{--with-64-bit-indices}.
+
+\begin{itemize}
+\item \emph{When 64 bits are needed.} With 32-bit indices, a matrix or a
+  distributed array passed to these libraries must have fewer than
+  $2^{31}\approx 2.1\times10^{9}$ elements. A dense polyad of $N$ states
+  has $N^2$ of them, so a matrix held whole reaches the limit at
+  $N \approx 46\,000$. In distributed runs each process holds only part of
+  the matrix, but the workspace sizes can also exceed the limit. Larger
+  polyads need PETSc and all these libraries built with 64-bit
+  integers (ILP64). Below this size the code builds and works with the
+  usual 32-bit (LP64) libraries.
+\item \emph{Consistency.} All of BLAS, LAPACK, ScaLAPACK, BLACS and ELPA
+  must use the same integer size as \texttt{PetscBLASInt}. A library of the
+  other size links without errors, but receives indices of the wrong width:
+  the results are wrong, or the program crashes.
+\item \emph{What \prog{configure} does.} \devonly{} \prog{configure}
+  reads the size of \texttt{PetscBLASInt}. For BLAS, LAPACK and ScaLAPACK
+  not given with \opt{--with-\ldots} or \texttt{NAME\_LIBS}, it tries the
+  pkg-config modules available (for example \texttt{blas64},
+  \texttt{lapack64}, \texttt{scalapack64-openmpi} on Debian and Ubuntu,
+  or \texttt{mkl-dynamic-ilp64-gomp} for MKL, tried first when
+  \texttt{MKLROOT} is set) and keeps the first one that passes a small
+  test of its integer size; it lists the ones it skipped. It then tests
+  the libraries actually used, including those given by the user, and
+  stops if one of them uses the other size, and names it.
+  \opt{--disable-int-check} turns the error into a warning. BLACS and ELPA
+  are not checked: make sure they were built for the same integer size
+  (for ELPA, a 64-bit build is usually configured with
+  \texttt{--enable-64bit-integer-math-support}).
 \end{itemize}
 
 \section{Checking the build}
