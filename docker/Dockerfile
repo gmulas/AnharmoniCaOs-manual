@@ -3,7 +3,7 @@
 #   docker run -p 8080:80 anharmonicaos-manual   ->  http://localhost:8080
 #
 # Stage 1: build the HTML (LaTeXML) and the PDF (latexmk).
-FROM debian:bookworm-slim AS build
+FROM debian:trixie-slim AS build
 RUN apt-get update && apt-get install -y --no-install-recommends \
       latexml make latexmk texlive-latex-base texlive-latex-recommended \
       texlive-latex-extra texlive-fonts-recommended \
@@ -13,7 +13,7 @@ COPY . .
 RUN make html pdf && cp manual.pdf html/
 
 # Stage 2: serve it with Apache on a slim Debian, without the TeX toolchain.
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends apache2 \
     && rm -rf /var/lib/apt/lists/* \
     && rm -f /var/www/html/index.html \
