@@ -112,6 +112,8 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \begin{description}
 \optentry{hsizescalepar}{see README}{2a}{Scale of the polyad growth.}
 \optentry{maxtothops}{see README}{2a}{Maximum number of resonant steps.}
+\optentry{costmodel}{0}{2a}{\devonly{} Cost of one resonant step when a polyad grows: 0, $1/\max(1.5,\ \opt{hsizescalepar}\,|W/\Delta E|)$; 1, $1/(\opt{costscale}\,|W/\Delta E|+1)$. Both at least $1/\opt{maxtothops}$.}
+\optentry{costscale}{6}{2a}{\devonly{} Scale for \opt{costmodel}~$=1$, calibrated on toy Fermi and Wannier--Stark ladders (\file{tools/costmodel\_toy.py}).}
 \optentry{eigensolver}{see README}{2b}{Diagonalisation library: 2 ScaLAPACK (recommended), 0 SLEPc, 3 ELPA (\wip, not recommended at present; Chapter~\ref{ch:tut-pyrene}).}
 \optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method for large polyads; resolution \opt{spectraldelta}.}
 \end{description}
