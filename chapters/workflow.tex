@@ -52,6 +52,13 @@ running phase 1 again. Chapter~\ref{ch:tut-review} gives an example.
   its change of quantum numbers, can be forced \texttt{on} or
   \texttt{off}. Then rerun phase 1 with \opt{resonanceoverrides}.
 \end{itemize}
+Phase 1 checks both files. In \opt{resonanceoverrides} the change can be
+written with the modes in any order and either sign (\texttt{2:-1,1:+1}
+is the same change as \texttt{1:+1,2:-1}); a change that does not parse
+or names modes outside the molecule stops the run, and an override that
+acts on no term gives a warning. The rewritten
+\file{resonancecandidates} keeps the overrides in its last column, so it
+can be given back as it is.
 
 \section{Phase 2a: polyads}
 

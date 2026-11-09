@@ -14,7 +14,12 @@
   wavenumber, intensity estimate and direction (\texttt{both}, \texttt{up},
   \texttt{down}, \texttt{off}).
 \item[\file{resonancecandidates}] \devonly{} All candidate resonances with their
-  metrics, decision and reason, grouped by change of quantum numbers.
+  metrics, decision and reason, grouped by change of quantum numbers. Terms
+  that are resonant only because another term with the same change is
+  (they are ``carried along'') are marked \texttt{carried}, so that the
+  terms with decision~1 are exactly those of \file{resonanceslist}. The
+  last column is the override in force (\texttt{on}, \texttt{off}) or
+  \texttt{auto}.
 \item[\file{*.shifted}, \file{gradient.shifted}, \file{shiftgeometry.out}]
   With \opt{shiftgeometry}.
 \item[\file{dumpedparams}] Binary, read by phases 2a and 2b. It must come

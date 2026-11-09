@@ -99,8 +99,8 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \subsection*{Bands}
 \begin{description}
 \optentry{bandthres}{see README}{1}{Default activation of overtone, combination and difference bands, by $|\partial^2\tilde\mu|$.}
-\optentry{fundthres}{1e-6}{1}{\devonly{} Default activation of fundamentals, by $|\partial\mu|$.}
-\optentry{bandlistfile}{""}{1}{\devonly{} Edited band list.}
+\optentry{fundthres}{1e-6}{1}{\devonly{} Default activation of fundamentals, by $|\partial\mu|$. A dipole derivative below it is numerical noise of a symmetry-forbidden mode and is set to zero when \file{freqsfile} is read.}
+\optentry{bandlistfile}{""}{1}{\devonly{} Edited band list. It is read at the start of phase 1: an unknown choice stops the run at once, and lines that match no listed band give a warning.}
 \end{description}
 \subsection*{Checks}
 \begin{description}
