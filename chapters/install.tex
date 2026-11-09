@@ -7,7 +7,7 @@
 \item PETSc and SLEPc, built with the same MPI. They are needed by phases
   2a and 2b. 64-bit indices are needed only for very large polyads
   (section~\ref{sec:intsize}).
-\item ScaLAPACK, and optionally ELPA, for the distributed diagonalisation.
+\item ScaLAPACK for the distributed diagonalisation. ELPA is needed to build phase 2b, but using it (\opt{eigensolver}~=~3) is \wip{} and not recommended at present.
 \item PARI/GP, for the optional search of hidden resonances
   (\opt{diophantineiter}).
 \item The \texttt{oct\_parser} library, which reads the input file. It is

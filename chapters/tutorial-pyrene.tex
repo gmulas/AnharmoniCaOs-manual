@@ -29,6 +29,7 @@ ddthres = 0.20
 hsizescalepar = 8        # polyad size
 maxtothops = 4
 bandthres = 1e-3         # which overtone/combination bands to compute
+eigensolver = 2          # ScaLAPACK (see below)
 computeground = 1
 wnumhistmin = 0          # spectral grid (cm-1)
 wnumhistmax = 9000
@@ -67,9 +68,63 @@ cores; the largest polyad has 3582 states.
 \item The histograms \file{hist\_abs\_0}, \file{\_1} and \file{\_2}: the
   $x$, $y$ and $z$ components of the absorption spectrum.
 \end{itemize}
-% TODO: script to sum and plot the histograms (tools/), figure of the
-% spectrum, table of the strongest bands (from the 2026-11-06 runs:
-% 844.8, 711.9, 202.2 cm-1, ...).
+
+The script \file{plot\_spectrum.py} (in \file{examples/pyrene}, needs numpy
+and, for the figure, matplotlib) adds the three components, converts them to
+integrated intensities in km/mol ($I = 16.194\,\tilde\nu\,|\mu|^2$, with
+$|\mu|^2$ in atomic units as stored in the histograms), lists the strongest
+lines and draws Figure~\ref{fig:pyrene}:
+\begin{lstlisting}
+python3 plot_spectrum.py . 8
+\end{lstlisting}
+The run gives 4568 lines with a total of 446.1~km/mol. The strongest are:
+\begin{center}
+\begin{tabular}{rr}
+\toprule
+wavenumber (cm$^{-1}$) & intensity (km/mol) \\
+\midrule
+844.75 & 105.63 \\
+711.91 & 43.95 \\
+3035.46 & 38.69 \\
+742.61 & 16.00 \\
+3037.81 & 14.53 \\
+1184.02 & 12.14 \\
+202.22 & 10.19 \\
+3042.34 & 9.96 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/pyrene-spectrum.png}
+\caption{Pyrene, absorption from the ground state: the lines computed in
+this tutorial (up) against the harmonic fundamentals of \file{freqsfile}
+(down). The CH stretches (lower panel) move down by about 140~cm$^{-1}$ and
+split among the states they are in resonance with.}
+\label{fig:pyrene}
+\end{figure}
+
+These numbers and the figure come from a run of these inputs with the code
+of \texttt{master} at commit \texttt{84f7695} (2026-11-05); a build of
+2026-11-06 gives byte-identical histograms.
+
+\subsection*{Choice of the eigensolver}
+
+\opt{eigensolver} selects the library that diagonalises the polyads in
+phase 2b:
+\begin{itemize}
+\item \texttt{2}, ScaLAPACK: recommended, and used in all the tutorials;
+\item \texttt{0}, SLEPc: the lines it finds agree with ScaLAPACK, but
+  some weak lines are missing (on the same input with \opt{hsizescalepar}~=~4,
+  1439 lines and 2\% of the total intensity); the reason is being
+  investigated;
+\item \texttt{3}, ELPA: \wip{} Not recommended at present. In the tests of
+  November 2026 it stops at the start with a BLACS grid error
+  (\texttt{ELPA\_SETUP ERROR: your provided blacsgrid is not ok!}), probably
+  an inconsistency of integer sizes between ELPA, BLACS and the code
+  (Section~\ref{sec:intsize}).
+\end{itemize}
 
 \section{Variations}
 
