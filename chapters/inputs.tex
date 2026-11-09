@@ -13,6 +13,46 @@ The code uses the following conventions \notes{§2}:
 Indices in the files are 1-based. Force constants can be given for any
 order of the indices; each distinct set of indices must appear once.
 
+\section{The options file \file{inp}}\label{sec:inp}
+
+All three programs read their options from \file{inp} with the
+\texttt{oct\_parser} library, the input parser of the Octopus code
+(included as the submodule \file{external/oct-parser}). This has some
+practical consequences.
+
+\begin{itemize}
+\item \emph{Syntax.} One option per line, \texttt{name = value}; strings in
+  double quotes; \texttt{\#} starts a comment; a line ending with
+  \texttt{\textbackslash} continues on the next one. Names are not case
+  sensitive.
+\item \emph{Defaults.} Every option has a default, and only the options
+  that differ from it need to be given. The defaults are listed in
+  \file{README.md} of the code.
+\item \emph{\file{out.oct}.} Each program writes to \file{out.oct} every
+  option it has read, with the value it used. Values not given in
+  \file{inp} are marked \texttt{\# default}. This is the place to check
+  what a run actually used. Each program overwrites the file, so copy it
+  after each phase if you want to keep all three (as \file{run.sh} of the
+  tutorials does).
+\item \emph{Misspelled options.} A misspelled option name is not an error:
+  the parser takes it as a variable of its own, and the program uses the
+  default. Check \file{out.oct} when an option seems to have no effect.
+\item \emph{Variables and arithmetic.} Any name that is not an option can
+  be used as a variable, and values can be expressions with the usual
+  operators and functions (\texttt{sqrt}, \texttt{exp}, \texttt{log},
+  \ldots) and the constants \texttt{pi} and \texttt{e}. A variable must be
+  defined before it is used. The names \texttt{x}, \texttt{y}, \texttt{z},
+  \texttt{r}, \texttt{w}, \texttt{t} and \texttt{i} are reserved (case
+  insensitive) and cannot be used as variables. For example:
+\begin{lstlisting}
+thres = 0.20             # a variable, not an option
+fermithres = thres
+ddthres = thres
+temperature = 500        # K
+kT = 0.6950348*temperature   # kT is in cm-1
+\end{lstlisting}
+\end{itemize}
+
 \section{Files}
 
 \begin{description}
