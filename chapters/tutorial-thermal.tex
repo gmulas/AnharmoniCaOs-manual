@@ -7,3 +7,10 @@
 This chapter will show how to compute the spectrum of molecules with a
 given internal energy or temperature, by averaging over a sample of
 starting states, and how to split the work into cluster jobs.
+
+The temperature enters through \opt{kT}, in cm$^{-1}$. It is convenient to
+give the temperature in kelvin as a variable (Section~\ref{sec:inp}):
+\begin{lstlisting}
+temperature = 500        # K
+kT = 0.6950348*temperature
+\end{lstlisting}

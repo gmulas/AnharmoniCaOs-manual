@@ -20,7 +20,7 @@ quartic force field of the reference test case.
 \item[\file{quantafile}] The starting states: one line per state, with the
   quantum numbers of all the modes and a repetition count. Here it contains
   only the ground state.
-\item[\file{inp}] The options. The essential ones for this tutorial:
+\item[\file{inp}] The options (Section~\ref{sec:inp}). The essential ones for this tutorial:
 \end{description}
 \begin{lstlisting}
 nmodes = 72
@@ -43,6 +43,15 @@ thermal_anharmonicity_fase1 > fase1.log
 thermal_anharmonicity_fase2a > fase2a.log
 mpirun -np 4 thermal_anharmonicity_fase2b > fase2b.log
 \end{lstlisting}
+(\file{run.sh} does the same, and keeps a copy of \file{out.oct} after each
+phase: \file{out.fase1.oct}, \file{out.fase2a.oct}, \file{out.fase2b.oct}.)
+The two thresholds can also be set from one variable,
+\begin{lstlisting}
+thres = 0.20
+fermithres = thres
+ddthres = thres
+\end{lstlisting}
+which is handy when testing how the results depend on them.
 Phase 1 takes about 45~s. It finds 1785 resonances. It selects 31 fundamentals (the modes with flag 1
 in \file{freqsfile}; in the development version, those with a nonzero
 dipole derivative) and 1264 other bands. Phase 2b takes about 3 minutes on 4
