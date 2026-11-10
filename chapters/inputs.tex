@@ -117,10 +117,30 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \optentry{minhopcoupling}{0}{2a}{\devonly{} A polyad does not grow through a coupling $|W|$ below this value (cm$^{-1}$); the coupling stays in the matrix when both states are in the polyad. Off by default.}
 \optentry{eigensolver}{see README}{2b}{Diagonalisation library: 2 ScaLAPACK (recommended), 0 SLEPc, 3 ELPA (\wip, not recommended at present; Chapter~\ref{ch:tut-pyrene}).}
 \optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method for large polyads; resolution \opt{spectraldelta}.}
-\optentry{spectraleigenground}{0}{2b}{\devonly{} With \opt{spectral}~$=1$: diagonalise all the polyads of the ground-state step, which the line dumps of \opt{verbosity}~\&~4 need; otherwise only the polyad of the ground state is diagonalised and the dumps are skipped, with a warning. It does not change the spectra.}
+\optentry{spectraleigenground}{0}{2b}{\devonly{} With \opt{spectral}~$=1$: diagonalise all the polyads of the ground-state step, which the line dumps of \texttt{groundlines} (\opt{verbosity} bit 4) need; otherwise only the polyad of the ground state is diagonalised and the dumps are skipped, with a warning. It does not change the spectra.}
 \end{description}
 \subsection*{Histograms}
 \begin{description}
 \optentry{wnumhistmin, wnumhistmax, wnumhiststep}{}{2b}{Wavenumber grid (cm$^{-1}$).}
 \optentry{Ehistmin, Ehistmax, Ehiststep}{}{2b}{Bins of the energy of the starting state.}
 \end{description}
+\subsection*{Log output}
+\begin{description}
+\optentry{verbosity}{0}{all}{What the logs (\file{proclog\_n*}) contain. It is a sum of the bits of Table~\ref{tab:verbosity}, which can be given by name: for example \texttt{verbosity = timings + components} instead of \texttt{verbosity = 10}. Write each name once: a name written twice adds its bit twice, which gives another bit. \opt{verbosity} does not change the spectra. The one exception, bit 4 in phase~2a, changes the polyads of the ground-state step only, which add nothing to the histograms.}
+\end{description}
+\begin{table}[ht]
+\centering
+\caption{Bits of \opt{verbosity}.}\label{tab:verbosity}
+\begin{tabular}{rlp{0.62\textwidth}}
+\hline
+bit & name & what is written \\
+\hline
+1 & \texttt{polyadlevels} & For each starting state, the basis states of its polyads, with the target states marked by \texttt{*}, and their levels. With \opt{spectral}~$=1$, a polyad that is not diagonalised says so and lists only its basis states; a starting polyad diagonalised with \opt{spectralexactmax} lists its eigenstates and their weight on the starting state. \\
+2 & \texttt{timings} & Timings and polyad sizes. With \opt{spectral}~$=1$, the summary lines \texttt{spectral:}, \texttt{spectral border:} and \texttt{spectral timing:} for each starting state. \\
+4 & \texttt{groundlines} & The lines of the ground state, with their assignment. With \opt{spectral}~$=1$ they need \opt{spectraleigenground}~$=1$. In phase~2a this bit also makes the ground-state step build the polyads of the band destinations. \\
+8 & \texttt{components} & The main components of the eigenstates. \\
+16 & \texttt{transitions} & Every transition. \\
+32 & \texttt{spectraldiag} & \devonly{} Internals of the spectral method: one line per energy window of the starting state, and one per destination polyad, with its size, Chebyshev parameters and wall time. \\
+\hline
+\end{tabular}
+\end{table}
