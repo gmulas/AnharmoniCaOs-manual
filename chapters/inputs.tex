@@ -118,6 +118,7 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \optentry{eigensolver}{see README}{2b}{Diagonalisation library: 2 ScaLAPACK (recommended), 0 SLEPc, 3 ELPA (\wip, not recommended at present; Chapter~\ref{ch:tut-pyrene}).}
 \optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method for large polyads; resolution \opt{spectraldelta}.}
 \optentry{spectraleigenground}{0}{2b}{\devonly{} With \opt{spectral}~$=1$: diagonalise all the polyads of the ground-state step, which the line dumps of \opt{verbosity}~\&~4 need; otherwise only the polyad of the ground state is diagonalised and the dumps are skipped, with a warning. It does not change the spectra.}
+\optentry{spectralexactmax}{0}{2b}{\devonly{} With \opt{spectral}~$=1$: a starting polyad of at most this many states is diagonalised, and its eigenstates replace the energy windows of the starting state (much faster for starting states in small polyads, such as the ground state). The destination polyads are still treated spectrally. Changes the spectra within the resolution; 0 switches it off.}
 \end{description}
 \subsection*{Histograms}
 \begin{description}
