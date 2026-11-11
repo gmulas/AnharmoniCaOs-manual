@@ -111,8 +111,9 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \subsection*{Polyads and diagonalisation}
 \begin{description}
 \optentry{hsizescalepar}{see README}{2a}{Scale of the polyad growth.}
-\optentry{maxtothops}{see README}{2a}{Maximum number of resonant steps.}
-\optentry{costmodel}{0}{2a}{\devonly{} Cost of one resonant step when a polyad grows: 0, $1/\max(1.5,\ \opt{hsizescalepar}\,|W/\Delta E|)$; 1, $1/(\opt{costscale}\,|W/\Delta E|+1)$. Both at least $1/\opt{maxtothops}$.}
+\optentry{maxtothops}{see README}{2a}{Maximum number of resonant steps from a target state. Its default is the larger of \opt{maxfhops} and \opt{maxddhops}, which have no other effect. How it acts depends on \opt{separatehops}.}
+\optentry{separatehops}{0}{2a}{\devonly{} How \opt{maxtothops} limits a polyad. With 0, every step costs at least $1/\opt{maxtothops}$, so the credit allows at most \opt{maxtothops} steps, except steps between degenerate states, which cost nothing and are not limited. With 1, the cost has no minimum and the steps are counted: a state is added if some path from a target reaches it with credit left in at most \opt{maxtothops} steps, degenerate steps included. With 1 the polyads are larger (about 2.5 times for the pyrene tutorial). Changes results.}
+\optentry{costmodel}{0}{2a}{\devonly{} Cost of one resonant step when a polyad grows: 0, $1/\max(1.5,\ \opt{hsizescalepar}\,|W/\Delta E|)$; 1, $1/(\opt{costscale}\,|W/\Delta E|+1)$. Both at least $1/\opt{maxtothops}$, unless \opt{separatehops}~$=1$.}
 \optentry{costscale}{6}{2a}{\devonly{} Scale for \opt{costmodel}~$=1$, calibrated on toy Fermi and Wannier--Stark ladders (\file{tools/costmodel\_toy.py}).}
 \optentry{minhopcoupling}{0.5}{2a}{\devonly{} A polyad does not grow through a coupling $|W|$ below this value (cm$^{-1}$); the coupling stays in the matrix when both states are in the polyad. Set it to 0 to switch it off and get the polyads of earlier versions.}
 \optentry{eigensolver}{1}{2b}{Diagonalisation library: 1 ScaLAPACK \texttt{pdsyevr}, 2 ScaLAPACK \texttt{pdsyevx}, 0 SLEPc, 3 ELPA (the fastest in the tests of Chapter~\ref{ch:tut-pyrene}). With 1 and 3, the small polyads (at most 300 states per row or column of the process grid beyond the first) go to \texttt{pdsyevx}.}
