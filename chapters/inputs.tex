@@ -88,7 +88,7 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \optentry{ddthres}{0.2}{1}{The same for quartic (Darling--Dennison) resonances.}
 \optentry{samesignresonances}{0}{1}{Also accept terms whose detuning is a single frequency.}
 \optentry{closureterms}{0}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}.}
-\optentry{rescriterion}{0}{1}{\devonly{} 1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta.}
+\optentry{rescriterion}{0}{1}{\devonly{} 1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta. Each error is evaluated with the deperturbed and with the harmonic detuning, and the term is resonant if either is too large: a term left out is treated with the harmonic detuning, so it must be small with both (in \file{resonancecandidates}, \texttt{why} ends in \texttt{-harm} when the harmonic detuning decided).}
 \optentry{resonanceoverrides}{""}{1}{\devonly{} Force resonances on or off (Chapter~\ref{ch:tut-review}).}
 \end{description}
 \subsection*{Geometry and dipole}
