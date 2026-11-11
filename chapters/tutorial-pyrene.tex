@@ -149,6 +149,12 @@ ELPA two-stage, \opt{elpablock}~=~16 & 1 & 2:12 \\
 On polyads of this size more processes make phase 2b slower: the cost of
 distributing the matrices exceeds the gain. One process with ELPA, or
 several independent runs, is the efficient choice here.
+\devonly{} These times include the diagonalisation of all the polyads of the
+ground-state step (\opt{computeground}). From code PR~\#78 only the polyad of
+the ground state is diagonalised there, unless \opt{groundtransitions}~$=1$,
+so phase~2b takes less; with \texttt{verbosity = 31}, as in this tutorial,
+the log warns that the lines of the ground state are skipped. The spectra do
+not change.
 
 \section{Variations}
 

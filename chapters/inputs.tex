@@ -119,7 +119,7 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \optentry{elpasolver}{1}{2b}{With \opt{eigensolver}~=~3: ELPA's one-stage (1) or two-stage (2) solver.}
 \optentry{elpablock}{64}{2b}{With \opt{eigensolver}~=~3: block size of the distributed matrices. ELPA's two-stage solver gives wrong eigenvalues, without any error, with large blocks (it did with 300); keep it at 64 or below. Its GPU kernel needs a power of 2. See Section~\ref{sec:elpa}.}
 \optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method for large polyads; resolution \opt{spectraldelta}.}
-\optentry{spectraleigenground}{0}{2b}{\devonly{} With \opt{spectral}~$=1$: diagonalise all the polyads of the ground-state step, which the line dumps of \texttt{groundlines} (\opt{verbosity} bit 4) need; otherwise only the polyad of the ground state is diagonalised and the dumps are skipped, with a warning. It does not change the spectra.}
+\optentry{groundtransitions}{0}{2b}{\devonly{} With \opt{computeground}~$=1$: in the ground-state step, which adds nothing to the spectra, diagonalise all its polyads and compute the lines of the ground state, which \texttt{groundlines} (\opt{verbosity} bit 4) writes. With 0 only the polyad of the ground state is diagonalised, for the reference energy, and \texttt{groundlines} gives a warning instead of the lines. It applies to every \opt{eigensolver} and to \opt{spectral}. It does not change the spectra. Its older name, \opt{spectraleigenground}, is still read.}
 \optentry{spectralexactmax}{0}{2b}{\devonly{} With \opt{spectral}~$=1$: a starting polyad of at most this many states is diagonalised, and its eigenstates replace the energy windows of the starting state (much faster for starting states in small polyads, such as the ground state). The destination polyads are still treated spectrally. Changes the spectra within the resolution; 0 switches it off.}
 \end{description}
 \subsection*{Histograms}
@@ -129,7 +129,7 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \end{description}
 \subsection*{Log output}
 \begin{description}
-\optentry{verbosity}{0}{all}{What the logs (\file{proclog\_n*}) contain. It is a sum of the bits of Table~\ref{tab:verbosity}, which can be given by name: for example \texttt{verbosity = timings + components} instead of \texttt{verbosity = 10}. Write each name once: a name written twice adds its bit twice, which gives another bit. \opt{verbosity} does not change the spectra. The one exception, bit 4 in phase~2a, changes the polyads of the ground-state step only, which add nothing to the histograms.}
+\optentry{verbosity}{0}{all}{What the logs (\file{proclog\_n*}) contain. It is a sum of the bits of Table~\ref{tab:verbosity}, which can be given by name: for example \texttt{verbosity = timings + components} instead of \texttt{verbosity = 10}. Write each name once: a name written twice adds its bit twice, which gives another bit. \opt{verbosity} does not change the spectra. In the released version bit 4 also changes what phase~2a builds: without it, phase~2a builds no polyads of the band destinations, and the spectra are empty, so keep bit 4 set there. \devonly{} In the development version \opt{verbosity} never changes what is computed; the lines of the ground state need \opt{groundtransitions}~$=1$.}
 \end{description}
 \begin{table}[ht]
 \centering
@@ -140,7 +140,7 @@ bit & name & what is written \\
 \hline
 1 & \texttt{polyadlevels} & For each starting state, the basis states of its polyads, with the target states marked by \texttt{*}, and their levels. With \opt{spectral}~$=1$, a polyad that is not diagonalised says so and lists only its basis states; a starting polyad diagonalised with \opt{spectralexactmax} lists its eigenstates and their weight on the starting state. \\
 2 & \texttt{timings} & Timings and polyad sizes. With \opt{spectral}~$=1$, the summary lines \texttt{spectral:}, \texttt{spectral border:} and \texttt{spectral timing:} for each starting state. \\
-4 & \texttt{groundlines} & The lines of the ground state, with their assignment. With \opt{spectral}~$=1$ they need \opt{spectraleigenground}~$=1$. In phase~2a this bit also makes the ground-state step build the polyads of the band destinations. \\
+4 & \texttt{groundlines} & The lines of the ground state, with their assignment. In the released version this bit also makes phase~2a build the polyads of the band destinations. \devonly{} The lines need \opt{groundtransitions}~$=1$. \\
 8 & \texttt{components} & The main components of the eigenstates. \\
 16 & \texttt{transitions} & Every transition. \\
 32 & \texttt{spectraldiag} & \devonly{} Internals of the spectral method: one line per energy window of the starting state, and one per destination polyad, with its size, Chebyshev parameters and wall time. \\
