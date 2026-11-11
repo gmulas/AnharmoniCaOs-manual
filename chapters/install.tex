@@ -68,6 +68,61 @@ which is set by the PETSc option \texttt{--with-64-bit-indices}.
   \texttt{--enable-64bit-integer-math-support}).
 \end{itemize}
 
+\section{Using ELPA}\label{sec:elpa}
+
+With \opt{eigensolver}~=~3 phase 2b diagonalises the polyads with ELPA, the
+fastest of the eigensolvers in the tests of Chapter~\ref{ch:tut-pyrene}.
+The code sets ELPA's solver with \opt{elpasolver} (1 one-stage, the
+default; 2 two-stage) and the block size of the distributed matrices with
+\opt{elpablock} (64).
+
+\paragraph{What the installed ELPA contains.} \file{elpa2\_print\_kernels},
+in the \file{bin} directory of the ELPA installation, lists the kernels of
+the two-stage solver that were compiled in, and the default one. The
+header \file{elpa/elpa\_configured\_options.h}, in the \file{include}
+directory, says whether the GPU versions were built
+(\texttt{ELPA\_WITH\_NVIDIA\_GPU\_VERSION 1}). \texttt{ldd libelpa.so}
+shows the BLAS, LAPACK and ScaLAPACK it uses: they must be the 64-bit ones
+of the code (Section~\ref{sec:intsize}).
+
+\paragraph{Choosing at run time.} ELPA reads environment variables
+\texttt{ELPA\_FORCE\_}\emph{option}, which override what the code sets,
+\opt{elpasolver} included. With MPI they must be passed to every process,
+for example
+\begin{verbatim}
+mpirun -np 1 -x ELPA_FORCE_solver=ELPA_SOLVER_2STAGE \
+       -x ELPA_FORCE_real_kernel=ELPA_2STAGE_REAL_AVX2_BLOCK4 \
+       thermal_anharmonicity_fase2b
+mpirun -np 1 -x ELPA_FORCE_gpu=1 thermal_anharmonicity_fase2b
+\end{verbatim}
+The kernel names are those printed by \file{elpa2\_print\_kernels}. For
+the GPU use \texttt{ELPA\_FORCE\_gpu}: the option \texttt{nvidia-gpu} has a
+dash, which an environment variable cannot have. ELPA does not always
+confirm a forced option in the output; for the GPU, \texttt{nvidia-smi}
+shows whether the process uses it.
+
+\paragraph{Suggestions.}
+\begin{itemize}
+\item Keep \opt{elpablock} at 64 or below. ELPA's two-stage solver gave
+  wrong eigenvalues, without any error, with blocks of 300 on polyads of
+  3400 states and more; ELPA's own test on the same matrix failed in the
+  same way. The GPU kernel needs a power of 2.
+\item The kernel of the two-stage solver only enters the
+  back-transformation of the eigenvectors: changing it changes the speed,
+  not the eigenvalues.
+\item For polyads of up to a few thousand states one MPI process is the
+  fastest: with more processes, distributing the matrices costs more than
+  it gains (Chapter~\ref{ch:tut-pyrene}). Run several starting states as
+  independent runs instead.
+\item The GPU helped a little with one process (pyrene tutorial on a
+  laptop with a GeForce GTX 1650 Ti: 1:50 instead of 2:20), and not at all
+  with four. Consumer GPUs are slow in double precision. Several
+  processes sharing one GPU have not been tested yet.
+\item After installing a new ELPA, or on a new machine, compare one run
+  with \opt{eigensolver}~=~2 (\texttt{pdsyevx}): the spectra must agree
+  to rounding.
+\end{itemize}
+
 \section{Checking the build}
 
 The directory \file{tests/claude\_check} contains checks that compare the
