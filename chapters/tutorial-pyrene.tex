@@ -56,7 +56,7 @@ which is handy when testing how the results depend on them.
 Phase 1 takes about 45~s. It finds 1785 resonances. It selects 31 fundamentals (the modes with flag 1
 in \file{freqsfile}; in the development version, those with a nonzero
 dipole derivative) and 1264 other bands. Phase 2b takes about 3 minutes on 4
-cores; the largest polyad has 3582 states.
+cores; the largest polyad has 3582 states. \devonly{} The development version stops polyad growth through couplings below \opt{minhopcoupling}~$=0.5$~cm$^{-1}$ by default: there the largest polyad has 2363 states, and phase 2b is about four times faster.
 
 \section{What to look at}
 
