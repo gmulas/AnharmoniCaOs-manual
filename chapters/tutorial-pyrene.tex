@@ -114,17 +114,41 @@ of \texttt{master} at commit \texttt{84f7695} (2026-11-05); a build of
 \opt{eigensolver} selects the library that diagonalises the polyads in
 phase 2b:
 \begin{itemize}
-\item \texttt{2}, ScaLAPACK: recommended, and used in all the tutorials;
+\item \texttt{2}, ScaLAPACK \texttt{pdsyevx}: used in all the tutorials;
+\item \texttt{1}, ScaLAPACK \texttt{pdsyevr}: same spectra;
 \item \texttt{0}, SLEPc: the lines it finds agree with ScaLAPACK, but
   some weak lines are missing (on the same input with \opt{hsizescalepar}~=~4,
   1439 lines and 2\% of the total intensity); the reason is being
   investigated;
-\item \texttt{3}, ELPA: \wip{} Not recommended at present. In the tests of
-  November 2026 it stops at the start with a BLACS grid error
-  (\texttt{ELPA\_SETUP ERROR: your provided blacsgrid is not ok!}), probably
-  an inconsistency of integer sizes between ELPA, BLACS and the code
-  (Section~\ref{sec:intsize}).
+\item \texttt{3}, ELPA: same spectra (relative L1 distance below
+  $10^{-7}$, the same transition energies), and the fastest. Its two-stage
+  solver (\opt{elpasolver}~=~2) needs blocks of at most 64
+  (\opt{elpablock}); with blocks of 300 it gave wrong eigenvalues on the
+  polyads of 3400 states and more, without any error.
 \end{itemize}
+
+Wall time of phase 2b of this tutorial on a 4-core laptop, one thread per
+process (\texttt{pdsyevx} with 4 processes: \texttt{dev/polyad-jobs} at \texttt{e07bbdf}; the others: branch \texttt{fix/elpa-small-polyads} at
+\texttt{0acd9f2} and \texttt{a90ff52}, November 2026; the times vary by
+about 15\% between sessions):
+\begin{center}
+\begin{tabular}{lrr}
+\hline
+eigensolver & processes & wall time \\
+\hline
+\texttt{pdsyevx} (2) & 4 & 5:28 \\
+\texttt{pdsyevx} (2) & 1 & 8:48 \\
+\texttt{pdsyevr} (1) & 1 & 3:07 \\
+ELPA one-stage (3) & 4 & 4:08 \\
+ELPA one-stage (3) & 2 & 2:53 \\
+ELPA one-stage (3) & 1 & 2:20 \\
+ELPA two-stage, \opt{elpablock}~=~16 & 1 & 2:12 \\
+\hline
+\end{tabular}
+\end{center}
+On polyads of this size more processes make phase 2b slower: the cost of
+distributing the matrices exceeds the gain. One process with ELPA, or
+several independent runs, is the efficient choice here.
 
 \section{Variations}
 
