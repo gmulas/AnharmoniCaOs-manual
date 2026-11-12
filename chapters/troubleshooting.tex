@@ -11,9 +11,14 @@
     \opt{shiftgeometry}~$=1$ or \opt{samesignresonances}~$=1$.
   \end{itemize}
   See \notes{§11.8}.
-\item[\texttt{rotatedcomp is ... > .5}] With \opt{shiftgeometry}, the
-  rotation of the normal modes strongly mixes some modes. The intensities
-  of those bands are less accurate.
+\item[\texttt{rotatedcomp is ... > .5}] Some band mixes strongly with
+  other states through terms treated as nonresonant, so its intensity is
+  less accurate. \devonly{} The next line names the largest such term,
+  with its harmonic detuning. If that detuning is small, make the term
+  resonant: lower \opt{fermithres} (with \opt{rescriterion}~$=0$), or set its change to \texttt{on} in
+  \file{resonancecandidates} and give the file back with
+  \opt{resonanceoverrides}. With \opt{shiftgeometry} the rotation of the
+  normal modes can also cause it.
 \item[\texttt{freqsfile disables N modes in its 6th column}] \devonly{} That column is
   ignored. Choose the bands in \file{bandlist}.
 \item[\texttt{error reading updown for band}] \devonly \file{dumpedparams} was
