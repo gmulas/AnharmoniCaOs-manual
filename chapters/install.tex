@@ -68,6 +68,23 @@ which is set by the PETSc option \texttt{--with-64-bit-indices}.
   \texttt{--enable-64bit-integer-math-support}).
 \end{itemize}
 
+\paragraph{Licences of the libraries.} \ac{} is distributed under the GNU
+GPL version~3. The libraries it links are free software compatible with it:
+\begin{itemize}
+\item GSL is under the GPL;
+\item PETSc, SLEPc, ScaLAPACK and OpenBLAS are under BSD-style licences;
+\item ELPA is under the LGPL;
+\item the parser is from Octopus, under the GPL.
+\end{itemize}
+Intel MKL (oneMKL) is the exception: it is proprietary, distributed under
+the Intel Simplified Software License, which allows its use and
+redistribution without fees~\cite{intel-mkl-faq}, but it is not
+GPL-compatible software. Building \ac{} with MKL for your own use is not a
+problem. Whoever distributes executables linked with MKL must make sure
+that they may do so. Free libraries with similar performance are
+available: OpenBLAS, and the 64-bit ScaLAPACK of the Linux distributions
+(\texttt{libscalapack64}).
+
 \section{Using ELPA}\label{sec:elpa}
 
 With \opt{eigensolver}~=~3 phase 2b diagonalises the polyads with ELPA, the
