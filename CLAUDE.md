@@ -23,5 +23,7 @@ rules and the technical background). The theory notes are in
     version of the code.
 - When an option or output of the code changes, update the manual in a PR
   that names the code PR.
-- The example data belong to the maintainer and are public. The code
-  repository is private: do not copy source code into the manual.
+- The example data belong to the maintainer and are public. The theory
+  notes are private until published: point to them with `\notes{...}`, do
+  not copy their derivations into the manual. Source code goes in the code
+  repository, not here.
