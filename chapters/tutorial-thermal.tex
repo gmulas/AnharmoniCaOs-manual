@@ -1,15 +1,183 @@
 \chapter{Tutorial 3: hot bands and emission at a given temperature}\label{ch:tut-thermal}
 
-% TODO: sampling of the starting states (Monte Carlo / thermal), weights
-% and nrepeats, energy bins (Ehist*), anharmonic energy histograms;
-% splitting the work into parts and jobs (doc/polyad-jobs.md, T1/T2);
-% example on pyrene at a moderate temperature with a small sample.
-This chapter will show how to compute the spectrum of molecules with a
-given internal energy or temperature, by averaging over a sample of
-starting states, and how to split the work into cluster jobs.
+This chapter shows how to compute the spectrum of molecules with a given
+internal energy or temperature. The spectrum is averaged over a sample of
+starting states, and the work is split into jobs. It has three steps, each
+done by a tool in the \file{tools/} directory of the code:
+\begin{enumerate}
+\item choose the starting states (\prog{anh\_sample.py}, this section);
+\item split them into jobs and run phases 2a and 2b (\prog{anh\_jobs.py});
+\item assemble the results into spectra per energy and per temperature
+(\prog{anh\_assemble.py}).
+\end{enumerate}
+The tools need Python~3 with numpy. \devonly{} They are in the development
+version (code PRs \#91 and \#92). Steps 2 and~3 are described here once
+code PR \#92 is merged \wip.
 
-The temperature enters through \opt{kT}, in cm$^{-1}$. It is convenient to
-give the temperature in kelvin as a variable (Section~\ref{sec:inp}):
+\section{What is computed}\label{sec:thermal-what}
+
+The energy axis is divided into bins of width \opt{Ehiststep}, starting at
+\opt{Ehistmin}. A starting state belongs to the bin of its harmonic
+energy above the ground state. For every bin, phase~2b sums the spectra of
+the starting states of that bin and counts them, each with its weight (the
+last number of its line in the \file{quantafile}). Dividing the sums by
+the count gives the \emph{average} spectrum of the bin.
+
+To describe molecules with that energy, the starting states of a bin must
+be drawn uniformly among all its states. The statistical error then
+decreases as one over the square root of their number. A spectrum at
+temperature $T$ also needs the number of states $g$ of each bin, because
+each bin weighs $g\,e^{-E/k_BT}$. The sampling tool provides both:
+\begin{itemize}
+\item a uniform sample of the states of each bin;
+\item the number of states of each bin.
+\end{itemize}
+The method is explained in \notes{Section ``Choosing the starting
+states''}.
+
+\section{Step 1: choosing the starting states}\label{sec:thermal-sample}
+
+\paragraph{How \prog{anh\_sample.py} works.}
+\begin{enumerate}
+\item \textbf{Enumeration.} It lists every vibrational state below an
+energy E$_\mathrm{enum}$ (\opt{--enum}). At low energy there are few
+states, each can have strong hot bands, and their number per bin is known
+exactly.
+\item \textbf{Wang--Landau walks.} From E$_\mathrm{enum}$ up to E$_\mathrm{max}$
+(\opt{--emax}) it runs Wang--Landau random walks in the space of the
+quantum numbers. Each step adds or removes one quantum in a random mode.
+The walks visit every energy bin equally often, and inside a bin every
+state is equally likely. At the same time they give the number of states
+of each bin.
+\item \textbf{Merging.} It merges the enumerated and the visited states,
+one entry per state, and sorts them by energy. It assigns them to the
+same bins as phase~2b and shuffles each bin.
+\item \textbf{Blocks.} It writes \emph{blocks} of starting states in the
+\file{quantafile} format. Each block takes up to K (\opt{--per-bin})
+states from every bin. Each block gives a complete spectrum, so the
+blocks can be computed one after the other: later blocks add sampling.
+\end{enumerate}
+
+\paragraph{Example.} The example uses the inputs of
+Tutorial~1 (\file{examples/pyrene/}):
+\begin{itemize}
+\item every state up to 1000~cm$^{-1}$;
+\item Wang--Landau up to 2500~cm$^{-1}$, with two walkers;
+\item bins of 100~cm$^{-1}$, centred on multiples of 100 (\opt{Ehistmin}~$=-50$);
+\item two states per bin in one block.
+\end{itemize}
+From an empty directory:
+\begin{lstlisting}
+sh .../examples/pyrene-thermal/run_sample.sh CODEDIR
+\end{lstlisting}
+where \file{CODEDIR} is the source tree of \ac{} (it contains
+\file{tools/}). The script runs
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_sample.py --inp inp --freqsfile freqsfile \
+  --enum 1000 --emax 2500 --ehistmin -50 --ehiststep 100 \
+  --walkers 2 --per-bin 2 --blocks 1 --prefix s
+\end{lstlisting}
+It takes about 5~seconds and prints, with development version
+\texttt{11d12fc}:
+\begin{lstlisting}
+enumerated 839 states with E <= 1000 cm-1
+walker 0: 1900000 steps, 15 stages, final ln f 1.00e-05, 52280 states visited
+walker 1: 1900000 steps, 15 stages, final ln f 1.00e-05, 51624 states visited
+s_quanta_block000: 51 states
+\end{lstlisting}
+The random numbers have a fixed seed (\opt{--seed}), so the output is the
+same at every run.
+
+\paragraph{The output files.}
+\begin{description}
+\item[\file{s\_quanta\_block000}] The starting states of the block, in
+\file{quantafile} format, each with weight~1. There are 51 of them: the
+ground state, which is alone in its bin, and two states in each of the 25
+other bins.
+\item[\file{s\_dos.dat}] The number of states of each bin. Its columns are:
+\begin{enumerate}
+\item the bin;
+\item its lower and upper edge (cm$^{-1}$);
+\item the exact count from the enumeration, complete only for bins that
+end below E$_\mathrm{enum}$;
+\item the Wang--Landau $\ln g$ and its error;
+\item the number of distinct states found in the bin.
+\end{enumerate}
+\item[\file{s\_states.dat}] All the states found. Its columns are:
+\begin{enumerate}
+\item the energy;
+\item the bin;
+\item the source (0 enumerated, 1 Wang--Landau);
+\item the number of visits;
+\item the quantum numbers.
+\end{enumerate}
+\end{description}
+
+\paragraph{How good the counts are.} In this example the Wang--Landau
+$\ln g$ can be compared with an exact count:
+
+\begin{center}
+\begin{tabular}{rrrrr}
+bin (cm$^{-1}$) & exact states & exact $\ln g$ & Wang--Landau $\ln g$ & distinct states found \\
+\hline
+950--1050 & 469 & 6.151 & $6.126\pm0.015$ & 469 \\
+1450--1550 & 5237 & 8.564 & $8.561\pm0.026$ & 4397 \\
+1950--2050 & 44728 & 10.708 & $10.728\pm0.018$ & 8961 \\
+2450--2550 & 318639 & 12.672 & $12.694\pm0.038$ & 6489 \\
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{The counts:} the error on $\ln g$ is about 0.02, that is
+2\,\%, much smaller than the statistical error of a spectrum averaged over
+a few starting states.
+\item \textbf{The sample:} the walks find only a fraction of the states of
+the higher bins. This does not matter, because the starting states only
+have to be a uniform sample. Only their number has to be large enough.
+\end{itemize}
+
+\paragraph{The options of \prog{anh\_sample.py}.}
+\begin{description}
+\item[\opt{--inp}, \opt{--freqsfile}] The \file{inp} of the run, and the
+frequencies, first column of \file{freqsfile}.
+\item[\opt{--enum}, \opt{--emax}] E$_\mathrm{enum}$ and E$_\mathrm{max}$ in
+cm$^{-1}$.
+\begin{itemize}
+\item Keep E$_\mathrm{enum}$ low enough that the enumeration stays below
+a few million states.
+\item For phase~2b, \opt{Ehistmax} must be at least E$_\mathrm{max}$:
+phase~2b ignores starting states outside the energy histogram.
+\end{itemize}
+\item[\opt{--ehistmin}, \opt{--ehiststep}] The energy bins. They must be
+those of the phase~2b runs (\opt{Ehistmin}, \opt{Ehiststep}). By default
+they are read from \file{inp}.
+\item[\opt{--walkers}, \opt{--procs}, \opt{--seed}] The number of
+independent walks, how many processes run them, and the random seed.
+More walkers mean less correlated samples and an error estimate on
+$\ln g$.
+\item[\opt{--lnf-final}] When the walks stop, by default $10^{-5}$.
+Smaller values give more accurate counts, at a cost in time proportional
+to their inverse.
+\item[\opt{--per-bin}, \opt{--blocks}] K states per bin in each block, and
+the number of blocks.
+\item[\opt{--energy}] \texttt{harmonic} (the default) or \texttt{dunham},
+the energies with the deperturbed Dunham coefficients of
+\file{dunhamparams}. Keep the default: phase~2b assigns the starting
+states to the bins with their harmonic energy.
+\end{description}
+
+\paragraph{What to choose.} Start with a small block, a few states per
+bin, and the energy range you need. Compute it in order of increasing
+energy, then add blocks where the spectra are still noisy. The cost of a
+starting state grows quickly with its energy: see the polyad sizes in
+\file{polyadsizes} and the \texttt{growth} lines of the log
+(\opt{verbosity} bit \texttt{timings}).
+
+\section{Temperature in phase 2b}
+
+The temperature enters phase~2b through \opt{kT}, in cm$^{-1}$. It is
+convenient to give the temperature in kelvin as a variable
+(Section~\ref{sec:inp}):
 \begin{lstlisting}
 temperature = 500        # K
 kT = 0.6950348*temperature
