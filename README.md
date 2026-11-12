@@ -25,5 +25,5 @@ Rules for the sources:
 ## License
 
 This manual is distributed under the GNU General Public License, version 3
-or (at your option) any later version (SPDX `GPL-3.0-or-later`), the same
-license as AnharmoniCaOs; see [`COPYING`](COPYING).
+(SPDX `GPL-3.0-only`), the same license as AnharmoniCaOs; see
+[`COPYING`](COPYING).
