@@ -21,3 +21,9 @@ Rules for the sources:
   runs.
 - Point to the theory notes with `\notes{§...}`, and to the literature
   with `\cite`.
+
+## License
+
+This manual is distributed under the GNU General Public License, version 3
+(SPDX `GPL-3.0-only`), the same license as AnharmoniCaOs; see
+[`COPYING`](COPYING).
