@@ -166,6 +166,85 @@ the energies with the deperturbed Dunham coefficients of
 states to the bins with their harmonic energy.
 \end{description}
 
+\section{How high in energy the sampling must go}\label{sec:thermal-howhigh}
+
+A natural guess is that starting states up to a few $kT$ (say 3 or $5\,kT$)
+are enough for a spectrum at temperature $T$, since the Boltzmann factor
+$e^{-E/kT}$ is already small there. This is wrong for a polyatomic
+molecule, and badly so. The population of the energy $E$ is
+\[
+P(E)\propto g(E)\,e^{-E/kT},
+\]
+and the number of states $g(E)$ rises extremely fast with $E$. For pyrene
+(72 modes), $g$ grows by a factor of about $e^{5}$, that is 150, between
+1000 and 2000~cm$^{-1}$, much faster than $e^{-E/kT}$ falls at room
+temperature.
+
+\paragraph{Where the population lies.} $P(E)$ has its maximum where
+$\ln g$ grows exactly as fast as $E/kT$, that is where
+$\mathrm{d}\ln g/\mathrm{d}E=1/kT$. The left panel of
+Figure~\ref{fig:thermal-energy} shows that this happens far above $kT$:
+\begin{itemize}
+\item at 500~K ($kT=348$~cm$^{-1}$) around 5000~cm$^{-1}$;
+\item at 1000~K ($kT=695$~cm$^{-1}$) around 21\,000~cm$^{-1}$.
+\end{itemize}
+The right panel shows the distributions themselves. The dotted lines at
+$5\,kT$ fall on their low-energy side.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figures/thermal-energy.png}
+\caption{Pyrene, harmonic states. Left: the logarithmic growth rate of the
+number of states, $\mathrm{d}\ln g/\mathrm{d}E$, against $1/kT$ for three
+temperatures; the population peaks where they cross. Right: the thermal
+distribution of the vibrational energy $P(E)$; dotted lines at $5\,kT$,
+dashed lines at the energy below which 99.9\,\% of the population lies.
+Made by \file{examples/pyrene-thermal/thermal\_energy.py}.}
+\label{fig:thermal-energy}
+\end{figure}
+
+\paragraph{The numbers.} The script \file{examples/pyrene-thermal/thermal\_energy.py}
+counts the harmonic states of pyrene exactly, with the Beyer--Swinehart
+algorithm. It needs numpy, and matplotlib for the figure, and gives:
+
+\begin{center}
+\begin{tabular}{rrrrrrr}
+$T$ (K) & $kT$ (cm$^{-1}$) & $5\,kT$ & mean $E$ & 99\,\% below & 99.9\,\% below & 99.9\,\% in $kT$ \\
+\hline
+100 & 70 & 348 & 82 & 550 & 810 & 11.7 \\
+300 & 209 & 1043 & 1621 & 4250 & 5410 & 25.9 \\
+500 & 348 & 1738 & 5500 & 11000 & 13240 & 38.1 \\
+1000 & 695 & 3475 & 21641 & 34770 & 39830 & 57.3 \\
+\end{tabular}
+\end{center}
+(Energies in cm$^{-1}$, on a 10~cm$^{-1}$ grid.)
+
+\begin{itemize}
+\item \textbf{A check:} the mean energy agrees with the exact harmonic
+value $\sum_i\omega_i/(e^{\omega_i/kT}-1)$, which the script also
+prints, within the grid.
+\item \textbf{The rule:} already at 300~K the sampling must reach
+26~$kT$, and at 1000~K 57~$kT$, to cover 99.9\,\% of the population. The
+larger the molecule, the steeper $g(E)$ and the larger this factor.
+\item \textbf{Anharmonicity} lowers the levels, so the anharmonic density
+of states grows somewhat faster still. Use these harmonic numbers as a
+lower bound.
+\end{itemize}
+
+\paragraph{In practice.}
+\begin{itemize}
+\item Run \file{thermal\_energy.py} with the \file{freqsfile} of your
+molecule. It prints the energy that holds 99.9\,\% of the population at
+each temperature. Choose E$_\mathrm{max}$ of the sampling above it, for
+the highest temperature you need.
+\item \prog{anh\_assemble.py} checks this too: it estimates the
+population above the highest sampled energy and warns if it is not
+negligible.
+\item The example of Section~\ref{sec:thermal-sample} stops at
+2500~cm$^{-1}$. That is enough only up to about 100~K. At 300~K about a
+fifth of the population lies above it.
+\end{itemize}
+
 \paragraph{What to choose.} Start with a small block, a few states per
 bin, and the energy range you need. Compute it in order of increasing
 energy, then add blocks where the spectra are still noisy. The cost of a
