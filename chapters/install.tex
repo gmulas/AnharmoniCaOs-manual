@@ -142,9 +142,11 @@ shows whether the process uses it.
 
 \section{Checking the build}
 
-The directory \file{tests/claude\_check} contains checks that compare the
+The directory \file{tests/checks} contains checks that compare the
 code with exact reference implementations; each \file{run.sh} ends with
-\texttt{OK}. Phase 1 alone can also be built without MPI, PETSc or PARI,
-with \file{tests/claude\_check/fase1\_standalone/build.sh}. This is useful
+\texttt{OK}. They were designed and written with the support of Claude,
+the AI model by Anthropic, during the 2026 review of the code. Phase 1
+alone can also be built without MPI, PETSc or PARI, with
+\file{tests/checks/fase1\_standalone/build.sh}. This is useful
 on a laptop, to inspect the resonances before running phases 2a and 2b on
 a cluster.
