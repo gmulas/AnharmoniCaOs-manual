@@ -15,7 +15,7 @@ The examples in `examples/` (force fields, dipole derivatives, inputs) are
 the data of the tutorials and are distributed under the same licence as
 the manual. The same data are published in the PAH database of
 INAF – Osservatorio Astronomico di Cagliari,
-<https://qchitool-pah-dev.oa-cagliari.inaf.it>.
+<https://cosmicpah-qcals.oa-cagliari.inaf.it>.
 
 ## Building
 
