@@ -3,7 +3,7 @@
 ## System definition ##
 nmodes = 72
 
-verbosity = 31
+verbosity = 27
 
 ## Limits ##
 cutcorrflag = 0
