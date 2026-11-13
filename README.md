@@ -1,5 +1,24 @@
 # AnharmoniCaOs user manual
 
+The user manual of [AnharmoniCaOs](https://sourceforge.net/projects/anharmonica/),
+a code for the anharmonic infrared spectra of large molecules: how to
+install it, its input files and options, its outputs, and tutorials that
+can be reproduced. The code is on SourceForge (public release) and on
+GitHub (development); the input parser is
+[liboct-parser](https://github.com/gmulas/oct-parser-fork), from Octopus.
+
+Authors: Giacomo Mulas (INAF – Osservatorio Astronomico di Cagliari) and
+Cyril Falvo (Université Paris-Saclay), with contributions by Claude (AI
+model by Anthropic) since 2026.
+
+The examples in `examples/` (force fields, dipole derivatives, inputs) are
+the data of the tutorials and are distributed under the same licence as
+the manual. The same data are published in the PAH database of
+INAF – Osservatorio Astronomico di Cagliari,
+<https://qchitool-pah-dev.oa-cagliari.inaf.it>.
+
+## Building
+
 There is one LaTeX source and two outputs:
 
 - **PDF**: `make pdf`, or compile `manual.tex` on Overleaf.
