@@ -66,13 +66,21 @@ can differ, because the two codes choose the resonances differently.
 
 \section{Versions}
 
-This manual describes the release \ac{}~\acversion{} and the development
-version (branch \texttt{dev/polyad-jobs}). Options, files and behaviours
-that exist only in the development version are marked \devonly. The most
-visible difference concerns the choice of the bands. In the release, the
-fundamentals are chosen with the last column of \file{freqsfile}, and the
-other bands by \opt{bandthres}. In the development version, all the bands
-are chosen in \file{bandlist}, separately for absorption and emission.
+This manual describes \ac{}~\acversion{}. Every program writes its version
+as the first line of its log, for example
+\texttt{AnharmoniCaOs 2026.11.1 (git v2026.11.1), phase 1}; the same line
+heads \file{bandlist}, \file{dunhamparams}, \file{resonancecandidates} and
+the files written by the tools. The changes from the previous version,
+2026.11, are listed in \file{NEWS.md} of the code. The ones that matter
+most for inputs written for 2026.11:
+\begin{itemize}
+\item the bands are chosen in \file{bandlist}, separately for absorption
+  and emission, and no longer with the last column of \file{freqsfile};
+\item \opt{minhopcoupling} is 0.5~cm$^{-1}$ by default, which makes the
+  polyads smaller (0 gives back the polyads of 2026.11);
+\item \opt{verbosity} no longer changes what is computed (in 2026.11,
+  without bit~4 the spectra were empty).
+\end{itemize}
 
 \section{How to read this manual}
 

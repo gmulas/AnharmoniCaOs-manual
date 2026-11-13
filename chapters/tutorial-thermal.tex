@@ -10,9 +10,8 @@ done by a tool in the \file{tools/} directory of the code:
 \item assemble the results into spectra per energy and per temperature
 (\prog{anh\_assemble.py}).
 \end{enumerate}
-The tools need Python~3 with numpy. \devonly{} They are in the development
-version (code PRs \#91 and \#92). Steps 2 and~3 are described here once
-code PR \#92 is merged \wip.
+The tools need Python~3 with numpy; they are in \file{tools/} of the code.
+Steps 2 and~3 are described here in the next version of this manual \wip.
 
 \section{What is computed}\label{sec:thermal-what}
 
@@ -77,8 +76,8 @@ python3 CODEDIR/tools/anh_sample.py --inp inp --freqsfile freqsfile \
   --enum 1000 --emax 2500 --ehistmin -50 --ehiststep 100 \
   --walkers 2 --per-bin 2 --blocks 1 --prefix s
 \end{lstlisting}
-It takes about 5~seconds and prints, with development version
-\texttt{11d12fc}:
+It takes about 15~seconds on a laptop and prints, with AnharmoniCaOs
+2026.11.1 (\texttt{git 88b3b13}):
 \begin{lstlisting}
 enumerated 839 states with E <= 1000 cm-1
 walker 0: 1900000 steps, 15 stages, final ln f 1.00e-05, 52280 states visited

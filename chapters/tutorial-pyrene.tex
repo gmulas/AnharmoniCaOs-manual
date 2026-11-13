@@ -52,10 +52,30 @@ fermithres = thres
 ddthres = thres
 \end{lstlisting}
 which is handy when testing how the results depend on them.
-Phase 1 takes about 45~s. It finds 1785 resonances. It selects 31 fundamentals (the modes with flag 1
-in \file{freqsfile}; in the development version, those with a nonzero
-dipole derivative) and 1264 other bands. Phase 2b takes about 3 minutes on 4
-cores; the largest polyad has 3582 states. \devonly{} The development version stops polyad growth through couplings below \opt{minhopcoupling}~$=0.5$~cm$^{-1}$ by default: there the largest polyad has 2363 states, and phase 2b is about four times faster.
+\file{run.sh} takes about 1 min 40~s on a 4-core laptop: phase 1 about
+20~s, phase 2a 4~s, phase 2b about 70~s. Phase 1 finds 1785 resonances
+(1609 E4, 89 B3, 79 D4, 8 G2) and writes \file{bandlist} with 31
+fundamentals (the modes with a nonzero dipole derivative) and 1264
+overtone, combination and difference bands. The largest polyad has 2363
+states. (With \opt{minhopcoupling}~$=0$, the default of 2026.11, it has
+3582 and phase 2b takes about four times longer.)
+
+Phase 1 prints two warnings:
+\begin{lstlisting}
+Warning: rotatedcomp is 0.580081>.5 for vib mode 0, possible intensity inaccuracy
+  largest term: B3 1 56 56 (1-based, 1 <-> 56 + 56), |Phi/Delta| = 0.611823,
+  harmonic Delta = -54.391 cm-1, treated as nonresonant; see rescandfile, resonanceoverrides
+\end{lstlisting}
+and the same for mode~1 (modes are counted from 0 here, from 1 in the
+second line). They are expected. The two highest CH stretches are mixed
+strongly by the contact transformation (\texttt{rotatedcomp} above 0.5),
+mostly through a Fermi term with the overtone or a combination of mode~56
+(the second line names it), which the default criterion treats as
+nonresonant; so their intensities, computed perturbatively, are less
+accurate (Chapter~\ref{ch:trouble}). Tutorial~4
+(Chapter~\ref{ch:tut-review}) shows how to review such terms, and with
+\opt{rescriterion}~$=1$ they are treated as resonant and the warnings
+disappear.
 
 \section{What to look at}
 
@@ -76,20 +96,20 @@ lines and draws Figure~\ref{fig:pyrene}:
 \begin{lstlisting}
 python3 plot_spectrum.py . 8
 \end{lstlisting}
-The run gives 4568 lines with a total of 446.1~km/mol. The strongest are:
+The run gives 3963 lines with a total of 446.1~km/mol. The strongest are:
 \begin{center}
 \begin{tabular}{rr}
 \toprule
 wavenumber (cm$^{-1}$) & intensity (km/mol) \\
 \midrule
-844.75 & 105.63 \\
+844.79 & 109.92 \\
 711.91 & 43.95 \\
 3035.46 & 38.69 \\
 742.61 & 16.00 \\
-3037.81 & 14.53 \\
-1184.02 & 12.14 \\
+3037.83 & 14.11 \\
+1184.00 & 12.16 \\
 202.22 & 10.19 \\
-3042.34 & 9.96 \\
+3042.34 & 9.97 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -104,9 +124,9 @@ split among the states they are in resonance with.}
 \label{fig:pyrene}
 \end{figure}
 
-These numbers and the figure come from a run of these inputs with the code
-of \texttt{master} at commit \texttt{84f7695} (2026-11-05); a build of
-2026-11-06 gives byte-identical histograms.
+These numbers and the figure come from a run of \file{run.sh} with
+AnharmoniCaOs 2026.11.1 (\texttt{git 88b3b13}, the release candidate; the
+programs of the release are the same) on a 4-core laptop.
 
 \subsection*{Choice of the eigensolver}
 
@@ -126,34 +146,27 @@ phase 2b:
   polyads of 3400 states and more, without any error.
 \end{itemize}
 
-Wall time of phase 2b of this tutorial on a 4-core laptop, one thread per
-process (\texttt{pdsyevx} with 4 processes: \texttt{dev/polyad-jobs} at \texttt{e07bbdf}; the others: branch \texttt{fix/elpa-small-polyads} at
-\texttt{0acd9f2} and \texttt{a90ff52}, November 2026; the times vary by
-about 15\% between sessions):
+Wall time of phase 2b of this tutorial on a 4-core laptop, with
+AnharmoniCaOs 2026.11.1 (\texttt{git 88b3b13}); the three runs give the
+same total, 446.08~km/mol:
 \begin{center}
 \begin{tabular}{lrr}
 \hline
-eigensolver & processes & wall time \\
+eigensolver & processes $\times$ threads & wall time \\
 \hline
-\texttt{pdsyevx} (2) & 4 & 5:28 \\
-\texttt{pdsyevx} (2) & 1 & 8:48 \\
-\texttt{pdsyevr} (1) & 1 & 3:07 \\
-ELPA one-stage (3) & 4 & 4:08 \\
-ELPA one-stage (3) & 2 & 2:53 \\
-ELPA one-stage (3) & 1 & 2:20 \\
-ELPA two-stage, \opt{elpablock}~=~16 & 1 & 2:12 \\
+\texttt{pdsyevx} (2) & $4\times1$ & 1:05 \\
+ELPA one-stage (3) & $1\times1$ & 0:27 \\
+\opt{spectral}~$=1$, \opt{spectralexactmax}~$=3000$ & $1\times4$ & 0:06 \\
 \hline
 \end{tabular}
 \end{center}
-On polyads of this size more processes make phase 2b slower: the cost of
-distributing the matrices exceeds the gain. One process with ELPA, or
-several independent runs, is the efficient choice here.
-\devonly{} These times include the diagonalisation of all the polyads of the
-ground-state step (\opt{computeground}). From code PR~\#78 only the polyad of
-the ground state is diagonalised there, unless \opt{groundtransitions}~$=1$,
-so phase~2b takes less; with \texttt{verbosity = 31}, as in this tutorial,
-the log warns that the lines of the ground state are skipped. The spectra do
-not change.
+On polyads of this size more processes do not help: the cost of
+distributing the matrices exceeds the gain, and one process with ELPA, or
+several independent runs, is the efficient choice. The spectral method
+(option \opt{spectral}) is fastest; with \opt{spectralexactmax} as
+large as the largest polyad all the polyads are diagonalised exactly and
+the spectrum agrees with the other solvers within its resolution
+(relative L1 distance 0.5\%).
 
 \section{Variations}
 

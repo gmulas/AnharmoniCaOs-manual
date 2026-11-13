@@ -58,10 +58,9 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \begin{description}
 \item[\file{freqsfile}] One line per mode: $\omega$, then
   $\partial\mu/\partial q$ ($x$, $y$, $z$), then two optional columns: a
-  legacy scale factor (unused) and a flag. In the release, a flag of 1
-  computes the fundamental of that mode and 0 disables it; a disabled mode
-  also has its dipole derivative set to zero. \devonly{} The flag is
-  ignored, with a warning, and the bands are chosen in \file{bandlist}.
+  legacy scale factor (unused) and a flag, also unused: up to 2026.11 it
+  chose the fundamentals, now they are chosen in \file{bandlist}, and a
+  flag of 0 gives a warning.
 \item[\file{phi3file}, \file{phi4file}] Lines \texttt{i j k value} and
   \texttt{i j k l value}. Entries below \opt{phi3threshold} and
   \opt{phi4threshold} (cm$^{-1}$) are dropped.
@@ -73,7 +72,7 @@ kT = 0.6950348*temperature   # kT is in cm-1
   then the repetition count.
 \item[\opt{gradientfile}] Optional: the classical gradient at the reference
   geometry, lines \texttt{i g\_i} (written by \opt{shiftgeometry}).
-\item[\opt{bandlistfile}, \opt{resonanceoverrides}] \devonly{} Edited copies of
+\item[\opt{bandlistfile}, \opt{resonanceoverrides}] Edited copies of
   \file{bandlist} and \file{resonancecandidates}
   (Chapter~\ref{ch:tut-review}).
 \end{description}
@@ -88,8 +87,8 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \optentry{ddthres}{0.2}{1}{The same for quartic (Darling--Dennison) resonances.}
 \optentry{samesignresonances}{0}{1}{Also accept terms whose detuning is a single frequency.}
 \optentry{closureterms}{0}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}.}
-\optentry{rescriterion}{0}{1}{\devonly{} 1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta. Each error is evaluated with the deperturbed and with the harmonic detuning, and the term is resonant if either is too large: a term left out is treated with the harmonic detuning, so it must be small with both (in \file{resonancecandidates}, \texttt{why} ends in \texttt{-harm} when the harmonic detuning decided).}
-\optentry{resonanceoverrides}{""}{1}{\devonly{} Force resonances on or off (Chapter~\ref{ch:tut-review}).}
+\optentry{rescriterion}{0}{1}{1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta. Each error is evaluated with the deperturbed and with the harmonic detuning, and the term is resonant if either is too large: a term left out is treated with the harmonic detuning, so it must be small with both (in \file{resonancecandidates}, \texttt{why} ends in \texttt{-harm} when the harmonic detuning decided).}
+\optentry{resonanceoverrides}{""}{1}{Force resonances on or off (Chapter~\ref{ch:tut-review}).}
 \end{description}
 \subsection*{Geometry and dipole}
 \begin{description}
@@ -99,8 +98,8 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \subsection*{Bands}
 \begin{description}
 \optentry{bandthres}{see README}{1}{Default activation of overtone, combination and difference bands, by $|\partial^2\tilde\mu|$.}
-\optentry{fundthres}{1e-6}{1}{\devonly{} Default activation of fundamentals, by $|\partial\mu|$. A dipole derivative below it is numerical noise of a symmetry-forbidden mode and is set to zero when \file{freqsfile} is read.}
-\optentry{bandlistfile}{""}{1}{\devonly{} Edited band list. It is read at the start of phase 1: an unknown choice stops the run at once, and lines that match no listed band give a warning.}
+\optentry{fundthres}{1e-6}{1}{Default activation of fundamentals, by $|\partial\mu|$. A dipole derivative below it is numerical noise of a symmetry-forbidden mode and is set to zero when \file{freqsfile} is read.}
+\optentry{bandlistfile}{""}{1}{Edited band list. It is read at the start of phase 1: an unknown choice stops the run at once, and lines that match no listed band give a warning.}
 \end{description}
 \subsection*{Checks}
 \begin{description}
@@ -112,17 +111,17 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \begin{description}
 \optentry{hsizescalepar}{see README}{2a}{Scale of the polyad growth.}
 \optentry{maxtothops}{see README}{2a}{Maximum number of resonant steps from a target state. Its default is the larger of \opt{maxfhops} and \opt{maxddhops}, which have no other effect. How it acts depends on \opt{separatehops}.}
-\optentry{separatehops}{0}{2a}{\devonly{} How \opt{maxtothops} limits a polyad. With 0, every step costs at least $1/\opt{maxtothops}$, so the credit allows at most \opt{maxtothops} steps, except steps between degenerate states, which cost nothing and are not limited. With 1, the cost has no minimum and the steps are counted: a state is added if some path from a target reaches it with credit left in at most \opt{maxtothops} steps, degenerate steps included. With 1 the polyads are larger (about 2.5 times for the pyrene tutorial). Changes results.}
-\optentry{costmodel}{0}{2a}{\devonly{} Cost of one resonant step when a polyad grows: 0, $1/\max(1.5,\ \opt{hsizescalepar}\,|W/\Delta E|)$; 1, $1/(\opt{costscale}\,|W/\Delta E|+1)$. Both at least $1/\opt{maxtothops}$, unless \opt{separatehops}~$=1$.}
-\optentry{costscale}{6}{2a}{\devonly{} Scale for \opt{costmodel}~$=1$, calibrated on toy Fermi and Wannier--Stark ladders (\file{tools/costmodel\_toy.py}).}
-\optentry{minhopcoupling}{0.5}{2a}{\devonly{} A polyad does not grow through a coupling $|W|$ below this value (cm$^{-1}$); the coupling stays in the matrix when both states are in the polyad. Set it to 0 to switch it off and get the polyads of earlier versions.}
-\optentry{maxqueued}{0}{2a}{\devonly{} A limit on the states queued for one starting state (0: no limit). When it is reached, the growth of that starting state stops: the log gets a \texttt{growth stopped} summary and stderr a warning, its polyads are not written, and it is listed in \file{processedmodepopfile.stopped} instead of the files read by phase~2b. Phase~2a goes on with the next starting state; if the ground-state step reaches the limit, phase~2a stops. A queued state takes about 375 bytes, so \texttt{maxqueued = 1e8} is about 40~GB.}
+\optentry{separatehops}{0}{2a}{How \opt{maxtothops} limits a polyad. With 0, every step costs at least $1/\opt{maxtothops}$, so the credit allows at most \opt{maxtothops} steps, except steps between degenerate states, which cost nothing and are not limited. With 1, the cost has no minimum and the steps are counted: a state is added if some path from a target reaches it with credit left in at most \opt{maxtothops} steps, degenerate steps included. With 1 the polyads are larger (about 2.5 times for the pyrene tutorial). Changes results.}
+\optentry{costmodel}{0}{2a}{Cost of one resonant step when a polyad grows: 0, $1/\max(1.5,\ \opt{hsizescalepar}\,|W/\Delta E|)$; 1, $1/(\opt{costscale}\,|W/\Delta E|+1)$. Both at least $1/\opt{maxtothops}$, unless \opt{separatehops}~$=1$.}
+\optentry{costscale}{6}{2a}{Scale for \opt{costmodel}~$=1$, calibrated on toy Fermi and Wannier--Stark ladders (\file{tools/costmodel\_toy.py}).}
+\optentry{minhopcoupling}{0.5}{2a}{A polyad does not grow through a coupling $|W|$ below this value (cm$^{-1}$); the coupling stays in the matrix when both states are in the polyad. Set it to 0 to switch it off and get the polyads of earlier versions.}
+\optentry{maxqueued}{0}{2a}{A limit on the states queued for one starting state (0: no limit). When it is reached, the growth of that starting state stops: the log gets a \texttt{growth stopped} summary and stderr a warning, its polyads are not written, and it is listed in \file{processedmodepopfile.stopped} instead of the files read by phase~2b. Phase~2a goes on with the next starting state; if the ground-state step reaches the limit, phase~2a stops. A queued state takes about 375 bytes, so \texttt{maxqueued = 1e8} is about 40~GB.}
 \optentry{eigensolver}{1}{2b}{Diagonalisation library: 1 ScaLAPACK \texttt{pdsyevr}, 2 ScaLAPACK \texttt{pdsyevx}, 0 SLEPc, 3 ELPA (the fastest in the tests of Chapter~\ref{ch:tut-pyrene}). With 1 and 3, the small polyads (at most 300 states per row or column of the process grid beyond the first) go to \texttt{pdsyevx}.}
 \optentry{elpasolver}{1}{2b}{With \opt{eigensolver}~=~3: ELPA's one-stage (1) or two-stage (2) solver.}
 \optentry{elpablock}{64}{2b}{With \opt{eigensolver}~=~3: block size of the distributed matrices. ELPA's two-stage solver gives wrong eigenvalues, without any error, with large blocks (it did with 300); keep it at 64 or below. Its GPU kernel needs a power of 2. See Section~\ref{sec:elpa}.}
 \optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method for large polyads; resolution \opt{spectraldelta}.}
-\optentry{groundtransitions}{0}{2b}{\devonly{} With \opt{computeground}~$=1$: in the ground-state step, which adds nothing to the spectra, diagonalise all its polyads and compute the lines of the ground state, which \texttt{groundlines} (\opt{verbosity} bit 4) writes. With 0 only the polyad of the ground state is diagonalised, for the reference energy, and \texttt{groundlines} gives a warning instead of the lines. It applies to every \opt{eigensolver} and to \opt{spectral}. It does not change the spectra. Its older name, \opt{spectraleigenground}, is still read.}
-\optentry{spectralexactmax}{0}{2b}{\devonly{} With \opt{spectral}~$=1$: a starting polyad of at most this many states is diagonalised, and its eigenstates replace the energy windows of the starting state (much faster for starting states in small polyads, such as the ground state). The destination polyads are still treated spectrally. Changes the spectra within the resolution; 0 switches it off.}
+\optentry{groundtransitions}{0}{2b}{With \opt{computeground}~$=1$: in the ground-state step, which adds nothing to the spectra, diagonalise all its polyads and compute the lines of the ground state, which \texttt{groundlines} (\opt{verbosity} bit 4) writes. With 0 only the polyad of the ground state is diagonalised, for the reference energy, and \texttt{groundlines} gives a warning instead of the lines. It applies to every \opt{eigensolver} and to \opt{spectral}. It does not change the spectra. Its older name, \opt{spectraleigenground}, is still read.}
+\optentry{spectralexactmax}{0}{2b}{With \opt{spectral}~$=1$: a starting polyad of at most this many states is diagonalised, and its eigenstates replace the energy windows of the starting state (much faster for starting states in small polyads, such as the ground state). The destination polyads are still treated spectrally. Changes the spectra within the resolution; 0 switches it off.}
 \end{description}
 \subsection*{Histograms}
 \begin{description}
@@ -131,7 +130,7 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \end{description}
 \subsection*{Log output}
 \begin{description}
-\optentry{verbosity}{0}{all}{What the logs (\file{proclog\_n*}) contain. It is a sum of the bits of Table~\ref{tab:verbosity}, which can be given by name: for example \texttt{verbosity = timings + components} instead of \texttt{verbosity = 10}. Write each name once: a name written twice adds its bit twice, which gives another bit. \opt{verbosity} does not change the spectra. In the released version bit 4 also changes what phase~2a builds: without it, phase~2a builds no polyads of the band destinations, and the spectra are empty, so keep bit 4 set there. \devonly{} In the development version \opt{verbosity} never changes what is computed; the lines of the ground state need \opt{groundtransitions}~$=1$.}
+\optentry{verbosity}{0}{all}{What the logs (\file{proclog\_n*}) contain. It is a sum of the bits of Table~\ref{tab:verbosity}, which can be given by name: for example \texttt{verbosity = timings + components} instead of \texttt{verbosity = 10}. Write each name once: a name written twice adds its bit twice, which gives another bit. \opt{verbosity} does not change the spectra. It never changes what is computed; the lines of the ground state need \opt{groundtransitions}~$=1$. (Up to 2026.11, without bit~4 phase~2a built no polyads of the band destinations, and the spectra were empty.)}
 \end{description}
 \begin{table}[ht]
 \centering
@@ -141,11 +140,11 @@ kT = 0.6950348*temperature   # kT is in cm-1
 bit & name & what is written \\
 \hline
 1 & \texttt{polyadlevels} & For each starting state, the basis states of its polyads, with the target states marked by \texttt{*}, and their levels. With \opt{spectral}~$=1$, a polyad that is not diagonalised says so and lists only its basis states; a starting polyad diagonalised with \opt{spectralexactmax} lists its eigenstates and their weight on the starting state. \\
-2 & \texttt{timings} & Timings and polyad sizes. \devonly{} In phase~2a, every 60~s and at the end of each starting state, a \texttt{growth:} line with histograms of the credit and hops of the waiting states, of the fewest hops of all the queued states, and of the hops taken per resonance type. With \opt{spectral}~$=1$, the summary lines \texttt{spectral:}, \texttt{spectral border:} and \texttt{spectral timing:} for each starting state. \\
-4 & \texttt{groundlines} & The lines of the ground state, with their assignment. In the released version this bit also makes phase~2a build the polyads of the band destinations. \devonly{} The lines need \opt{groundtransitions}~$=1$. \\
+2 & \texttt{timings} & Timings and polyad sizes. In phase~2a, every 60~s and at the end of each starting state, a \texttt{growth:} line with histograms of the credit and hops of the waiting states, of the fewest hops of all the queued states, and of the hops taken per resonance type. With \opt{spectral}~$=1$, the summary lines \texttt{spectral:}, \texttt{spectral border:} and \texttt{spectral timing:} for each starting state. \\
+4 & \texttt{groundlines} & The lines of the ground state, with their assignment. They need \opt{groundtransitions}~$=1$. \\
 8 & \texttt{components} & The main components of the eigenstates. \\
 16 & \texttt{transitions} & Every transition. \\
-32 & \texttt{spectraldiag} & \devonly{} Internals of the spectral method: one line per energy window of the starting state, and one per destination polyad, with its size, Chebyshev parameters and wall time. \\
+32 & \texttt{spectraldiag} & Internals of the spectral method: one line per energy window of the starting state, and one per destination polyad, with its size, Chebyshev parameters and wall time. \\
 \hline
 \end{tabular}
 \end{table}
