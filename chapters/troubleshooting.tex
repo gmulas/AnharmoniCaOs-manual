@@ -13,16 +13,17 @@
   See \notes{§11.8}.
 \item[\texttt{rotatedcomp is ... > .5}] Some band mixes strongly with
   other states through terms treated as nonresonant, so its intensity is
-  less accurate. \devonly{} The next line names the largest such term,
+  less accurate. The next line names the largest such term,
   with its harmonic detuning. If that detuning is small, make the term
   resonant: lower \opt{fermithres} (with \opt{rescriterion}~$=0$), or set its change to \texttt{on} in
   \file{resonancecandidates} and give the file back with
   \opt{resonanceoverrides}. With \opt{shiftgeometry} the rotation of the
   normal modes can also cause it.
-\item[\texttt{freqsfile disables N modes in its 6th column}] \devonly{} That column is
-  ignored. Choose the bands in \file{bandlist}.
-\item[\texttt{error reading updown for band}] \devonly \file{dumpedparams} was
-  written by an older phase 1. Rerun phase 1.
-\item[\texttt{resintensitythres is no longer used}] \devonly Replace it by
+\item[\texttt{freqsfile disables N modes in its 6th column}] That column
+  was the choice of the fundamentals before 2026.11.1; it is now ignored.
+  Choose the bands in \file{bandlist}.
+\item[\texttt{error reading updown for band}] \file{dumpedparams} was
+  written by the phase 1 of an older version. Rerun phase 1.
+\item[\texttt{resintensitythres is no longer used}] Replace it by
   \opt{resintensityrel}.
 \end{description}

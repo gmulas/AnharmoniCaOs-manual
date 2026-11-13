@@ -35,12 +35,12 @@ writes three readable files that you should look at before going on:
   and their ratio;
 \item \file{dunhamparams}: the deperturbed anharmonic constants, in the
   same convention as Gaussian's X matrix (Section~\ref{sec:dunham});
-\item \file{bandlist} \devonly: all the bands of the spectrum, with an intensity
+\item \file{bandlist}: all the bands of the spectrum, with an intensity
   estimate and a column saying whether, and in which direction, each band
   is computed.
 \end{itemize}
 
-\section{Reviewing and adjusting (optional) \devonly}
+\section{Reviewing and adjusting (optional)}
 
 The automatic choices of phase 1 can be changed by editing two files and
 running phase 1 again. Chapter~\ref{ch:tut-review} gives an example.
@@ -72,14 +72,14 @@ state. Its cost grows with the size of the polyads, controlled mainly by
 A polyad grows from each target state with a credit of 1. Each resonant
 step spends a part of it that depends on the ratio of the coupling $W$ to
 the difference $\Delta E$ of the diagonal energies of the two states; a
-state is added while some credit is left \notes{§11.3}. \devonly{} With
+state is added while some credit is left \notes{§11.3}. With
 \opt{costmodel}~$=1$ the cost of a step is $1/(\opt{costscale}\,|W/\Delta
 E|+1)$, with a scale calibrated on model polyads: in one-dimensional Fermi and
 Wannier--Stark ladders, the polyad then reproduces, within 1~cm$^{-1}$ and
 with overlap at least 0.95, the eigenstates carrying 95\% of the target
 weight. On pyrene the default \opt{costscale}~$=6$ gives polyads a
 little smaller than \opt{hsizescalepar}~$=8$ (largest 3264 states against
-3582, with \opt{maxtothops}~$=4$ and \opt{minhopcoupling}~$=0$). \devonly{} With the default \opt{minhopcoupling}~$=0.5$ the largest polyad of pyrene has 2363 states, and the 0~K spectrum differs from the one with \opt{minhopcoupling}~$=0$ by 0.7\% (relative L1 distance at 5~cm$^{-1}$ resolution). The cap \opt{maxtothops} stays necessary: without it the largest
+3582, with \opt{maxtothops}~$=4$ and \opt{minhopcoupling}~$=0$). With the default \opt{minhopcoupling}~$=0.5$ the largest polyad of pyrene has 2363 states, and the 0~K spectrum differs from the one with \opt{minhopcoupling}~$=0$ by 0.7\% (relative L1 distance at 5~cm$^{-1}$ resolution). The cap \opt{maxtothops} stays necessary: without it the largest
 polyad of pyrene has over 100\,000 states.
 
 \section{Phase 2b: diagonalisation and spectra}

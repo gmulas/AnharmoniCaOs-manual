@@ -52,7 +52,7 @@ which is set by the PETSc option \texttt{--with-64-bit-indices}.
   must use the same integer size as \texttt{PetscBLASInt}. A library of the
   other size links without errors, but receives indices of the wrong width:
   the results are wrong, or the program crashes.
-\item \emph{What \prog{configure} does.} \devonly{} \prog{configure}
+\item \emph{What \prog{configure} does.} \prog{configure}
   reads the size of \texttt{PetscBLASInt}. For BLAS, LAPACK and ScaLAPACK
   not given with \opt{--with-\ldots} or \texttt{NAME\_LIBS}, it tries the
   pkg-config modules available (for example \texttt{blas64},
