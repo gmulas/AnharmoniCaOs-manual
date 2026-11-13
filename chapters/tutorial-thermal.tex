@@ -5,13 +5,16 @@ internal energy or temperature. The spectrum is averaged over a sample of
 starting states, and the work is split into jobs. It has three steps, each
 done by a tool in the \file{tools/} directory of the code:
 \begin{enumerate}
-\item choose the starting states (\prog{anh\_sample.py}, this section);
-\item split them into jobs and run phases 2a and 2b (\prog{anh\_jobs.py});
+\item choose the starting states (\prog{anh\_sample.py},
+Section~\ref{sec:thermal-sample});
+\item split them into jobs and run phases 2a and 2b (\prog{anh\_jobs.py},
+Section~\ref{sec:thermal-jobs});
 \item assemble the results into spectra per energy and per temperature
-(\prog{anh\_assemble.py}).
+(\prog{anh\_assemble.py}, Section~\ref{sec:thermal-assemble}).
 \end{enumerate}
 The tools need Python~3 with numpy; they are in \file{tools/} of the code.
-Steps 2 and~3 are described here in the next version of this manual \wip.
+The example of this chapter takes about one hour on a 4-core laptop, or a
+few minutes on a cluster.
 
 \section{What is computed}\label{sec:thermal-what}
 
@@ -250,6 +253,167 @@ energy, then add blocks where the spectra are still noisy. The cost of a
 starting state grows quickly with its energy: see the polyad sizes in
 \file{polyadsizes} and the \texttt{growth} lines of the log
 (\opt{verbosity} bit \texttt{timings}).
+
+\section{Step 2: the jobs}\label{sec:thermal-jobs}
+
+\prog{anh\_jobs.py} splits the starting states into jobs, each of which
+runs phase~2a and then phase~2b with the spectral method on its own
+\file{quantafile}. The jobs share the phase~1 of one directory, and all of
+them write their histograms on the same energy and wavenumber grid, so
+that they can be added up exactly.
+
+\paragraph{Example.} Phase~1 must have been run, with the same \file{inp},
+in a directory: here the one of Tutorial~1, \file{../t1}. From the
+directory of step~1:
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_jobs.py --base ../t1 --profile laptop --out jobs \
+  --states s_quanta_block000 --Ehiststep 100 --Emax 2500
+\end{lstlisting}
+It prints
+\begin{lstlisting}
+3 jobs, 51 starting states, energies 0.0-2549.4 cm-1, grid: 26 energy bins x 140000 wavenumber bins
+\end{lstlisting}
+and writes, in \file{jobs/}:
+\begin{description}
+\item[\file{job\_0000/}, \dots] One directory per job: links to the
+phase~1 files of the base directory, the job's \file{quantafile}, its
+\file{inp} (the base \file{inp} plus the lines that set the spectral
+method, \opt{computeground}, the starting states and the grid), and the
+script \file{run.sh} (\file{run.slurm} on a Slurm cluster).
+\item[\file{submit\_all.sh}] Starts the jobs, in order of increasing
+energy.
+\item[\file{manifest.json}] The grid, the profile and the energy range of
+every job, read by step~3.
+\end{description}
+The jobs are run with
+\begin{lstlisting}
+ANHBIN=CODEDIR sh jobs/submit_all.sh
+\end{lstlisting}
+where \texttt{ANHBIN} is the directory of the programs (not needed if
+they are in \texttt{PATH}, for example from a module). A job that has
+finished a phase leaves \file{phase2a.done} or \file{phase2b.done}, and
+skips that phase if it is started again.
+
+\paragraph{Options.}
+\begin{description}
+\item[\texttt{--base}] The directory where phase~1 was run.
+\item[\texttt{--profile}] The machine: \texttt{laptop}, \texttt{leonardo}
+or a JSON file of your own (Section~\ref{sec:thermal-profiles}).
+\item[\texttt{--states}, \texttt{--per-job}] All the starting states in
+one file, split into jobs of \texttt{--per-job} states (default: the
+profile's, 20 for \texttt{laptop}). With \texttt{--blocks} instead, each
+file given is one job.
+\item[\texttt{--Ehistmin}, \texttt{--Ehiststep}, \texttt{--Emax}] The
+energy grid. It must be the one of step~1 (bins of 100~cm$^{-1}$
+centred on multiples of 100 here, the default of \texttt{--Ehistmin}).
+\item[\texttt{--wnummin}, \texttt{--wnummax}, \texttt{--wnumstep}] The
+wavenumber grid: 0 to 7000~cm$^{-1}$ in steps of 0.05~cm$^{-1}$ by
+default.
+\item[\texttt{--inp-extra}] More \texttt{key = value} lines for the
+\file{inp} of every job.
+\end{description}
+
+\paragraph{How long it takes.} With AnharmoniCaOs 2026.11.1
+(\texttt{git 88b3b13}):
+\begin{itemize}
+\item on a 4-core laptop, the 51 states take about one hour (phase~2a
+about 8~minutes, phase~2b the rest);
+\item on the cluster of the authors, as 13 jobs of 4 states with 8
+threads each, all running at the same time, they take 5~min~33~s.
+\end{itemize}
+The cost is uneven: the polyads grow quickly with the energy of the
+starting state, and one of these 51 states has a polyad of 22320 states.
+Its job is the slowest even though it is not the highest in energy.
+
+\paragraph{Profiles.}\label{sec:thermal-profiles} A profile is a JSON file
+in \file{tools/profiles/}, or anywhere else given by its path:
+\begin{lstlisting}
+{
+ "kind": "slurm",
+ "partition": "dcgp_usr_prod",
+ "account": "CHANGE_ME",
+ "threads": 8,
+ "time": "24:00:00",
+ "mem": "16G",
+ "states_per_job": 50,
+ "mpirun": "srun -n 1 --cpu-bind=none",
+ "setup": ["module load anharmonicaos"],
+ "bindir": ""
+}
+\end{lstlisting}
+\texttt{kind} is \texttt{shell} or \texttt{slurm}. For Slurm,
+\texttt{partition}, \texttt{account}, \texttt{qos}, \texttt{mem} and
+\texttt{time} become \texttt{\#SBATCH} lines; ask for memory with
+\texttt{mem} on clusters that otherwise give a job the whole node.
+\texttt{setup} holds the lines that prepare the environment (modules),
+\texttt{bindir} the directory of the programs (empty: \texttt{PATH}).
+A Slurm job must be submitted from its own directory
+(\texttt{cd jobs/job\_0000 \&\& sbatch run.slurm}), as
+\file{submit\_all.sh} does.
+
+\section{Step 3: the spectra}\label{sec:thermal-assemble}
+
+\prog{anh\_assemble.py} adds up the histograms of the jobs and makes the
+spectra:
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out res --T 0 100 200 \
+  --lng s_dos.dat
+\end{lstlisting}
+It prints, for each temperature, how many energy bins enter and how much
+of the Boltzmann weight is left out, and writes in \file{res/}:
+\begin{description}
+\item[\file{hist\_*}] The histograms of all the jobs added up, in the
+format of phase~2b.
+\item[\file{spectra\_by\_energy.dat}] The average spectrum of the starting
+states of each energy bin (harmonic energy of the starting state).
+\item[\file{spectra\_by\_anh\_energy.dat}] The same per bin of the
+anharmonic energy of the initial eigenstates.
+\item[\file{dos\_anh.dat}] The anharmonic density of states (see below),
+with how complete each bin is.
+\item[\file{thermal\_T<T>.dat}] The spectrum at temperature $T$:
+absorption (km/mol) and spontaneous emission (s$^{-1}$) per wavenumber
+bin. Its header gives the totals and the Boltzmann weight left out.
+\end{description}
+With \texttt{--plot} it also draws them (needs matplotlib).
+
+\paragraph{The two schemes.} A spectrum at temperature $T$ is an average
+over the energy bins, each weighted by its number of states times
+$e^{-E/k_BT}$. Which energy $E$ is used is chosen with \texttt{--scheme}:
+\begin{description}
+\item[\texttt{anharmonic} (default)] The bins are those of the
+anharmonic energy of the eigenstates reached from the starting states.
+Their number of states is the harmonic one shifted by the anharmonic
+energy shifts that phase~2b records (\file{hist\_err}). Only the bins
+whose number of states is known at least to \texttt{--min-complete}
+(0.99 by default) are used: near E$_\mathrm{max}$ of the sampling, states
+shifted down from above it are missing.
+\item[\texttt{harmonic}] The bins of the harmonic energy of the starting
+states, with the number of states of \file{s\_dos.dat}. This is the
+simpler choice, and the one of the previous versions.
+\end{description}
+
+\paragraph{Results.} The absorption totals (\texttt{absorption total} in
+the header of \file{thermal\_T*.dat}), in km/mol, with AnharmoniCaOs
+2026.11.1 (\texttt{git 88b3b13}); the laptop and the cluster runs give
+the same numbers:
+\begin{center}
+\begin{tabular}{rrr}
+\toprule
+$T$ (K) & \texttt{anharmonic} & \texttt{harmonic} \\
+\midrule
+0 & 446.078 & 446.078 \\
+100 & 448.044 & 448.038 \\
+200 & 455.458 & 450.261 \\
+\bottomrule
+\end{tabular}
+\end{center}
+At 0~K both are the spectrum of Tutorial~1. At 200~K the two schemes
+differ by 1\,\%: the anharmonic energies of the excited states are lower
+than the harmonic ones, so the two schemes give them different
+Boltzmann weights. With the harmonic scheme the tool also warns that
+about 0.14\,\% of the population at 200~K lies above 2500~cm$^{-1}$
+(Section~\ref{sec:thermal-howhigh}); for higher temperatures the
+sampling must go higher.
 
 \section{Temperature in phase 2b}
 
