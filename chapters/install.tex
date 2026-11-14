@@ -51,6 +51,13 @@ apptainer pull anharmonicaos-2026.11.1.sif \
 apptainer exec anharmonicaos-2026.11.1.sif anh-selftest
 apptainer exec anharmonicaos-2026.11.1.sif thermal_anharmonicity_fase1
 \end{verbatim}
+Where the machine cannot reach \file{ghcr.io}, the same image is in the
+Files section of the SourceForge project as
+\file{AnharmoniCaOs-2026.11.1-amd64.sif} (x86\_64) and
+\file{AnharmoniCaOs-2026.11.1-arm64.sif} (aarch64; \texttt{uname -m}
+tells which one), with their checksums in \file{SHA256SUMS}: download the
+one for the processor, copy it to the cluster and use it in place of the
+file made by \prog{apptainer pull}.
 In a Slurm job with one task and several cores, run the MPI programs as
 \texttt{apptainer exec --cleanenv \ldots{} mpirun -np N \ldots}:
 without \texttt{--cleanenv}, \prog{mpirun} inside the container reads the
