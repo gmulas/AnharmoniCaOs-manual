@@ -32,6 +32,13 @@
 \item[\file{processedquantas}, \file{processeddirs}] The starting states
   and their directories.
 \item[\file{polyadsizes}] The polyad sizes.
+\item[\file{growthsizes}] Only with \opt{sizesonly}~=~1, instead of all
+  the files above. One line per starting state (after a header line
+  \texttt{\#}): index (0 = ground state), states queued, number of
+  polyads, largest polyad, $\sum N^2$, $\sum N^3$ ($N$ = polyad sizes),
+  wall time of the growth (s), 1 if \opt{maxqueued} stopped the growth (the
+  sizes are then lower bounds), harmonic and deperturbed anharmonic energy
+  above the ground state (cm$^{-1}$), weight, quantum numbers.
 \end{description}
 \section{Phase 2b}
 \begin{description}
