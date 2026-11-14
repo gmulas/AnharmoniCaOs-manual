@@ -252,7 +252,11 @@ bin, and the energy range you need. Compute it in order of increasing
 energy, then add blocks where the spectra are still noisy. The cost of a
 starting state grows quickly with its energy: see the polyad sizes in
 \file{polyadsizes} and the \texttt{growth} lines of the log
-(\opt{verbosity} bit \texttt{timings}).
+(\opt{verbosity} bit \texttt{timings}). To measure it before computing,
+run phase~2a once with \opt{sizesonly}~=~1 on the starting states: it
+writes their polyad sizes to \file{growthsizes} without building the
+Hamiltonians, which for large polyads take most of the time and
+memory of phase~2a.
 
 \section{Step 2: the jobs}\label{sec:thermal-jobs}
 
