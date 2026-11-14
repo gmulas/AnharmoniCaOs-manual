@@ -1,5 +1,76 @@
 \chapter{Installation}\label{ch:install}
 
+\section{The container image}\label{sec:container}
+
+The quickest way to run \ac{} is the container image
+\file{ghcr.io/gmulas/anharmonicaos}, built from the release tarball with
+all the libraries of this chapter (64-bit integers, ELPA included). It
+runs on any x86\_64 or arm64 machine with Docker or Apptainer, without
+compiling anything. The tag is the version (\texttt{\acversion}), or
+\texttt{latest}; Docker downloads the image the first time it is used.
+The recipe and more details are in the repository
+\url{https://github.com/gmulas/AnharmoniCaOs-container}.
+
+\paragraph{Checking it.} \prog{anh-selftest} runs Tutorial~1
+(Chapter~\ref{ch:tut-pyrene}) inside the image, with two MPI processes, in
+about a minute, and ends with \texttt{anh-selftest: OK}:
+\begin{verbatim}
+docker run --rm ghcr.io/gmulas/anharmonicaos:2026.11.1 anh-selftest
+\end{verbatim}
+\texttt{anh-selftest~N} uses N processes; N must not exceed the physical
+cores.
+
+\paragraph{Running on your own files.} Mount the working directory as
+\file{/work}:
+\begin{verbatim}
+docker run --rm -v $PWD:/work ghcr.io/gmulas/anharmonicaos:2026.11.1 \
+       thermal_anharmonicity_fase1
+docker run --rm -v $PWD:/work ghcr.io/gmulas/anharmonicaos:2026.11.1 \
+       mpirun -np 4 thermal_anharmonicity_fase2b
+\end{verbatim}
+\begin{itemize}
+\item \emph{Owner of the files.} With rootless Docker, and with Docker
+  Desktop, the files written in \file{/work} belong to you. With a Docker
+  daemon running as root, add \texttt{--user \$(id -u):\$(id -g)}, or they
+  belong to root. With rootless Docker, do not add \texttt{--user}: the
+  program cannot write in \file{/work}.
+\item \emph{What else is inside.} The tools of Chapter~\ref{ch:workflow}
+  (\prog{gaussian2ac.py}, \prog{anh\_jobs.py}, \prog{anh\_sample.py},
+  \prog{anh\_assemble.py}) are in the \texttt{PATH}; the inputs of the
+  tutorials, with their scripts, are in \texttt{\$ANH\_EXAMPLES}.
+\end{itemize}
+
+\paragraph{Apptainer and Singularity.} On clusters, convert the image to
+a single \file{.sif} file (about 0.5~GB) once, and run the programs with
+\prog{apptainer exec} (\prog{singularity exec} where Apptainer is not
+installed). The files written belong to you, and the current directory is
+visible inside the container:
+\begin{verbatim}
+apptainer pull anharmonicaos-2026.11.1.sif \
+       docker://ghcr.io/gmulas/anharmonicaos:2026.11.1
+apptainer exec anharmonicaos-2026.11.1.sif anh-selftest
+apptainer exec anharmonicaos-2026.11.1.sif thermal_anharmonicity_fase1
+\end{verbatim}
+In a Slurm job with one task and several cores, run the MPI programs as
+\texttt{apptainer exec --cleanenv \ldots{} mpirun -np N \ldots}:
+without \texttt{--cleanenv}, \prog{mpirun} inside the container reads the
+task count of the job and starts a single process.
+
+\paragraph{Several nodes.} The host's \prog{mpirun} can start one container
+per MPI process (\texttt{mpirun -np 64 apptainer exec \ldots}). This
+needs an OpenMPI on the host close to the one in the image (5.0.7), and
+depends on the cluster's network. It worked on a Slurm cluster, on one
+and on two nodes, with the same results as a run inside the container;
+with InfiniBand, \texttt{-x OMPI\_MCA\_pml=ucx} is needed to use it. Try it
+at your own risk, and compare a small run with a single-node run before
+relying on it. The README of the container repository has the details.
+
+\paragraph{Limits.} The image has only the generic CPU kernels of ELPA and
+no GPU support, so that it runs on any processor. For the fastest
+two-stage kernels (AVX2, AVX-512) or for a GPU (Section~\ref{sec:elpa}),
+build ELPA and \ac{} on the machine, as described in the rest of this
+chapter.
+
 \section{Requirements}
 
 \begin{itemize}
