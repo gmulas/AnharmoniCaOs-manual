@@ -11,6 +11,23 @@ compiling anything. The tag is the version (\texttt{\acversion}), or
 The recipe and more details are in the repository
 \url{https://github.com/gmulas/AnharmoniCaOs-container}.
 
+\paragraph{Operating systems.} \ac{} is built and tested on Linux, where
+it runs natively or in the container. On macOS and on Windows the
+container image should run as well, but this has not been tested yet:
+\begin{itemize}
+\item \emph{macOS:} with Docker Desktop or an equivalent (Colima,
+  OrbStack, Podman), which runs a Linux virtual machine; Docker takes the
+  arm64 image on Apple silicon and the x86\_64 one on Intel Macs. The
+  \file{.sif} files are of no use there: Apptainer and Singularity do not
+  run on macOS itself.
+\item \emph{Windows:} inside WSL2, which is a real Linux system, with
+  Docker (Docker Desktop with the WSL2 back end, or Docker installed in
+  WSL2) or Apptainer; building from the sources in WSL2 as on Linux should
+  work too. Windows without WSL2 is not supported.
+\end{itemize}
+Reports of a test on these systems (the output of
+\texttt{anh-selftest}, see below, and the system version) are welcome.
+
 \paragraph{Checking it.} \prog{anh-selftest} runs Tutorial~1
 (Chapter~\ref{ch:tut-pyrene}) inside the image, with two MPI processes, in
 about a minute, and ends with \texttt{anh-selftest: OK}:
