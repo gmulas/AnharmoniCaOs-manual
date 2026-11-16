@@ -22,6 +22,7 @@ program & what it does & section \\
 \midrule
 \multicolumn{3}{l}{\emph{Tools (\file{tools/}, Python)}} \\
 \prog{gaussian2ac.py} & input files from a Gaussian log & \ref{sec:run-gaussian2ac} \\
+\prog{orca2ac.py} & input files from an ORCA VPT2 job & \ref{sec:run-orca2ac} \\
 \prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
 \prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
 \prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
@@ -253,6 +254,54 @@ as numerical noise; \texttt{-{}-no-dmu3} skips \file{dmu3file}.
 
 \paragraph{Result.} \file{freqsfile}, \file{phi3file}, \file{phi4file},
 \file{dmu2file} and, when the log has them, \file{dmu3file}.
+
+\section{\prog{orca2ac.py}}\label{sec:run-orca2ac}
+
+\paragraph{Where.} In the directory where the input files of \ac{} should
+be written, or anywhere with \texttt{-{}-outdir}. It reads the files of an
+ORCA job with the VPT2 module, at an optimised geometry, with a method
+that has analytic Hessians and dipole derivatives (HF, DFT). The input
+used for the check of the tool (ORCA 6.1.1, formaldehyde) is
+\begin{lstlisting}
+! B3LYP/G 6-31G(d) VeryTightSCF DefGrid3 VPT2 NoAutoStart
+%vpt2
+  VPT2 On
+  AnharmDisp 0.05
+  PrintLevel 2
+end
+* xyz 0 1
+  ... optimised geometry ...
+*
+\end{lstlisting}
+The job \file{BASENAME.inp} writes \file{BASENAME.vpt2} (masses, Hessian,
+first and second dipole derivatives, cubic and semi-quartic force
+constants), \file{BASENAME.hess} (normal modes and frequencies), and the
+Hessians at the displaced geometries, \file{BASENAME\_D001.hess},
+\ldots{} Keep them, or at least the output \file{BASENAME.out}: the tool
+reads the direction of each displacement from them, because the force
+constants refer to that direction, which is not always that of the
+normal mode in \file{BASENAME.hess}.
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/orca2ac.py BASENAME.vpt2 [--outdir DIR]
+anh python3 TOOLS/orca2ac.py BASENAME.vpt2 [--outdir DIR]
+\end{lstlisting}
+\texttt{-{}-hess} and \texttt{-{}-out} give the \file{.hess} and
+\file{.out} files when they are not \file{BASENAME.hess} and
+\file{BASENAME.out}; \texttt{-{}-phinoisethres} and
+\texttt{-{}-dmunoisethres} work as in \prog{gaussian2ac.py}.
+
+\paragraph{Result.} \file{freqsfile}, \file{phi3file}, \file{phi4file}
+and \file{dmu2file}, in the same conventions as those of
+\prog{gaussian2ac.py}; no \file{dmu3file}. As in Gaussian, the quartic
+constants are only the semi-quartic ones, $\Phi_{ijkk}$. The tool prints
+the number of modes and constants, the modes whose sign it changed, and
+three checks: the frequencies recomputed from the Hessian, the agreement
+of the semi-quartic constants that ORCA gives more than once, and the
+asymmetry of the second dipole derivatives, which must be small (about
+$10^{-6}$~a.u.\ for water and formaldehyde; a large value means wrong mode
+signs).
 
 \section{\prog{anh\_sample.py}}\label{sec:run-sample}
 
