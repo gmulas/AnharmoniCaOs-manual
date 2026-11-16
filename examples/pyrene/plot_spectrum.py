@@ -6,7 +6,7 @@ atomic units, one column per 0.01 cm-1 bin) of a finished run, adds the three
 components, converts them to integrated intensities in km/mol
 (I = 16.194 * nu * |mu|^2), merges the bins closer than 0.5 cm-1 into lines,
 and prints the strongest lines. With matplotlib, it also draws the line
-spectrum against the harmonic one from freqsfile (pyrene-spectrum.png).
+spectrum against the harmonic one from freqsfile (RUNDIR/pyrene-spectrum.png).
 
 Usage: plot_spectrum.py [RUNDIR] [NLINES]     (default: current directory, 15)
 """
@@ -72,8 +72,9 @@ def main():
     ax[0].legend(fontsize=8, loc='upper left')
     ax[1].set_xlabel('wavenumber (cm$^{-1}$)')
     fig.tight_layout()
-    fig.savefig('pyrene-spectrum.png', dpi=150)
-    print('written pyrene-spectrum.png')
+    out = os.path.join(d, 'pyrene-spectrum.png')
+    fig.savefig(out, dpi=150)
+    print('written', out)
 
 
 if __name__ == '__main__':

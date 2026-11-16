@@ -1,0 +1,335 @@
+\chapter{Running the programs}\label{ch:programs}
+\sloppy
+
+This chapter lists every program and script that comes with \ac{} and
+says how to start each one: from which directory, with which command and
+options, both with a build from the sources and with the container image.
+Table~\ref{tab:programs} is the index. What the programs compute is in
+Chapter~\ref{ch:workflow} and in the tutorials; their options in the
+input file are in Chapter~\ref{ch:inputs}.
+
+\begin{table}[ht]
+\centering\small
+\caption{The programs and scripts of \ac{}.}\label{tab:programs}
+\begin{tabular}{lp{0.36\textwidth}r}
+\toprule
+program & what it does & section \\
+\midrule
+\multicolumn{3}{l}{\emph{The three phases}} \\
+\prog{thermal\_anharmonicity\_fase1} & resonances, coefficients, band list & \ref{sec:run-fase1} \\
+\prog{thermal\_anharmonicity\_fase2a} & polyads of the starting states & \ref{sec:run-fase2a} \\
+\prog{thermal\_anharmonicity\_fase2b} & diagonalisation, transitions, histograms & \ref{sec:run-fase2b} \\
+\midrule
+\multicolumn{3}{l}{\emph{Tools (\file{tools/}, Python)}} \\
+\prog{gaussian2ac.py} & input files from a Gaussian log & \ref{sec:run-gaussian2ac} \\
+\prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
+\prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
+\prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
+\prog{anh\_hopball.py} & largest possible size of the polyads & \ref{sec:run-hopball} \\
+\midrule
+\multicolumn{3}{l}{\emph{Checks}} \\
+\prog{tests/selftest.sh} & Tutorial~1 as a check of a build & \ref{sec:run-selftest} \\
+\prog{anh-selftest} & the same, in the container image & \ref{sec:run-selftest} \\
+\midrule
+\multicolumn{3}{l}{\emph{Scripts of the examples (\file{examples/})}} \\
+\prog{pyrene/run.sh} & Tutorial~1, the three phases & \ref{sec:run-examples} \\
+\prog{pyrene/plot\_spectrum.py} & strongest lines and figure of Tutorial~1 & \ref{sec:run-examples} \\
+\prog{pyrene-thermal/run\_sample.sh} & Tutorial~3, step~1 & \ref{sec:run-examples} \\
+\prog{pyrene-thermal/thermal\_energy.py} & thermal energy distribution & \ref{sec:run-examples} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The development repository also has \prog{tools/polyad\_overlap.py} and
+\prog{tools/costmodel\_toy.py}, used to study the method; they are not
+described here.
+
+\section{Three ways to run them}\label{sec:run-ways}
+
+In this chapter \file{CODEDIR} is the top directory of the code (the one
+with \file{tools/}), and every command is given twice: first as it is typed with
+a build from the sources, then with the container image, through a short
+shell function \prog{anh} defined below. With the image, the tools are in
+\nolinkurl{/opt/anharmonicaos/share/anharmonicaos/tools} (called \file{TOOLS}
+below) and the examples in
+\nolinkurl{/opt/anharmonicaos/share/anharmonicaos/examples} (also
+\texttt{\$ANH\_EXAMPLES} inside the container).
+
+\paragraph{Built from the sources.} The three programs are in
+\file{CODEDIR} after \prog{make} (in \file{PREFIX/bin} after
+\prog{make install}); put that directory in \texttt{PATH}, or give the
+full path. The tools need the Python packages of Section~\ref{sec:python}:
+activate their virtual environment first, then run
+\texttt{python3 CODEDIR/tools/NAME.py}.
+\begin{lstlisting}
+export PATH=CODEDIR:$PATH
+source ~/venvs/anharmonicaos/bin/activate
+\end{lstlisting}
+
+\paragraph{Docker.} A container sees only the directories mounted into it.
+The function below mounts the current directory at the same path inside
+the container and starts there, passes the number of OpenMP threads
+(the image sets it to 1 otherwise), and runs the command given:
+\begin{lstlisting}
+IMG=ghcr.io/gmulas/anharmonicaos:2026.11.1
+anh() { docker run --rm -v "$PWD":"$PWD" -w "$PWD" \
+          -e OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" "$IMG" "$@"; }
+\end{lstlisting}
+Mounting at the same path keeps absolute paths valid, for example the
+links that \prog{anh\_jobs.py} makes to the phase~1 files. Every other
+directory that the command reads or writes must be mounted too, with one
+more \texttt{-v DIR:DIR} per directory: for example the parent directory,
+if \file{inp} names \file{../t1/freqsfile}, or the phase~1 directory of
+\prog{anh\_jobs.py}. Mounting a common parent once (\texttt{-v
+\$HOME/runs:\$HOME/runs}) covers them all. With a Docker daemon running
+as root, add \texttt{-{}-user \$(id -u):\$(id -g)}, or the files written
+belong to root; with rootless Docker and with Docker Desktop do not add
+it (Section~\ref{sec:container}).
+
+\paragraph{Apptainer and Singularity.} With the \file{.sif} file of
+Section~\ref{sec:container}:
+\begin{lstlisting}
+SIF=$HOME/anharmonicaos-2026.11.1.sif
+anh() { apptainer exec --env OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" "$SIF" "$@"; }
+\end{lstlisting}
+Use \prog{singularity} where \prog{apptainer} is not installed
+(\texttt{-{}-env} needs Apptainer 1.0 or Singularity 3.6 or later). Apptainer
+starts in the current directory, runs as you, and by default mounts the
+home directory, the current directory and \file{/tmp} (the system
+configuration can change this). Other file systems, for example a scratch
+area, must be added with \texttt{-{}-bind}, as in
+\texttt{apptainer exec -{}-bind /scratch,/archive \ldots}. Inside a Slurm
+job, add \texttt{-{}-cleanenv} when the command is \prog{mpirun} inside the
+container: otherwise it reads the task count of the job and starts a
+single process. Running one container per MPI process, across nodes, is
+described in Section~\ref{sec:container}.
+
+\paragraph{Messages.} All the programs write their log on the standard
+output and errors and warnings on the standard error: redirect the first
+to a file (\texttt{> fase1.log}) and keep the second on the terminal, or
+redirect both. Each program writes to \file{out.oct} every option it read,
+with the value used.
+
+\section{\prog{thermal\_anharmonicity\_fase1}}\label{sec:run-fase1}
+
+\paragraph{Where.} In the directory that contains \file{inp} and the
+input files it names (\file{freqsfile}, \file{phi3file}, \file{phi4file},
+\file{dmu2file}, Chapter~\ref{ch:inputs}).
+
+\paragraph{Command.} It takes no arguments; the threshold tests use
+OpenMP threads.
+\begin{lstlisting}
+OMP_NUM_THREADS=4 thermal_anharmonicity_fase1 > fase1.log
+OMP_NUM_THREADS=4 anh thermal_anharmonicity_fase1 > fase1.log
+\end{lstlisting}
+
+\paragraph{Result.} \file{resonanceslist}, \file{dunhamparams},
+\file{bandlist}, \file{resonancecandidates} and \file{dumpedparams}, in the
+same directory (Chapter~\ref{ch:outputs}). Phase~1 alone can also be built
+without MPI, PETSc or PARI (Section~\ref{sec:checks}).
+
+\section{\prog{thermal\_anharmonicity\_fase2a}}\label{sec:run-fase2a}
+
+\paragraph{Where.} In the directory of phase~1, after it, with the file of
+starting states named by \opt{modepopfile} (\file{quantafile} in the
+tutorials).
+
+\paragraph{Command.} One process, no arguments:
+\begin{lstlisting}
+thermal_anharmonicity_fase2a > fase2a.log
+anh thermal_anharmonicity_fase2a > fase2a.log
+\end{lstlisting}
+
+\paragraph{Result.} One directory \file{dir\_n00000}, \file{dir\_n00001},
+\ldots{} per starting state, with the Hamiltonian matrices of its polyads,
+and \file{polyadsizes}, \file{processedquantas}, \file{processeddirs}.
+With \opt{sizesonly}~$=1$, only \file{growthsizes}.
+
+\section{\prog{thermal\_anharmonicity\_fase2b}}\label{sec:run-fase2b}
+
+\paragraph{Where.} In the same directory, after phase~2a.
+
+\paragraph{Command.} It runs with MPI and takes no arguments. With the
+distributed eigensolvers (\opt{eigensolver}~$=1$, 2, 3), give the number
+of processes, at most the physical cores:
+\begin{lstlisting}
+mpirun -np 4 thermal_anharmonicity_fase2b > fase2b.log
+anh mpirun -np 4 thermal_anharmonicity_fase2b > fase2b.log
+\end{lstlisting}
+With the spectral method (\opt{spectral}~$=1$, \opt{eigensolver}~$=0$) use
+one process and OpenMP threads; \texttt{-{}-bind-to none} lets the threads
+use all the cores:
+\begin{lstlisting}
+OMP_NUM_THREADS=8 mpirun -np 1 --bind-to none thermal_anharmonicity_fase2b > fase2b.log
+OMP_NUM_THREADS=8 anh mpirun -np 1 --bind-to none thermal_anharmonicity_fase2b > fase2b.log
+\end{lstlisting}
+In a Slurm job, \prog{srun} can replace \prog{mpirun} for a build from
+the sources; with Apptainer, add \texttt{-{}-cleanenv} to \prog{anh}
+(Section~\ref{sec:run-ways}).
+
+\paragraph{Result.} The histograms \file{hist\_*} and one log per starting
+state, \file{proclog\_n*}.
+
+\section{\prog{gaussian2ac.py}}\label{sec:run-gaussian2ac}
+
+\paragraph{Where.} In the directory where the input files of \ac{} should
+be written, or anywhere with \texttt{-{}-outdir}. The Gaussian log must come
+from a \texttt{freq=(anharm,PrintDerivatives)} job
+(Chapter~\ref{ch:tut-gaussian}).
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/gaussian2ac.py molecule.log [--outdir DIR]
+anh python3 TOOLS/gaussian2ac.py molecule.log [--outdir DIR]
+\end{lstlisting}
+\texttt{-{}-phinoisethres} and \texttt{-{}-dmunoisethres} change the
+thresholds below which force constants and dipole derivatives are taken
+as numerical noise; \texttt{-{}-no-dmu3} skips \file{dmu3file}.
+
+\paragraph{Result.} \file{freqsfile}, \file{phi3file}, \file{phi4file},
+\file{dmu2file} and, when the log has them, \file{dmu3file}.
+
+\section{\prog{anh\_sample.py}}\label{sec:run-sample}
+
+\paragraph{Where.} Anywhere: it reads \file{inp} and \file{freqsfile}
+from the paths given, and writes in the current directory.
+
+\paragraph{Command.} \texttt{-{}-enum} and \texttt{-{}-emax} are required
+(Section~\ref{sec:thermal-sample}):
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_sample.py --inp inp --enum 1000 --emax 2500 \
+  --per-bin 2 --blocks 1 --prefix s
+anh python3 TOOLS/anh_sample.py --inp inp --enum 1000 --emax 2500 \
+  --per-bin 2 --blocks 1 --prefix s
+\end{lstlisting}
+\texttt{-{}-walkers N --procs N} runs N Wang--Landau walkers in parallel.
+
+\paragraph{Result.} \file{PREFIX\_states.dat}, \file{PREFIX\_dos.dat} and,
+with \texttt{-{}-per-bin}, the blocks \file{PREFIX\_quanta\_block000},
+\ldots{} in the \file{quantafile} format.
+
+\section{\prog{anh\_jobs.py}}\label{sec:run-jobs}
+
+\paragraph{Where.} Anywhere: \texttt{-{}-base} is the directory where
+phase~1 was run, \texttt{-{}-out} the directory of the jobs, which must not
+exist (Section~\ref{sec:thermal-jobs}).
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_jobs.py --base ../t1 --profile laptop --out jobs \
+  --states s_quanta_block000 --Ehiststep 100 --Emax 2500
+anh python3 TOOLS/anh_jobs.py --base ../t1 --profile laptop --out jobs \
+  --states s_quanta_block000 --Ehiststep 100 --Emax 2500
+\end{lstlisting}
+With Docker, mount the phase~1 directory too (here the parent directory:
+\texttt{-v "\$(dirname \$PWD)":"\$(dirname \$PWD)"}), since the jobs link
+to its files.
+
+\paragraph{Running the jobs.} With a build from the sources:
+\begin{lstlisting}
+ANHBIN=CODEDIR sh jobs/submit_all.sh
+\end{lstlisting}
+With the container and a shell profile (\texttt{laptop}), run the whole
+script inside it: the programs are in its \texttt{PATH}.
+\begin{lstlisting}
+anh sh jobs/submit_all.sh
+\end{lstlisting}
+With Apptainer and a Slurm profile, \file{submit\_all.sh} runs on the
+host and each job starts the container. Write the container in the
+\texttt{mpirun} entry of the profile, with the threads of the profile,
+and leave \texttt{bindir} empty:
+\begin{lstlisting}
+"mpirun": "apptainer exec --cleanenv --env OMP_NUM_THREADS=8 /path/anharmonicaos-2026.11.1.sif mpirun -np 1 --bind-to none",
+"bindir": ""
+\end{lstlisting}
+Add \texttt{-{}-bind} for the file systems of the jobs and of the phase~1
+directory if they are not mounted by default.
+
+\section{\prog{anh\_assemble.py}}\label{sec:run-assemble}
+
+\paragraph{Where.} Anywhere: \texttt{-{}-jobs} is the directory written by
+\prog{anh\_jobs.py} (or \texttt{-{}-dirs} lists phase~2b directories), and
+\texttt{-{}-out} the directory of the results
+(Section~\ref{sec:thermal-assemble}).
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out res --T 0 100 200 --lng s_dos.dat
+anh python3 TOOLS/anh_assemble.py --jobs jobs --out res --T 0 100 200 --lng s_dos.dat
+\end{lstlisting}
+\texttt{-{}-plot} also writes figures (matplotlib).
+
+\paragraph{Result.} In \file{res/}: the summed \file{hist\_*},
+\file{spectra\_by\_energy.dat}, \file{spectra\_by\_anh\_energy.dat}, and,
+with \texttt{-{}-T}, \file{thermal\_T<T>.dat}.
+
+\section{\prog{anh\_hopball.py}}\label{sec:run-hopball}
+
+\paragraph{Where.} In the directory of phase~1 (it reads
+\file{resonanceslist}, and \file{bandlist} with \texttt{-{}-bandlist}).
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_hopball.py resonanceslist --hops 4 \
+  --quanta quantafile --bandlist bandlist
+anh python3 TOOLS/anh_hopball.py resonanceslist --hops 4 \
+  --quanta quantafile --bandlist bandlist
+\end{lstlisting}
+
+\paragraph{Result.} On the terminal, the number of states within 0 to
+$H$ steps (Chapter~\ref{ch:workflow}).
+
+\section{The checks}\label{sec:run-selftest}
+
+\prog{tests/selftest.sh} checks a build from the sources, and
+\prog{anh-selftest} the container image. Both run Tutorial~1 in a
+temporary directory, in about a minute, with N MPI processes (default 2,
+at most the physical cores), and end with \texttt{OK}:
+\begin{lstlisting}
+CODEDIR/tests/selftest.sh CODEDIR 4         # from anywhere
+docker run --rm ghcr.io/gmulas/anharmonicaos:2026.11.1 anh-selftest 4
+apptainer exec anharmonicaos-2026.11.1.sif anh-selftest 4
+\end{lstlisting}
+The first argument of \prog{selftest.sh} is the directory of the
+programs. The numerical checks of \file{tests/checks} are described in
+Section~\ref{sec:checks} and in \file{tests/checks/README.md}.
+
+\section{The scripts of the examples}\label{sec:run-examples}
+
+\paragraph{\prog{examples/pyrene/run.sh BINDIR [NPROC]}.} Runs Tutorial~1
+(the three phases, phase~2b with NPROC processes, default 4) in the
+directory of the example, and keeps a copy of \file{out.oct} after each
+phase. Copy the directory first, so the original stays clean:
+\begin{lstlisting}
+cp -r CODEDIR/doc/manual/examples/pyrene t1 && cd t1 && sh run.sh CODEDIR 4
+anh cp -r /opt/anharmonicaos/share/anharmonicaos/examples/pyrene t1
+cd t1 && anh sh run.sh /opt/anharmonicaos/bin 4
+\end{lstlisting}
+
+\paragraph{\prog{examples/pyrene/plot\_spectrum.py [RUNDIR] [NLINES]}.}
+Prints the NLINES strongest lines of a finished run of Tutorial~1 and,
+with matplotlib, draws \file{pyrene-spectrum.png} in RUNDIR. \file{run.sh} calls it
+at the end.
+\begin{lstlisting}
+python3 plot_spectrum.py . 15
+anh python3 plot_spectrum.py . 15
+\end{lstlisting}
+
+\paragraph{\prog{examples/pyrene-thermal/run\_sample.sh CODEDIR}.} Step~1
+of Tutorial~3: runs \prog{anh\_sample.py} on the inputs of Tutorial~1, in
+the current directory, in a few seconds.
+\begin{lstlisting}
+sh CODEDIR/doc/manual/examples/pyrene-thermal/run_sample.sh CODEDIR
+anh sh /opt/anharmonicaos/share/anharmonicaos/examples/pyrene-thermal/run_sample.sh \
+  /opt/anharmonicaos/share/anharmonicaos
+\end{lstlisting}
+
+\paragraph{\prog{examples/pyrene-thermal/thermal\_energy.py [FREQSFILE]
+[--plot]}.} For a few temperatures, the mean vibrational energy and the
+energies below which 99\,\% and 99.9\,\% of the population lie
+(Section~\ref{sec:thermal-howhigh}); \texttt{-{}-plot} draws the figure.
+\begin{lstlisting}
+python3 thermal_energy.py freqsfile --plot
+anh python3 thermal_energy.py freqsfile --plot
+\end{lstlisting}
+\fussy
