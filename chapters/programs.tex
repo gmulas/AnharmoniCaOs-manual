@@ -95,13 +95,16 @@ anh() { apptainer exec --env OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" "$SIF" "$@"
 Use \prog{singularity} where \prog{apptainer} is not installed
 (\texttt{-{}-env} needs Apptainer 1.0 or Singularity 3.6 or later). Apptainer
 starts in the current directory, runs as you, and by default mounts the
-home directory, the current directory and \file{/tmp} (the system
-configuration can change this). Other file systems, for example a scratch
+home directory, the current directory, \file{/tmp} and \file{/var/tmp}
+(the system configuration can change this). Other file systems, for example a scratch
 area, must be added with \texttt{-{}-bind}, as in
 \texttt{apptainer exec -{}-bind /scratch,/archive \ldots}. Inside a Slurm
-job, add \texttt{-{}-cleanenv} when the command is \prog{mpirun} inside the
-container: otherwise it reads the task count of the job and starts a
-single process. Running one container per MPI process, across nodes, is
+job, always add \texttt{-{}-cleanenv}: otherwise \prog{mpirun} inside the
+container reads the task count of the job, and \texttt{mpirun -np 4} in a
+job with one task stops with ``not enough slots''.
+\texttt{-{}-env OMP\_NUM\_THREADS} still passes the threads with
+\texttt{-{}-cleanenv}; without \texttt{-{}-env}, the value 1 of the image
+wins over that of the host. Running one container per MPI process, across nodes, is
 described in Section~\ref{sec:container}.
 
 \paragraph{Messages.} All the programs write their log on the standard
@@ -257,13 +260,22 @@ as numerical noise; \texttt{-{}-no-dmu3} skips \file{dmu3file}.
 from the paths given, and writes in the current directory.
 
 \paragraph{Command.} \texttt{-{}-enum} and \texttt{-{}-emax} are required
-(Section~\ref{sec:thermal-sample}):
+(Section~\ref{sec:thermal-sample}). The energy bins are those of
+\texttt{-{}-ehistmin} and \texttt{-{}-ehiststep}, or, if these are not given,
+of \opt{Ehistmin} and \opt{Ehiststep} of \file{inp} (5~cm$^{-1}$ in
+Tutorial~1, which would give hundreds of bins). Give the same step as the
+\texttt{-{}-Ehiststep} of \prog{anh\_jobs.py}, since \prog{anh\_assemble.py}
+needs the density of states on the grid of the jobs. As in Tutorial~3:
 \begin{lstlisting}
-python3 CODEDIR/tools/anh_sample.py --inp inp --enum 1000 --emax 2500 \
+python3 CODEDIR/tools/anh_sample.py --inp inp --freqsfile freqsfile \
+  --enum 1000 --emax 2500 --ehistmin -50 --ehiststep 100 \
   --per-bin 2 --blocks 1 --prefix s
-anh python3 TOOLS/anh_sample.py --inp inp --enum 1000 --emax 2500 \
+anh python3 TOOLS/anh_sample.py --inp inp --freqsfile freqsfile \
+  --enum 1000 --emax 2500 --ehistmin -50 --ehiststep 100 \
   --per-bin 2 --blocks 1 --prefix s
 \end{lstlisting}
+A second run with the same \texttt{-{}-prefix} in the same directory
+overwrites the files of the first.
 \texttt{-{}-walkers N --procs N} runs N Wang--Landau walkers in parallel.
 
 \paragraph{Result.} \file{PREFIX\_states.dat}, \file{PREFIX\_dos.dat} and,
@@ -280,12 +292,19 @@ exist (Section~\ref{sec:thermal-jobs}).
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_jobs.py --base ../t1 --profile laptop --out jobs \
   --states s_quanta_block000 --Ehiststep 100 --Emax 2500
-anh python3 TOOLS/anh_jobs.py --base ../t1 --profile laptop --out jobs \
+anhp python3 TOOLS/anh_jobs.py --base ../t1 --profile laptop --out jobs \
   --states s_quanta_block000 --Ehiststep 100 --Emax 2500
 \end{lstlisting}
-With Docker, mount the phase~1 directory too (here the parent directory:
-\texttt{-v "\$(dirname \$PWD)":"\$(dirname \$PWD)"}), since the jobs link
-to its files.
+With Docker, the container must also see the phase~1 directory, since the
+jobs link to its files: \prog{anh} mounts only the current directory, and
+the command above fails. Here the phase~1 directory is next to the current
+one, so a variant of \prog{anh} that mounts the parent directory does it:
+\begin{lstlisting}
+anhp() { docker run --rm -v "$(dirname "$PWD")":"$(dirname "$PWD")" -w "$PWD" \
+           -e OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" "$IMG" "$@"; }
+\end{lstlisting}
+With Apptainer, \prog{anh} is enough when both directories are under the
+home directory.
 
 \paragraph{Running the jobs.} With a build from the sources:
 \begin{lstlisting}
@@ -294,7 +313,7 @@ ANHBIN=CODEDIR sh jobs/submit_all.sh
 With the container and a shell profile (\texttt{laptop}), run the whole
 script inside it: the programs are in its \texttt{PATH}.
 \begin{lstlisting}
-anh sh jobs/submit_all.sh
+anhp sh jobs/submit_all.sh
 \end{lstlisting}
 With Apptainer and a Slurm profile, \file{submit\_all.sh} runs on the
 host and each job starts the container. Write the container in the
@@ -317,9 +336,12 @@ directory if they are not mounted by default.
 \paragraph{Command.}
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out res --T 0 100 200 --lng s_dos.dat
-anh python3 TOOLS/anh_assemble.py --jobs jobs --out res --T 0 100 200 --lng s_dos.dat
+anhp python3 TOOLS/anh_assemble.py --jobs jobs --out res --T 0 100 200 --lng s_dos.dat
 \end{lstlisting}
-\texttt{-{}-plot} also writes figures (matplotlib).
+The file of \texttt{-{}-lng} must come from \prog{anh\_sample.py} with the
+energy grid of the jobs (Section~\ref{sec:run-sample}); otherwise the
+program stops with ``energy \ldots{} is not on the grid''. \texttt{-{}-plot}
+also writes figures (matplotlib).
 
 \paragraph{Result.} In \file{res/}: the summed \file{hist\_*},
 \file{spectra\_by\_energy.dat}, \file{spectra\_by\_anh\_energy.dat}, and,
@@ -337,6 +359,8 @@ python3 CODEDIR/tools/anh_hopball.py resonanceslist --hops 4 \
 anh python3 TOOLS/anh_hopball.py resonanceslist --hops 4 \
   --quanta quantafile --bandlist bandlist
 \end{lstlisting}
+The image of release 2026.11.1 does not contain \prog{anh\_hopball.py},
+which came later; with that image, run it from the sources (first line).
 
 \paragraph{Result.} On the terminal, the number of states within 0 to
 $H$ steps (Chapter~\ref{ch:workflow}).

@@ -65,7 +65,10 @@ docker run --rm -v $PWD:/work ghcr.io/gmulas/anharmonicaos:2026.11.1 \
   program cannot write in \file{/work}.
 \item \emph{What else is inside.} The tools of Chapter~\ref{ch:workflow}
   (\prog{gaussian2ac.py}, \prog{anh\_jobs.py}, \prog{anh\_sample.py},
-  \prog{anh\_assemble.py}) are in the \texttt{PATH}; the inputs of the
+  \prog{anh\_assemble.py}) are in the \texttt{PATH} (in the image of
+  release 2026.11.1, run \prog{anh\_sample.py} as \texttt{python3
+  /opt/anharmonicaos/share/anharmonicaos/tools/anh\_sample.py}: it is not
+  marked executable); the inputs of the
   tutorials, with their scripts, are in \texttt{\$ANH\_EXAMPLES}.
 \end{itemize}
 
@@ -89,8 +92,9 @@ one for the processor, copy it to the cluster and use it in place of the
 file made by \prog{apptainer pull}.
 In a Slurm job with one task and several cores, run the MPI programs as
 \texttt{apptainer exec --cleanenv \ldots{} mpirun -np N \ldots}:
-without \texttt{--cleanenv}, \prog{mpirun} inside the container reads the
-task count of the job and starts a single process.
+without \texttt{-{}-cleanenv}, \prog{mpirun} inside the container reads the
+task count of the job, and asking for more processes than the job's tasks
+stops with ``not enough slots''.
 
 \paragraph{Several nodes.} The host's \prog{mpirun} can start one container
 per MPI process (\texttt{mpirun -np 64 apptainer exec \ldots}). This
