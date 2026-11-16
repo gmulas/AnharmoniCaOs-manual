@@ -53,7 +53,7 @@ kT = 0.6950348*temperature   # kT is in cm-1
 \end{lstlisting}
 \end{itemize}
 
-\section{Files}
+\section{Files}\label{sec:files-in}
 
 \begin{description}
 \item[\file{freqsfile}] One line per mode: $\omega$, then
@@ -77,63 +77,180 @@ kT = 0.6950348*temperature   # kT is in cm-1
   (Chapter~\ref{ch:tut-review}).
 \end{description}
 
-\section{Options}
+\section{Options}\label{sec:options}
+
+This section lists every option the three programs read, with its
+default and the phases that use it. The defaults are those of the
+version \acversion{}; the tutorials set some of them differently in their
+\file{inp}. Options that are still read but no longer have any effect are
+collected at the end (Section~\ref{sec:obsolete}). The index at the end
+of the manual gives, for every option, where it is described (bold page
+number) and where it is mentioned or used.
 
 % TODO: generate this section from a single machine-readable table, shared
 % with README.md, so that the two cannot diverge.
+
+\subsection*{Input data}
+\begin{description}
+\optentry{nmodes}{none}{all}{Number of normal modes. Required.}
+\optentry{freqsfile}{"freqsfile"}{1}{Harmonic wavenumbers and first dipole derivatives (Section~\ref{sec:files-in}).}
+\optentry{phi3file}{"phi3file"}{1}{Cubic force constants.}
+\optentry{phi4file}{"phi4file"}{1}{Quartic force constants (usually only the semidiagonal ones).}
+\optentry{dmu2file}{"dmu2file"}{1}{Second dipole derivatives.}
+\optentry{dmu3file}{"dmu3file"}{1}{Third dipole derivatives, read only with \opt{dipole3}~$=1$; optional, missing entries are zero.}
+\optentry{gradientfile}{""}{1}{The classical gradient $\partial V/\partial q_i$ at the reference geometry (lines \texttt{i g\_i}, cm$^{-1}$), added to the linear terms; normally \file{gradient.shifted} from a run with \opt{shiftgeometry}. It cannot be combined with \opt{shiftgeometry}.}
+\optentry{phi3threshold}{1e-4}{1}{Entries of \file{phi3file} with smaller absolute value (cm$^{-1}$) are read as zero.}
+\optentry{phi4threshold}{1e-3}{1}{The same for \file{phi4file}.}
+\optentry{dmu2threshold}{1e-7}{1}{The same for \file{dmu2file} and \file{dmu3file} (atomic units).}
+\end{description}
+
 \subsection*{Resonances}
 \begin{description}
-\optentry{fermithres}{0.2}{1}{Threshold on $|W/\Delta|$ for cubic (Fermi) resonances.}
-\optentry{ddthres}{0.2}{1}{The same for quartic (Darling--Dennison) resonances.}
+\optentry{fermithres}{0.1}{1}{Threshold on $|W/\Delta|$ for cubic (Fermi) resonances. The tutorials use 0.2.}
+\optentry{ddthres}{0.1}{1}{The same for quartic (Darling--Dennison) resonances. The tutorials use 0.2.}
+\optentry{harmdiffthres}{1e-6}{1}{Detunings smaller than this (cm$^{-1}$) are treated as exact degeneracies.}
+\optentry{phi4cutoff}{1}{1}{For an exactly degenerate quartic term of type C4 (all four quanta created), the smallest coupling (cm$^{-1}$) that makes it resonant.}
 \optentry{samesignresonances}{0}{1}{Also accept terms whose detuning is a single frequency.}
-\optentry{closureterms}{0}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}.}
-\optentry{rescriterion}{0}{1}{1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta. Each error is evaluated with the deperturbed and with the harmonic detuning, and the term is resonant if either is too large: a term left out is treated with the harmonic detuning, so it must be small with both (in \file{resonancecandidates}, \texttt{why} ends in \texttt{-harm} when the harmonic detuning decided).}
+\optentry{closureterms}{0}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}. Changes results.}
+\optentry{enablequarticresons}{1}{1}{With 0, the iterative search for the resonances that appear through the effective second-order couplings is skipped, and only the first pass of the quartic test is done. A test option; changes results.}
+\optentry{diophantineiter}{0}{1}{If nonzero, close the set of resonances under integer combinations, with the PARI library. It can produce very many resonances. Not available in builds without PARI.}
+\optentry{paristacksize}{200000000}{1}{With \opt{diophantineiter}: the stack of PARI, in bytes.}
+\optentry{parimaxprime}{0}{1}{With \opt{diophantineiter}: the largest prime PARI precomputes (0: its default).}
+\optentry{rescriterion}{0}{1}{1: decide resonances from the error of perturbation theory on energies (\opt{resenergythres}, cm$^{-1}$, following~\cite{martin1995}) and relative intensities (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}), up to \opt{rescheckquanta} quanta. Each error is evaluated with the deperturbed and with the harmonic detuning, and the term is resonant if either is too large: a term left out is treated with the harmonic detuning, so it must be small with both (in \file{resonancecandidates}, \texttt{why} ends in \texttt{-harm} when the harmonic detuning decided). Changes results.}
+\optentry{resenergythres}{1}{1}{With \opt{rescriterion}~$=1$: tolerance on the error of the splitting, $W^4/|\tilde\Delta|^3$ (cm$^{-1}$), as Gaussian's default test.}
+\optentry{resintensityrel}{0.05}{1}{With \opt{rescriterion}~$=1$: tolerance on the relative error of an intensity, $3r^4$ for the bright band and $3r^2$ for the dark band ($r=W/\tilde\Delta$).}
+\optentry{resdarkrel}{0.01}{1}{With \opt{rescriterion}~$=1$: the dark band is tested only if it receives at least this fraction of the bright intensity\ldots}
+\optentry{resdarkmin}{0.1}{1}{\ldots and at least this intensity (km/mol).}
+\optentry{rescheckquanta}{3}{1}{With \opt{rescriterion}~$=1$: the pairs of states tested have a lower state with at most this many quanta.}
+\optentry{rescandthres}{0.01}{1}{Terms with $|W/\Delta|$ below this are not tested by \opt{rescriterion} and not written to \opt{rescandfile}.}
+\optentry{rescandfile}{"resonancecandidates"}{1}{Every term with $|W/\Delta|\ge\opt{rescandthres}$, with its metrics and the decision (Chapter~\ref{ch:tut-review}). Empty: not written.}
 \optentry{resonanceoverrides}{""}{1}{Force resonances on or off (Chapter~\ref{ch:tut-review}).}
 \end{description}
+
 \subsection*{Geometry and dipole}
 \begin{description}
-\optentry{shiftgeometry}{0}{1}{Move the reference geometry to remove the linear terms; writes the shifted force field (\file{*.shifted}).}
-\optentry{dipole3}{0}{1}{Third-order transformed dipole for fundamentals and hot bands.}
+\optentry{shiftgeometry}{0}{1}{Move the reference geometry to remove the linear terms; writes the shifted force field (\file{*.shifted}). Changes results.}
+\optentry{dipole3}{0}{1}{Third-order transformed dipole for fundamentals and hot bands. Changes intensities; it cannot be combined with \opt{conserveint}.}
+\optentry{conserveint}{0}{1}{A heuristic renormalisation of the fundamental intensities. Changes intensities.}
 \end{description}
+
 \subsection*{Bands}
 \begin{description}
-\optentry{bandthres}{see README}{1}{Default activation of overtone, combination and difference bands, by $|\partial^2\tilde\mu|$.}
+\optentry{bandthres}{1e-4}{1}{Default activation of overtone, combination and difference bands, by $|\partial^2\tilde\mu|$.}
 \optentry{fundthres}{1e-6}{1}{Default activation of fundamentals, by $|\partial\mu|$. A dipole derivative below it is numerical noise of a symmetry-forbidden mode and is set to zero when \file{freqsfile} is read.}
+\optentry{bandlistmin}{\opt{bandthres}/100}{1}{Overtone, combination and difference bands with $|\partial^2\tilde\mu|$ at least this are written to \opt{bandlistout}; the others are left out of it.}
+\optentry{bandlistout}{"bandlist"}{1}{The band list written by phase~1.}
 \optentry{bandlistfile}{""}{1}{Edited band list. It is read at the start of phase 1: an unknown choice stops the run at once, and lines that match no listed band give a warning.}
 \end{description}
+
 \subsection*{Checks}
 \begin{description}
-\optentry{dunhamcheck}{1}{1}{Stop if a deperturbed level falls at or below a lower one (Chapter~\ref{ch:trouble}).}
-\optentry{dunhamfix}{0}{1}{Make the near Fermi resonances responsible explicit.}
-\optentry{residualcheck}{0}{2b}{Estimate the truncation error of the polyads.}
+\optentry{dunhamcheck}{1}{1}{Stop if a deperturbed level falls at or below a lower one (Chapter~\ref{ch:trouble}); with 0, only a warning.}
+\optentry{dunhamcheckquanta}{3}{1}{The Dunham ladders are checked up to this many quanta.}
+\optentry{dunhamwarnfrac}{0.2}{1}{A step of a ladder smaller than this fraction of $\omega$ gives a warning.}
+\optentry{dunhamfix}{0}{1}{Make the near Fermi resonances responsible explicit. Changes results.}
+\optentry{dunhamfixthres}{\opt{fermithres}/2}{1}{With \opt{dunhamfix}: the near Fermi terms with $|c/D|$ at least this are the candidates.}
+\optentry{dunhamfixmaxiter}{50}{1}{With \opt{dunhamfix}: the largest number of iterations.}
+\optentry{residualcheck}{0}{2b}{Estimate the truncation error of the polyads: 1 for each starting eigenstate used, 2 also for the final states of the transitions of at least \opt{residualminint}. It writes to the log only; see the warnings in \file{README.md} on how far the estimates can be trusted.}
+\optentry{residualminint}{1}{2b}{With \opt{residualcheck}~$=2$: the smallest intensity (km/mol) of a transition whose final state is checked.}
 \end{description}
-\subsection*{Polyads and diagonalisation}
+
+\subsection*{Polyads}
 \begin{description}
-\optentry{hsizescalepar}{see README}{2a}{Scale of the polyad growth.}
-\optentry{maxtothops}{see README}{2a}{Maximum number of resonant steps from a target state. Its default is the larger of \opt{maxfhops} and \opt{maxddhops}, which have no other effect. How it acts depends on \opt{separatehops}.}
+\optentry{hsizescalepar}{4}{2a}{Scale of the polyad growth (cost model 0).}
+\optentry{maxtothops}{the larger of \opt{maxfhops} and \opt{maxddhops}}{2a}{Maximum number of resonant steps from a target state. How it acts depends on \opt{separatehops}.}
+\optentry{maxfhops}{3}{1, 2a}{Only gives the default of \opt{maxtothops}; no other effect.}
+\optentry{maxddhops}{2}{1, 2a}{The same.}
 \optentry{separatehops}{0}{2a}{How \opt{maxtothops} limits a polyad. With 0, every step costs at least $1/\opt{maxtothops}$, so the credit allows at most \opt{maxtothops} steps, except steps between degenerate states, which cost nothing and are not limited. With 1, the cost has no minimum and the steps are counted: a state is added if some path from a target reaches it with credit left in at most \opt{maxtothops} steps, degenerate steps included. With 1 the polyads are larger (about 2.5 times for the pyrene tutorial). Changes results.}
 \optentry{costmodel}{0}{2a}{Cost of one resonant step when a polyad grows: 0, $1/\max(1.5,\ \opt{hsizescalepar}\,|W/\Delta E|)$; 1, $1/(\opt{costscale}\,|W/\Delta E|+1)$. Both at least $1/\opt{maxtothops}$, unless \opt{separatehops}~$=1$.}
 \optentry{costscale}{6}{2a}{Scale for \opt{costmodel}~$=1$, calibrated on toy Fermi and Wannier--Stark ladders (\file{tools/costmodel\_toy.py}).}
 \optentry{minhopcoupling}{0.5}{2a}{A polyad does not grow through a coupling $|W|$ below this value (cm$^{-1}$); the coupling stays in the matrix when both states are in the polyad. Set it to 0 to switch it off and get the polyads of earlier versions.}
-\optentry{maxqueued}{0}{2a}{A limit on the states queued for one starting state (0: no limit). When it is reached, the growth of that starting state stops: the log gets a \texttt{growth stopped} summary and stderr a warning, its polyads are not written, and it is listed in \file{processedmodepopfile.stopped} instead of the files read by phase~2b. Phase~2a goes on with the next starting state; if the ground-state step reaches the limit, phase~2a stops. A queued state takes about 375 bytes, so \texttt{maxqueued = 1e8} is about 40~GB. The largest polyad reported for a stopped starting state is a lower bound: the polyads were still growing.}
+\optentry{depsilon}{1e-8}{2a, 2b}{Two diagonal energies closer than this (cm$^{-1}$) are degenerate: a step between them costs nothing when a polyad grows.}
+\optentry{maxqueued}{0}{2a}{A limit on the states queued for one starting state (0: no limit). When it is reached, the growth of that starting state stops: the log gets a \texttt{growth stopped} summary and stderr a warning, its polyads are not written, and it is listed in \file{processedmodepopfile.stopped} instead of the files read by phase~2b. Phase~2a goes on with the next starting state; if the ground-state step reaches the limit, phase~2a stops. A queued state takes about 375 bytes (0.5~kB in large growths), so \texttt{maxqueued = 1e8} is about 40--50~GB. The largest polyad reported for a stopped starting state is a lower bound: the polyads were still growing.}
 \optentry{sizesonly}{0}{2a}{1: grow the polyads of the ground state (if \opt{computeground}) and of every starting state as usual, and write only their sizes to \file{growthsizes}, without building the Hamiltonians. Nothing that phase~2b reads is written (no \file{dir\_n*}, \file{processedquantas}, \file{processeddirs} or \file{polyadsizes}). This measures cheaply how expensive the starting states are, before choosing which ones to compute; the sizes are those of a normal run with the same options. Starting states stopped by \opt{maxqueued} are listed too, flagged.}
-\optentry{growthsizes}{growthsizes}{2a}{With \opt{sizesonly}~=~1, the name of the output file; it must not exist.}
-\optentry{eigensolver}{1}{2b}{Diagonalisation library: 1 ScaLAPACK \texttt{pdsyevr}, 2 ScaLAPACK \texttt{pdsyevx}, 0 SLEPc, 3 ELPA (the fastest in the tests of Chapter~\ref{ch:tut-pyrene}). With 1 and 3, the small polyads (at most 300 states per row or column of the process grid beyond the first) go to \texttt{pdsyevx}.}
+\optentry{growthsizes}{"growthsizes"}{2a}{With \opt{sizesonly}~=~1, the name of the output file; it must not exist.}
+\optentry{anharmflag}{0}{2a, 2b}{0: the diagonal anharmonic energies are included in the polyad matrices before the diagonalisation; 1: they are added to the eigenvalues afterwards. Changes results.}
+\optentry{cutcorrflag}{0}{2a}{1: a coupling to a state outside the polyad is replaced by a two-level correction of the diagonal element. Changes results.}
+\optentry{zerodistinctdd}{0}{2a, 2b}{1: set to zero the couplings of the resonances with four distinct modes, whose quartic part may be missing; a sensitivity test. Changes results.}
+\end{description}
+
+\subsection*{Starting states}
+\begin{description}
+\optentry{modepopfile}{"quantas"}{2a, 2b}{The starting states (Section~\ref{sec:files-in}); the tutorials call it \file{quantafile}.}
+\optentry{computeground}{1 in phase 2a, 0 in phase 2b}{2a, 2b}{1: also compute the ground state, first, as the reference energy. Phase~2b then reads it as the first entry of \opt{processeddirs}; with 0 it needs \opt{groundstate}. The two defaults differ: give \texttt{computeground = 1} explicitly in \file{inp}, as the tutorials do, or phase~2b stops asking for \opt{groundstate}.}
+\optentry{groundstate}{none}{2b}{With \opt{computeground}~$=0$: the energy of the ground state (cm$^{-1}$), the reference of all the energies.}
+\optentry{groundtransitions}{0}{2b}{With \opt{computeground}~$=1$: in the ground-state step, which adds nothing to the spectra, diagonalise all its polyads and compute the lines of the ground state, which \texttt{groundlines} (\opt{verbosity} bit 4) writes. With 0 only the polyad of the ground state is diagonalised, for the reference energy, and \texttt{groundlines} gives a warning instead of the lines. It applies to every \opt{eigensolver} and to \opt{spectral}. It does not change the spectra. Its older name, \opt{spectraleigenground}, is still read.}
+\optentry{ltokeep}{10000}{2b}{For each harmonic starting state, at most this many of the eigenstates that contain it are used, in order of decreasing weight on it. The tutorials use 1: of each anharmonic state only the copies from the harmonic starting states for which it is the dominant eigenstate are kept, as those are expected to be the best converged \notes{Sec.~cl:crit}. Ignored with \opt{spectral}~$=1$.}
+\optentry{vectolerance3}{0.05}{2b}{The eigenstates that contain the starting state are used until their missing weight on it is below this value (and at most \opt{ltokeep} of them). Ignored with \opt{spectral}~$=1$.}
+\optentry{vectolerance2}{0.03}{2b}{The basis states of the starting polyad, in order of their weight on the eigenstates used, are taken as sources of the band transitions until the missing weight is below this value. Ignored with \opt{spectral}~$=1$.}
+\optentry{saveeach}{5}{2b}{The histograms are written every this many starting states, and at the end, so that a stopped run keeps its partial results.}
+\end{description}
+
+\subsection*{Diagonalisation}
+\begin{description}
+\optentry{eigensolver}{1}{2a, 2b}{Diagonalisation library: 1 ScaLAPACK \texttt{pdsyevr}, 2 ScaLAPACK \texttt{pdsyevx}, 0 SLEPc, 3 ELPA (the fastest in the tests of Chapter~\ref{ch:tut-pyrene}). With 1 and 3, the small polyads (at most 300 states per row or column of the process grid beyond the first) go to \texttt{pdsyevx}.}
 \optentry{elpasolver}{1}{2b}{With \opt{eigensolver}~=~3: ELPA's one-stage (1) or two-stage (2) solver.}
 \optentry{elpablock}{64}{2b}{With \opt{eigensolver}~=~3: block size of the distributed matrices. ELPA's two-stage solver gives wrong eigenvalues, without any error, with large blocks (it did with 300); keep it at 64 or below. Its GPU kernel needs a power of 2. See Section~\ref{sec:elpa}.}
-\optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method for large polyads; resolution \opt{spectraldelta}.}
-\optentry{groundtransitions}{0}{2b}{With \opt{computeground}~$=1$: in the ground-state step, which adds nothing to the spectra, diagonalise all its polyads and compute the lines of the ground state, which \texttt{groundlines} (\opt{verbosity} bit 4) writes. With 0 only the polyad of the ground state is diagonalised, for the reference energy, and \texttt{groundlines} gives a warning instead of the lines. It applies to every \opt{eigensolver} and to \opt{spectral}. It does not change the spectra. Its older name, \opt{spectraleigenground}, is still read.}
-\optentry{spectralexactmax}{0}{2b}{With \opt{spectral}~$=1$: a starting polyad of at most this many states is diagonalised, and its eigenstates replace the energy windows of the starting state (much faster for starting states in small polyads, such as the ground state). The destination polyads are still treated spectrally. Changes the spectra within the resolution; 0 switches it off.}
+\optentry{vectolerance}{0.05}{2b}{The eigenpairs of a polyad are computed until every target state is covered within this missing weight (with the iterative solvers of \opt{eigensolver}~$=0$).}
+\optentry{maxlapack}{50}{2b}{With \opt{eigensolver}~$=0$: polyads of at most this many states are diagonalised completely with LAPACK.}
+\optentry{targettosizeratiothres}{60}{2b}{With \opt{eigensolver}~$=0$: a larger polyad is also diagonalised completely when its target states are more than 1/\opt{targettosizeratiothres} of its basis.}
+\optentry{cissnev}{150}{2b}{With \opt{eigensolver}~$=0$ and the CISS solver: eigenvalues sought per energy window (at least 10).}
+\optentry{cissfactor}{1.5}{2b}{With CISS: the energy interval is divided into windows narrower by this factor than \opt{cissnev} states each would need (at least 1.5).}
+\optentry{mincissmargin}{1000}{2b}{With CISS: the smallest margin (cm$^{-1}$) added around the energies of the target states.}
+\optentry{maxmpd}{1000}{2b}{With \opt{eigensolver}~$=0$: the largest projected dimension (\texttt{mpd}) the SLEPc solver may use while it finds no converged eigenpair.}
+\optentry{minnev}{10}{2b}{With \opt{eigensolver}~$=0$: the fewest eigenpairs requested in a further round of the solver.}
+\optentry{maxnev}{30000}{2b}{With \opt{eigensolver}~$=0$: the most eigenpairs requested in one round of the solver.}
+\optentry{slepctarget}{0}{2b}{With \opt{eigensolver}~$=0$: for polyads larger than \opt{maxlapack}, compute only the eigenpairs that carry the weight of the target states (target-driven shift-and-invert Lanczos), until every target is covered within \opt{vectolerance}. In parallel it needs PETSc with MUMPS. Options with prefix \texttt{tgt\_} (e.g.\ \texttt{-tgt\_pc\_type lu}) change the factorisation.}
+\optentry{slepctargetwmin}{1e-5}{2b}{With \opt{slepctarget}: an eigenvector is kept if its weight on some target is at least this.}
+\optentry{slepctargetrestol}{1e-3}{2b}{With \opt{slepctarget}: Ritz pairs with residual below this (cm$^{-1}$) are accepted.}
+\optentry{slepctargetkrylov}{40}{2b}{With \opt{slepctarget}: dimension of the Krylov space per shift.}
+\optentry{slepctargetmaxshifts}{100}{2b}{With \opt{slepctarget}: the largest number of shifts.}
 \end{description}
+
+\subsection*{Spectral method}
+\begin{description}
+\optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method instead of eigenvectors, for every starting state \notes{§12}; it needs \opt{eigensolver}~$=0$ and one MPI process (OpenMP threads with \texttt{OMP\_NUM\_THREADS}). Lines become Gaussians of width about $\opt{spectraldelta}\sqrt2$. Changes results.}
+\optentry{spectraldelta}{0.1}{2b}{The resolution (cm$^{-1}$), both in the starting and in the final energy. The default \opt{wnumhiststep} becomes \opt{spectraldelta}/2.}
+\optentry{spectralwmin}{1e-6}{2b}{Energy windows of the starting state with a smaller weight are skipped.}
+\optentry{spectralborder}{1}{2b}{An energy window is skipped when its second-order shift from the states excluded from the polyad is at least \opt{spectraldelta}; the weight rejected is logged (\texttt{spectral border:}).}
+\optentry{spectralexactmax}{0}{2b}{With \opt{spectral}~$=1$: a starting polyad of at most this many states is diagonalised, and its eigenstates replace the energy windows of the starting state (much faster for starting states in small polyads, such as the ground state). The destination polyads are still treated spectrally. Changes the spectra within the resolution; 0 switches it off.}
+\optentry{spectralteams}{0}{2b}{1: the largest destination polyads run at the same time in teams of threads. A performance option; it does not change the histograms.}
+\end{description}
+
 \subsection*{Histograms}
 \begin{description}
-\optentry{wnumhistmin, wnumhistmax, wnumhiststep}{}{2b}{Wavenumber grid (cm$^{-1}$).}
-\optentry{Ehistmin, Ehistmax, Ehiststep}{}{2b}{Bins of the energy of the starting state.}
+\optentry{wnumhistmin}{0}{2b}{Wavenumber grid of the histograms (cm$^{-1}$): lower end, upper end, step. With \opt{spectral}~$=1$ the default step is \opt{spectraldelta}/2.}
+\optentry{wnumhistmax}{7000}{2b}{Wavenumber grid of the histograms (cm$^{-1}$): lower end, upper end, step. With \opt{spectral}~$=1$ the default step is \opt{spectraldelta}/2.}
+\optentry{wnumhiststep}{0.2}{2b}{Wavenumber grid of the histograms (cm$^{-1}$): lower end, upper end, step. With \opt{spectral}~$=1$ the default step is \opt{spectraldelta}/2.}
+\optentry{Ehistmin}{0}{2a, 2b}{Bins of the energy of the starting state (cm$^{-1}$): lower end, upper end, width. Starting states outside them are dropped.}
+\optentry{Ehistmax}{60000}{2a, 2b}{Bins of the energy of the starting state (cm$^{-1}$): lower end, upper end, width. Starting states outside them are dropped.}
+\optentry{Ehiststep}{100}{2a, 2b}{Bins of the energy of the starting state (cm$^{-1}$): lower end, upper end, width. Starting states outside them are dropped.}
+\optentry{danharmhistmin}{$-$7000}{2b}{Grid of the histograms of the anharmonic shifts (cm$^{-1}$): lower end, upper end, step.}
+\optentry{danharmhistmax}{7000}{2b}{Grid of the histograms of the anharmonic shifts (cm$^{-1}$): lower end, upper end, step.}
+\optentry{danharmhiststep}{0.2}{2b}{Grid of the histograms of the anharmonic shifts (cm$^{-1}$): lower end, upper end, step.}
+\optentry{histoutprefix}{"hist"}{2b}{Prefix of the histogram files.}
 \end{description}
+
+\subsection*{Files of phases 2a and 2b}
+\begin{description}
+\optentry{processedmodepops}{"processedquantas"}{2a, 2b}{The starting states processed by phase~2a, read by phase~2b (the text calls this file \file{processedmodepopfile}).}
+\optentry{processeddirs}{"processeddirs"}{2a, 2b}{The directories written by phase~2a, one per starting state, read by phase~2b.}
+\optentry{polyadsizes}{"polyadsizes"}{2a}{Largest polyad and $\sum N^2$ of each starting state.}
+\optentry{dirprefix}{"dir"}{2a, 2b}{Prefix of the directories of the starting states (\file{dir\_nNNNNN}).}
+\optentry{ancillaryfile}{"ancillarydump"}{2a, 2b}{Name of the file with the polyads, in each directory; the matrices are in the same name with \texttt{\_ham}.}
+\optentry{dumpedparams}{"dumpedparams"}{1, 2a, 2b}{The resonances and parameters written by phase~1 for phases 2a and 2b.}
+\end{description}
+
 \subsection*{Log output}
 \begin{description}
 \optentry{verbosity}{0}{all}{What the logs (\file{proclog\_n*}) contain. It is a sum of the bits of Table~\ref{tab:verbosity}, which can be given by name: for example \texttt{verbosity = timings + components} instead of \texttt{verbosity = 10}. Write each name once: a name written twice adds its bit twice, which gives another bit. \opt{verbosity} does not change the spectra. It never changes what is computed; the lines of the ground state need \opt{groundtransitions}~$=1$. (Up to 2026.11, without bit~4 phase~2a built no polyads of the band destinations, and the spectra were empty.)}
+\optentry{proclogprefix}{"proclog"}{all}{Prefix of the logs of the processes (\file{proclog\_nNNNNN}).}
+\optentry{masterlogfile}{"masterlog"}{all}{The log of the master process.}
+\optentry{cutintensity}{1e-3}{2b}{With \opt{verbosity} bit~8: transitions whose largest squared transition dipole of a single band (atomic units) is below this are not written.}
+\optentry{projoutthres}{0.1}{2b}{In the log of the ground-state polyads: a basis state whose weight on the computed eigenstates is below this gets a \texttt{low coverage} warning.}
+\optentry{tolerance}{1e-2}{2b}{In the summary of the fundamentals written to the log: for each fundamental, its eigenstates are listed until their missing weight is below a tenth of this value (at most 0.1).}
 \end{description}
+
 \begin{table}[ht]
 \centering
 \caption{Bits of \opt{verbosity}.}\label{tab:verbosity}
@@ -150,3 +267,18 @@ bit & name & what is written \\
 \hline
 \end{tabular}
 \end{table}
+
+\subsection{Options without effect}\label{sec:obsolete}
+
+These options are still read, and appear in \file{out.oct}, but no longer
+change anything: \opt{cutenergy}, \opt{maxiters}, \opt{maxnstates},
+\opt{maxpolyadsize}, \opt{targetmargin}, \opt{targetmarginscale},
+\opt{maxtargetmargin}, \opt{fhopstoproj}, \opt{ddhopstoproj},
+\opt{tothopstoproj}, \opt{projcutthres}, \opt{kT} and
+\opt{maxquantamargin} (the thermal weights come from the sampling of the
+starting states, Chapter~\ref{ch:tut-thermal}). \opt{maxfhops} and
+\opt{maxddhops} only give the default of \opt{maxtothops}.
+\opt{spectraleigenground} is the older name of \opt{groundtransitions}.
+\opt{resintensitythres} is no longer accepted: phase~1 stops with a
+message, because the intensity test of \opt{rescriterion} is now relative
+(\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}).
