@@ -48,8 +48,7 @@ practical consequences.
 thres = 0.20             # a variable, not an option
 fermithres = thres
 ddthres = thres
-temperature = 500        # K
-kT = 0.6950348*temperature   # kT is in cm-1
+rescandthres = thres/20  # an expression
 \end{lstlisting}
 \end{itemize}
 
@@ -270,13 +269,19 @@ bit & name & what is written \\
 
 \subsection{Options without effect}\label{sec:obsolete}
 
-These options are still read, and appear in \file{out.oct}, but no longer
-change anything: \opt{cutenergy}, \opt{maxiters}, \opt{maxnstates},
+These options had no effect in version 2026.11.1 and have since been
+removed: \opt{cutenergy}, \opt{maxiters}, \opt{maxnstates},
 \opt{maxpolyadsize}, \opt{targetmargin}, \opt{targetmarginscale},
 \opt{maxtargetmargin}, \opt{fhopstoproj}, \opt{ddhopstoproj},
 \opt{tothopstoproj}, \opt{projcutthres}, \opt{kT} and
-\opt{maxquantamargin} (the thermal weights come from the sampling of the
-starting states, Chapter~\ref{ch:tut-thermal}). \opt{maxfhops} and
+\opt{maxquantamargin}. An input file that still sets one of them works
+as before: each program prints
+\begin{lstlisting}
+Warning: option kT is no longer used and is ignored
+\end{lstlisting}
+and goes on. In particular no program takes a temperature: the thermal
+weights come from the sampling of the starting states and from
+\texttt{anh\_assemble.py} (Chapter~\ref{ch:tut-thermal}). \opt{maxfhops} and
 \opt{maxddhops} only give the default of \opt{maxtothops}.
 \opt{spectraleigenground} is the older name of \opt{groundtransitions}.
 \opt{resintensitythres} is no longer accepted: phase~1 stops with a
