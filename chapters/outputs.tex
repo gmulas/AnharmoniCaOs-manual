@@ -21,7 +21,14 @@
   last column is the override in force (\texttt{on}, \texttt{off}) or
   \texttt{auto}.
 \item[\file{*.shifted}, \file{gradient.shifted}, \file{shiftgeometry.out}]
-  With \opt{shiftgeometry}.
+  With \opt{shiftgeometry}: the input files of the new modes
+  (\file{freqsfile.shifted}, \file{phi3file.shifted},
+  \file{phi4file.shifted}, \file{dmu2file.shifted}, and
+  \file{dmu3file.shifted} with \opt{dipole3}; the names follow the input
+  files), in the input formats with 17 digits; \file{gradient.shifted},
+  the residual classical gradient $g'_i$ (lines \texttt{i g'\_i}); and
+  \file{shiftgeometry.out}, the displacement $d$ and the matrix $B$ of
+  $q=d+Bq'$ (line $i$: old mode $i$, $d_i$, $B_{i1}\ldots B_{iN}$).
 \item[\file{dumpedparams}] Binary, read by phases 2a and 2b. It must come
   from the same version of phase 1.
 \end{description}

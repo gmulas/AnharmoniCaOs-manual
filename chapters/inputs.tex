@@ -27,7 +27,7 @@ practical consequences.
   sensitive.
 \item \emph{Defaults.} Every option has a default, and only the options
   that differ from it need to be given. The defaults are listed in
-  \file{README.md} of the code.
+  Section~\ref{sec:options}.
 \item \emph{\file{out.oct}.} Each program writes to \file{out.oct} every
   option it has read, with the value it used. Values not given in
   \file{inp} are marked \texttt{\# default}. This is the place to check
@@ -48,8 +48,7 @@ practical consequences.
 thres = 0.20             # a variable, not an option
 fermithres = thres
 ddthres = thres
-temperature = 500        # K
-kT = 0.6950348*temperature   # kT is in cm-1
+rescandthres = thres/20  # an expression
 \end{lstlisting}
 \end{itemize}
 
@@ -88,7 +87,7 @@ of the manual gives, for every option, where it is described (bold page
 number) and where it is mentioned or used.
 
 % TODO: generate this section from a single machine-readable table, shared
-% with README.md, so that the two cannot diverge.
+% with the code (read_data*.c), so that the two cannot diverge.
 
 \subsection*{Input data}
 \begin{description}
@@ -129,7 +128,7 @@ number) and where it is mentioned or used.
 
 \subsection*{Geometry and dipole}
 \begin{description}
-\optentry{shiftgeometry}{0}{1}{Move the reference geometry to remove the linear terms; writes the shifted force field (\file{*.shifted}). Changes results.}
+\optentry{shiftgeometry}{0}{1}{Move the reference geometry and the normal modes so that the linear terms of the normal-ordered Hamiltonian vanish exactly; frequencies, force constants and dipole derivatives are replaced by those of the new modes. The new quantities are written to \file{*.shifted} (Chapter~\ref{ch:outputs}). A run that reads the \file{*.shifted} files with \opt{shiftgeometry}~$=0$, \opt{gradientfile}~$=$~\texttt{"gradient.shifted"} and \opt{phi3threshold}~$=$~\opt{phi4threshold}~$=$~\opt{dmu2threshold}~$=0$ reproduces the shifted run exactly. Changes results.}
 \optentry{dipole3}{0}{1}{Third-order transformed dipole for fundamentals and hot bands. Changes intensities; it cannot be combined with \opt{conserveint}.}
 \optentry{conserveint}{0}{1}{A heuristic renormalisation of the fundamental intensities. Changes intensities.}
 \end{description}
@@ -151,7 +150,7 @@ number) and where it is mentioned or used.
 \optentry{dunhamfix}{0}{1}{Make the near Fermi resonances responsible explicit. Changes results.}
 \optentry{dunhamfixthres}{\opt{fermithres}/2}{1}{With \opt{dunhamfix}: the near Fermi terms with $|c/D|$ at least this are the candidates.}
 \optentry{dunhamfixmaxiter}{50}{1}{With \opt{dunhamfix}: the largest number of iterations.}
-\optentry{residualcheck}{0}{2b}{Estimate the truncation error of the polyads: 1 for each starting eigenstate used, 2 also for the final states of the transitions of at least \opt{residualminint}. It writes to the log only; see the warnings in \file{README.md} on how far the estimates can be trusted.}
+\optentry{residualcheck}{0}{2b}{Estimate the truncation error of the polyads: 1 for each starting eigenstate used, 2 also for the final states of the transitions of at least \opt{residualminint}. It writes to the log only and does not change results. The log gives the residual norm $\|r\|$, which bounds the distance from an exact eigenvalue, but loosely, and the estimate $\|r\|^2/\delta$ \notes{§11.4}, which for final states is dominated by the level spacing of the polyad. The second-order shift due to the excluded states (\texttt{shift2}, with \opt{residualcheck}~$=2$) is not an error estimate: on hexahydropyrene it diverges near degenerate excluded states and is otherwise on average about 50 times larger than the real shift of the bands when the polyads grow, with a random sign. Use these lines to find the states to watch, and check convergence by repeating the run with larger polyads.}
 \optentry{residualminint}{1}{2b}{With \opt{residualcheck}~$=2$: the smallest intensity (km/mol) of a transition whose final state is checked.}
 \end{description}
 
@@ -270,13 +269,19 @@ bit & name & what is written \\
 
 \subsection{Options without effect}\label{sec:obsolete}
 
-These options are still read, and appear in \file{out.oct}, but no longer
-change anything: \opt{cutenergy}, \opt{maxiters}, \opt{maxnstates},
+These options had no effect in version 2026.11.1 and have since been
+removed: \opt{cutenergy}, \opt{maxiters}, \opt{maxnstates},
 \opt{maxpolyadsize}, \opt{targetmargin}, \opt{targetmarginscale},
 \opt{maxtargetmargin}, \opt{fhopstoproj}, \opt{ddhopstoproj},
 \opt{tothopstoproj}, \opt{projcutthres}, \opt{kT} and
-\opt{maxquantamargin} (the thermal weights come from the sampling of the
-starting states, Chapter~\ref{ch:tut-thermal}). \opt{maxfhops} and
+\opt{maxquantamargin}. An input file that still sets one of them works
+as before: each program prints
+\begin{lstlisting}
+Warning: option kT is no longer used and is ignored
+\end{lstlisting}
+and goes on. In particular no program takes a temperature: the thermal
+weights come from the sampling of the starting states and from
+\texttt{anh\_assemble.py} (Chapter~\ref{ch:tut-thermal}). \opt{maxfhops} and
 \opt{maxddhops} only give the default of \opt{maxtothops}.
 \opt{spectraleigenground} is the older name of \opt{groundtransitions}.
 \opt{resintensitythres} is no longer accepted: phase~1 stops with a

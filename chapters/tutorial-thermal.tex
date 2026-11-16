@@ -419,12 +419,13 @@ about 0.14\,\% of the population at 200~K lies above 2500~cm$^{-1}$
 (Section~\ref{sec:thermal-howhigh}); for higher temperatures the
 sampling must go higher.
 
-\section{Temperature in phase 2b}
+\section{Where the temperature enters}
 
-The temperature enters phase~2b through \opt{kT}, in cm$^{-1}$. It is
-convenient to give the temperature in kelvin as a variable
-(Section~\ref{sec:inp}):
-\begin{lstlisting}
-temperature = 500        # K
-kT = 0.6950348*temperature
-\end{lstlisting}
+None of the three programs takes a temperature: phases 2a and 2b compute
+the spectrum of each sampled starting state, whatever its weight. The
+temperature enters only when the results are combined, through the
+\flag{--T} option of \texttt{anh\_assemble.py} (in kelvin), and in the
+choice of E$_\mathrm{max}$ of the sampling
+(Section~\ref{sec:thermal-howhigh}). Older input files may set
+\opt{kT}: it never had an effect on the spectra and is now ignored with a
+warning (Section~\ref{sec:obsolete}).
