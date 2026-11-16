@@ -69,7 +69,7 @@ source ~/venvs/anharmonicaos/bin/activate
 \paragraph{Docker.} A container sees only the directories mounted into it.
 The function below mounts the current directory at the same path inside
 the container and starts there, passes the number of OpenMP threads
-(the image sets it to 1 otherwise), and runs the command given:
+(the image sets it to 1 otherwise; Section~\ref{sec:run-resources}), and runs the command given:
 \begin{lstlisting}
 IMG=ghcr.io/gmulas/anharmonicaos:2026.11.1
 anh() { docker run --rm -v "$PWD":"$PWD" -w "$PWD" \
@@ -109,6 +109,68 @@ output and errors and warnings on the standard error: redirect the first
 to a file (\texttt{> fase1.log}) and keep the second on the terminal, or
 redirect both. Each program writes to \file{out.oct} every option it read,
 with the value used.
+
+\section{Threads, processes and memory in a container}\label{sec:run-resources}
+
+\paragraph{Threads and processes.} The image sets
+\texttt{OMP\_NUM\_THREADS} to 1, so a program in the container uses one
+thread unless told otherwise: the functions \prog{anh} of
+Section~\ref{sec:run-ways} pass the value of the shell
+(\texttt{-e} for Docker, \texttt{-{}-env} for Apptainer), as in
+\texttt{OMP\_NUM\_THREADS=8 anh \ldots}. MPI processes are started inside
+the container, \texttt{anh mpirun -np 4 \ldots}. Threads times processes
+should not exceed the cores that the container sees, which
+\begin{lstlisting}
+anh nproc
+\end{lstlisting}
+prints. The self-tests use 2 processes and one thread, so that they run on
+any machine; on a larger one, \texttt{OMP\_NUM\_THREADS=8 anh anh-selftest
+8} (Docker: \texttt{docker run -{}-rm -e OMP\_NUM\_THREADS=8 IMAGE
+anh-selftest 8}).
+
+\paragraph{Linux.} Docker Engine and Apptainer run the container as
+ordinary processes of the host: they see all its cores and memory, unless
+limited by \texttt{docker run -{}-cpus/-{}-memory} or, on a cluster, by the
+Slurm allocation.
+
+\paragraph{macOS and Windows: a virtual machine.} Linux containers need a
+Linux kernel, so on macOS and Windows every container engine runs them in
+a Linux virtual machine, also when the commands are typed in a terminal.
+A container sees only the cores and the memory given to that virtual
+machine, and the defaults can be smaller than the computer:
+\begin{itemize}
+\item \emph{Docker Desktop on macOS:} Settings, Resources (CPU limit,
+  memory limit); see the Docker Desktop documentation,
+  \url{https://docs.docker.com/desktop/settings-and-maintenance/settings/}.
+\item \emph{Docker Desktop on Windows} with the WSL2 back end (the
+  default): the limits are those of WSL2, set in the file
+  \file{.wslconfig} of the user's folder (section \texttt{[wsl2]},
+  \texttt{processors=} and \texttt{memory=}), followed by
+  \texttt{wsl -{}-shutdown}; see
+  \url{https://learn.microsoft.com/windows/wsl/wsl-config}. Keep the run
+  directories in the Linux file system of WSL2 (for example under the
+  home directory of the distribution), not under \file{/mnt/c}: the
+  programs write many files, and reaching Windows files from the
+  virtual machine is much slower.
+\item \emph{Apptainer and Singularity} run only on Linux. On Windows they
+  run inside WSL2, with the same limits. On macOS they need a Linux
+  virtual machine, for example one made by Lima
+  (\url{https://lima-vm.io}), which has a template for Apptainer; this
+  has not been tested with \ac{}.
+\end{itemize}
+
+\paragraph{Other engines.} The image is a standard OCI image and should
+also run with other engines, each with its own settings for cores and
+memory: on macOS OrbStack, Colima, Podman Desktop, Rancher Desktop, and
+Apple's \prog{container} (macOS~26, one light virtual machine per
+container); on Windows Podman Desktop and Rancher Desktop, also on WSL2.
+All of them use the hardware virtualisation of the computer, and on Apple
+silicon the arm64 image runs without emulation, so the speed of the
+calculations should be about the same: the engines differ mostly in start
+time, memory used by the virtual machine and access to shared folders.
+Only the engines listed in Section~\ref{sec:container} have been tested.
+On Windows, building \ac{} from the sources inside WSL2, as on Linux,
+avoids the container but not the virtual machine.
 
 \section{\prog{thermal\_anharmonicity\_fase1}}\label{sec:run-fase1}
 
