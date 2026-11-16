@@ -12,24 +12,32 @@ The recipe and more details are in the repository
 \url{https://github.com/gmulas/AnharmoniCaOs-container}.
 
 \paragraph{Operating systems.} \ac{} is built and tested on Linux, where
-it runs natively or in the container. On macOS and on Windows the
-container image should run as well, but this has not been tested yet:
+it runs natively or in the container. On macOS and on Windows it runs in
+the container image; \texttt{anh-selftest} of release 2026.11.1 gave the
+expected results on:
 \begin{itemize}
-\item \emph{macOS:} with Docker Desktop or an equivalent (Colima,
-  OrbStack, Podman), which runs a Linux virtual machine; Docker takes the
-  arm64 image on Apple silicon and the x86\_64 one on Intel Macs. The
-  \file{.sif} files are of no use there: Apptainer and Singularity do not
-  run on macOS itself.
-\item \emph{Windows:} inside WSL2, which is a real Linux system, with
-  Docker (Docker Desktop with the WSL2 back end, or Docker installed in
-  WSL2) or Apptainer; building from the sources in WSL2 as on Linux should
-  work too. Windows without WSL2 is not supported.
+\item \emph{macOS} 26.7.1, MacBook Pro with Apple M1 Pro, Docker
+  Desktop 4.99 (arm64 image), in 2~min~22~s. Docker takes the arm64 image
+  on Apple silicon and the x86\_64 one on Intel Macs. Other engines that
+  run a Linux virtual machine (Colima, OrbStack, Podman) should work too,
+  but have not been tested. The \file{.sif} files are of no use there:
+  Apptainer and Singularity do not run on macOS itself.
+\item \emph{Windows} 11 Pro 23H2 with WSL2, ASUS Zenbook, Docker Desktop
+  4.99 with the WSL2 back end, started from PowerShell (x86\_64 image), in
+  about 30~s. Docker installed inside a WSL2 distribution, Apptainer
+  there, and building from the sources in WSL2 as on Linux should work
+  too, but have not been tested. Windows without WSL2 is not supported.
+  From PowerShell the current folder is mounted with
+  \texttt{-v \$\{PWD\}:/work}; for real runs, keep the files in the
+  Linux file system of WSL2 and work from its terminal
+  (Section~\ref{sec:run-resources}).
 \end{itemize}
 On both, a container sees only the cores and the memory of that virtual
 machine: see Section~\ref{sec:run-resources} for how to set them and how
 to use more threads and processes.
-Reports of a test on these systems (the output of
-\texttt{anh-selftest}, see below, and the system version) are welcome.
+Reports of tests on other systems (the output of
+\texttt{anh-selftest}, see below, the system and processor, and the
+output of \texttt{docker version}) are welcome.
 
 \paragraph{Checking it.} \prog{anh-selftest} runs Tutorial~1
 (Chapter~\ref{ch:tut-pyrene}) inside the image, with two MPI processes, in
