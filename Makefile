@@ -10,9 +10,10 @@ $(MAIN).pdf: $(SRC)
 	latexmk -pdf -interaction=nonstopmode $(MAIN).tex
 
 html: html/index.html
-html/index.html: $(SRC)
+html/index.html: $(SRC) html-extra.css
 	latexmlc --dest=html/index.html --split --splitat=chapter \
-	  --navigationtoc=context --bibtex --css=LaTeXML-navbar-left.css \
+	  --navigationtoc=context --bibliography=$(MAIN).bib \
+	  --css=LaTeXML-navbar-left.css --css=html-extra.css \
 	  --javascript='https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js' \
 	  $(MAIN).tex
 
