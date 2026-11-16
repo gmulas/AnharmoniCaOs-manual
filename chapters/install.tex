@@ -117,7 +117,7 @@ cd AnharmoniCaOs
 ./configure --with-petsc=PREFIX --with-slepc=PREFIX ...
 make
 \end{lstlisting}
-\opt{./configure --help} lists the options that point to each library.
+\flag{./configure --help} lists the options that point to each library.
 Building produces three programs:
 \begin{itemize}
 \item \prog{thermal\_anharmonicity\_fase1};
@@ -149,7 +149,7 @@ which is set by the PETSc option \texttt{--with-64-bit-indices}.
   the results are wrong, or the program crashes.
 \item \emph{What \prog{configure} does.} \prog{configure}
   reads the size of \texttt{PetscBLASInt}. For BLAS, LAPACK and ScaLAPACK
-  not given with \opt{--with-\ldots} or \texttt{NAME\_LIBS}, it tries the
+  not given with \flag{--with-\ldots} or \texttt{NAME\_LIBS}, it tries the
   pkg-config modules available (for example \texttt{blas64},
   \texttt{lapack64}, \texttt{scalapack64-openmpi} on Debian and Ubuntu,
   or \texttt{mkl-dynamic-ilp64-gomp} for MKL, tried first when
@@ -157,7 +157,7 @@ which is set by the PETSc option \texttt{--with-64-bit-indices}.
   test of its integer size; it lists the ones it skipped. It then tests
   the libraries actually used, including those given by the user, and
   stops if one of them uses the other size, and names it.
-  \opt{--disable-int-check} turns the error into a warning. BLACS and ELPA
+  \flag{--disable-int-check} turns the error into a warning. BLACS and ELPA
   are not checked: make sure they were built for the same integer size
   (for ELPA, a 64-bit build is usually configured with
   \texttt{--enable-64bit-integer-math-support}).

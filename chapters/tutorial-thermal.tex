@@ -42,11 +42,11 @@ states''}.
 \paragraph{How \prog{anh\_sample.py} works.}
 \begin{enumerate}
 \item \textbf{Enumeration.} It lists every vibrational state below an
-energy E$_\mathrm{enum}$ (\opt{--enum}). At low energy there are few
+energy E$_\mathrm{enum}$ (\flag{--enum}). At low energy there are few
 states, each can have strong hot bands, and their number per bin is known
 exactly.
 \item \textbf{Wang--Landau walks.} From E$_\mathrm{enum}$ up to E$_\mathrm{max}$
-(\opt{--emax}) it runs Wang--Landau random walks in the space of the
+(\flag{--emax}) it runs Wang--Landau random walks in the space of the
 quantum numbers. Each step adds or removes one quantum in a random mode.
 The walks visit every energy bin equally often, and inside a bin every
 state is equally likely. At the same time they give the number of states
@@ -55,7 +55,7 @@ of each bin.
 one entry per state, and sorts them by energy. It assigns them to the
 same bins as phase~2b and shuffles each bin.
 \item \textbf{Blocks.} It writes \emph{blocks} of starting states in the
-\file{quantafile} format. Each block takes up to K (\opt{--per-bin})
+\file{quantafile} format. Each block takes up to K (\flag{--per-bin})
 states from every bin. Each block gives a complete spectrum, so the
 blocks can be computed one after the other: later blocks add sampling.
 \end{enumerate}
@@ -87,7 +87,7 @@ walker 0: 1900000 steps, 15 stages, final ln f 1.00e-05, 52280 states visited
 walker 1: 1900000 steps, 15 stages, final ln f 1.00e-05, 51624 states visited
 s_quanta_block000: 51 states
 \end{lstlisting}
-The random numbers have a fixed seed (\opt{--seed}), so the output is the
+The random numbers have a fixed seed (\flag{--seed}), so the output is the
 same at every run.
 
 \paragraph{The output files.}
@@ -140,9 +140,9 @@ have to be a uniform sample. Only their number has to be large enough.
 
 \paragraph{The options of \prog{anh\_sample.py}.}
 \begin{description}
-\item[\opt{--inp}, \opt{--freqsfile}] The \file{inp} of the run, and the
+\item[\flag{--inp}, \flag{--freqsfile}] The \file{inp} of the run, and the
 frequencies, first column of \file{freqsfile}.
-\item[\opt{--enum}, \opt{--emax}] E$_\mathrm{enum}$ and E$_\mathrm{max}$ in
+\item[\flag{--enum}, \flag{--emax}] E$_\mathrm{enum}$ and E$_\mathrm{max}$ in
 cm$^{-1}$.
 \begin{itemize}
 \item Keep E$_\mathrm{enum}$ low enough that the enumeration stays below
@@ -150,19 +150,19 @@ a few million states.
 \item For phase~2b, \opt{Ehistmax} must be at least E$_\mathrm{max}$:
 phase~2b ignores starting states outside the energy histogram.
 \end{itemize}
-\item[\opt{--ehistmin}, \opt{--ehiststep}] The energy bins. They must be
+\item[\flag{--ehistmin}, \flag{--ehiststep}] The energy bins. They must be
 those of the phase~2b runs (\opt{Ehistmin}, \opt{Ehiststep}). By default
 they are read from \file{inp}.
-\item[\opt{--walkers}, \opt{--procs}, \opt{--seed}] The number of
+\item[\flag{--walkers}, \flag{--procs}, \flag{--seed}] The number of
 independent walks, how many processes run them, and the random seed.
 More walkers mean less correlated samples and an error estimate on
 $\ln g$.
-\item[\opt{--lnf-final}] When the walks stop, by default $10^{-5}$.
+\item[\flag{--lnf-final}] When the walks stop, by default $10^{-5}$.
 Smaller values give more accurate counts, at a cost in time proportional
 to their inverse.
-\item[\opt{--per-bin}, \opt{--blocks}] K states per bin in each block, and
+\item[\flag{--per-bin}, \flag{--blocks}] K states per bin in each block, and
 the number of blocks.
-\item[\opt{--energy}] \texttt{harmonic} (the default) or \texttt{dunham},
+\item[\flag{--energy}] \texttt{harmonic} (the default) or \texttt{dunham},
 the energies with the deperturbed Dunham coefficients of
 \file{dunhamparams}. Keep the default: phase~2b assigns the starting
 states to the bins with their harmonic energy.
