@@ -128,7 +128,7 @@ number) and where it is mentioned or used.
 
 \subsection*{Geometry and dipole}
 \begin{description}
-\optentry{shiftgeometry}{0}{1}{Move the reference geometry to remove the linear terms; writes the shifted force field (\file{*.shifted}). Changes results.}
+\optentry{shiftgeometry}{0}{1}{Move the reference geometry and the normal modes so that the linear terms of the normal-ordered Hamiltonian vanish exactly; frequencies, force constants and dipole derivatives are replaced by those of the new modes. The new quantities are written to \file{*.shifted} (Chapter~\ref{ch:outputs}). A run that reads the \file{*.shifted} files with \opt{shiftgeometry}~$=0$, \opt{gradientfile}~$=$~\texttt{"gradient.shifted"} and \opt{phi3threshold}~$=$~\opt{phi4threshold}~$=$~\opt{dmu2threshold}~$=0$ reproduces the shifted run exactly. Changes results.}
 \optentry{dipole3}{0}{1}{Third-order transformed dipole for fundamentals and hot bands. Changes intensities; it cannot be combined with \opt{conserveint}.}
 \optentry{conserveint}{0}{1}{A heuristic renormalisation of the fundamental intensities. Changes intensities.}
 \end{description}
@@ -150,7 +150,7 @@ number) and where it is mentioned or used.
 \optentry{dunhamfix}{0}{1}{Make the near Fermi resonances responsible explicit. Changes results.}
 \optentry{dunhamfixthres}{\opt{fermithres}/2}{1}{With \opt{dunhamfix}: the near Fermi terms with $|c/D|$ at least this are the candidates.}
 \optentry{dunhamfixmaxiter}{50}{1}{With \opt{dunhamfix}: the largest number of iterations.}
-\optentry{residualcheck}{0}{2b}{Estimate the truncation error of the polyads: 1 for each starting eigenstate used, 2 also for the final states of the transitions of at least \opt{residualminint}. It writes to the log only; see the warnings in \file{README.md} on how far the estimates can be trusted.}
+\optentry{residualcheck}{0}{2b}{Estimate the truncation error of the polyads: 1 for each starting eigenstate used, 2 also for the final states of the transitions of at least \opt{residualminint}. It writes to the log only and does not change results. The log gives the residual norm $\|r\|$, which bounds the distance from an exact eigenvalue, but loosely, and the estimate $\|r\|^2/\delta$ \notes{§11.4}, which for final states is dominated by the level spacing of the polyad. The second-order shift due to the excluded states (\texttt{shift2}, with \opt{residualcheck}~$=2$) is not an error estimate: on hexahydropyrene it diverges near degenerate excluded states and is otherwise on average about 50 times larger than the real shift of the bands when the polyads grow, with a random sign. Use these lines to find the states to watch, and check convergence by repeating the run with larger polyads.}
 \optentry{residualminint}{1}{2b}{With \opt{residualcheck}~$=2$: the smallest intensity (km/mol) of a transition whose final state is checked.}
 \end{description}
 
