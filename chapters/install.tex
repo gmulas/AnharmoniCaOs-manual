@@ -235,7 +235,35 @@ shows whether the process uses it.
   to rounding.
 \end{itemize}
 
+\section{Python packages for the tools}\label{sec:python}
+
+The tools of Chapter~\ref{ch:workflow} (\prog{anh\_sample.py},
+\prog{anh\_jobs.py}, \prog{anh\_assemble.py}, \prog{anh\_hopball.py},
+\prog{gaussian2ac.py}), the scripts of the examples and the checks are
+written in Python~3 (3.8 or later). They need numpy; matplotlib only for
+the figures, and scipy only for one check. The file
+\file{requirements.txt} of the code lists them. To install them in a
+virtual environment of their own, from the top directory of the code:
+\begin{lstlisting}
+python3 -m venv ~/venvs/anharmonicaos
+~/venvs/anharmonicaos/bin/pip install -r requirements.txt
+source ~/venvs/anharmonicaos/bin/activate
+\end{lstlisting}
+The last line is needed in every new shell before using the tools. On a
+cluster, create the environment with the Python of the cluster (for
+example from a module) on a file system visible from the nodes, and
+activate it in the job scripts. The container image already has numpy and
+matplotlib.
+
 \section{Checking the build}
+
+\prog{tests/selftest.sh BINDIR [NPROC]} runs Tutorial~1
+(Chapter~\ref{ch:tut-pyrene}) with the programs in \file{BINDIR}, in a
+temporary directory and in about a minute, and compares three numbers with
+those of the release: the lines of \file{resonanceslist}, the size of the
+largest polyad and the total absorption. It ends with
+\texttt{selftest: OK}. It is the same test as \prog{anh-selftest} of the
+container image.
 
 The directory \file{tests/checks} contains checks that compare the
 code with exact reference implementations; each \file{run.sh} ends with
