@@ -297,11 +297,11 @@ anh python3 TOOLS/orca2ac.py BASENAME.vpt2 [--outdir DIR]
 \file{dmu2file} and \file{dmu3file}, in the same conventions as those of
 \prog{gaussian2ac.py}. As in Gaussian, the quartic constants are only the
 semi-quartic ones, $\Phi_{ijkk}$, and the third dipole derivatives the
-semidiagonal ones, $\partial^3\mu/\partial q_k^2\partial q_j$. ORCA's
-block of third dipole derivatives in \file{BASENAME.vpt2} is not yet a
-derivative; the tool completes it, which has been checked only with
-\texttt{PropDisp} equal to \texttt{AnharmDisp} (the default): with
-different values it prints a warning. The tool prints
+semidiagonal ones, $\partial^3\mu/\partial q_k^2\partial q_j$. ORCA
+(6.1.1) takes all of them from the same displacements of
+\texttt{AnharmDisp}, and ignores \texttt{PropDisp}; the tool checks the
+step of each displaced geometry against \texttt{AnharmDisp}, and stops if
+they differ (the files would belong to different jobs). The tool prints
 the number of modes and constants, the modes whose sign it changed, and
 three checks: the frequencies recomputed from the Hessian, the agreement
 of the semi-quartic constants that ORCA gives more than once, and the
