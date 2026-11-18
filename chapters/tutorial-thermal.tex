@@ -162,6 +162,20 @@ Smaller values give more accurate counts, at a cost in time proportional
 to their inverse.
 \item[\flag{--per-bin}, \flag{--blocks}] K states per bin in each block, and
 the number of blocks.
+\item[\flag{--require}] Modes (numbers from 1, as \texttt{37-41,45}): the
+blocks take only states with at least one quantum in one of them. This is
+for a band that only such states emit, for example the CH stretches at
+3.3~$\mu$m: on pyrene only a fraction of $10^{-4}$ of the states near
+4000~cm$^{-1}$ have such a quantum, so a uniform sample of a bin would
+hardly ever contain one. Above E$_\mathrm{enum}$ the qualifying states
+come from Wang--Landau walks confined to them, again a uniform sample of
+each bin. \file{PREFIX\_require.dat} gives, for each bin, the fraction of
+all its states that qualify: exact below E$_\mathrm{enum}$, from
+Beyer--Swinehart counts above it (\flag{--bs-grain}, harmonic energies
+only). The emission of that band per state of the bin is the mean over the
+qualifying states times that fraction. Use it only for the band of those
+modes: the other bands of the same runs are biased. Version 2026.11.2 and
+later.
 \item[\flag{--energy}] \texttt{harmonic} (the default) or \texttt{dunham},
 the energies with the deperturbed Dunham coefficients of
 \file{dunhamparams}. Keep the default: phase~2b assigns the starting
