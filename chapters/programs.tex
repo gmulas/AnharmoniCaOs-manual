@@ -72,7 +72,7 @@ The function below mounts the current directory at the same path inside
 the container and starts there, passes the number of OpenMP threads
 (the image sets it to 1 otherwise; Section~\ref{sec:run-resources}), and runs the command given:
 \begin{lstlisting}
-IMG=ghcr.io/gmulas/anharmonicaos:2026.11.1
+IMG=ghcr.io/gmulas/anharmonicaos:2026.11.2
 anh() { docker run --rm -v "$PWD":"$PWD" -w "$PWD" \
           -e OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" "$IMG" "$@"; }
 \end{lstlisting}
@@ -90,7 +90,7 @@ it (Section~\ref{sec:container}).
 \paragraph{Apptainer and Singularity.} With the \file{.sif} file of
 Section~\ref{sec:container}:
 \begin{lstlisting}
-SIF=$HOME/anharmonicaos-2026.11.1.sif
+SIF=$HOME/anharmonicaos-2026.11.2.sif
 anh() { apptainer exec --env OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" "$SIF" "$@"; }
 \end{lstlisting}
 Use \prog{singularity} where \prog{apptainer} is not installed
@@ -376,7 +376,7 @@ host and each job starts the container. Write the container in the
 \texttt{mpirun} entry of the profile, with the threads of the profile,
 and leave \texttt{bindir} empty:
 \begin{lstlisting}
-"mpirun": "apptainer exec --cleanenv --env OMP_NUM_THREADS=8 /path/anharmonicaos-2026.11.1.sif mpirun -np 1 --bind-to none",
+"mpirun": "apptainer exec --cleanenv --env OMP_NUM_THREADS=8 /path/anharmonicaos-2026.11.2.sif mpirun -np 1 --bind-to none",
 "bindir": ""
 \end{lstlisting}
 Add \texttt{-{}-bind} for the file systems of the jobs and of the phase~1
@@ -416,7 +416,8 @@ anh python3 TOOLS/anh_hopball.py resonanceslist --hops 4 \
   --quanta quantafile --bandlist bandlist
 \end{lstlisting}
 The image of release 2026.11.1 does not contain \prog{anh\_hopball.py},
-which came later; with that image, run it from the sources (first line).
+which came later: with that image, run it from the sources (first line),
+or use the image of release 2026.11.2 or later.
 
 \paragraph{Result.} On the terminal, the number of states within 0 to
 $H$ steps (Chapter~\ref{ch:workflow}).
@@ -429,8 +430,8 @@ temporary directory, in about a minute, with N MPI processes (default 2,
 at most the physical cores), and end with \texttt{OK}:
 \begin{lstlisting}
 CODEDIR/tests/selftest.sh CODEDIR 4         # from anywhere
-docker run --rm ghcr.io/gmulas/anharmonicaos:2026.11.1 anh-selftest 4
-apptainer exec anharmonicaos-2026.11.1.sif anh-selftest 4
+docker run --rm ghcr.io/gmulas/anharmonicaos:2026.11.2 anh-selftest 4
+apptainer exec anharmonicaos-2026.11.2.sif anh-selftest 4
 \end{lstlisting}
 The first argument of \prog{selftest.sh} is the directory of the
 programs. The numerical checks of \file{tests/checks} are described in
