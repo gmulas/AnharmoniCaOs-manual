@@ -344,17 +344,32 @@ move the molecule. For Gaussian, \texttt{nosymm} is required:
 {GEOMETRY}
 
 \end{lstlisting}
-For ORCA, \texttt{Freq} (or \texttt{AnFreq}) and no \texttt{VPT2}:
+For ORCA, \texttt{Freq} (or \texttt{AnFreq}) and no \texttt{VPT2}, with
+fine integration grids without pruning, for the SCF and for the
+coupled-perturbed equations:
 \begin{lstlisting}
-! B3LYP 6-31G(d) VeryTightSCF Freq
+! B3LYP 6-31G(d) NoRI NoCOSX VeryTightSCF Freq
+%method
+  AngularGrid 7
+  IntAcc 8.0
+  GridPruning Unpruned
+  Z_GridXC 7
+  Z_IntAccXC 8.0
+end
 * xyz 0 1
 {GEOMETRY}
 *
 \end{lstlisting}
 The semi-quartic constants are second differences of Hessians divided by
 the square of the step (400 times the difference for the default step),
-so any numerical noise of the Hessians is amplified: use a fine
-integration grid and tight convergence.
+so any numerical noise of the Hessians is amplified. With ORCA 6.1.1 on
+benzene (6-31G, step 0.05), the default adaptive grids (\texttt{DefGrid2},
+\texttt{DefGrid3}) change discontinuously at the symmetric reference
+geometry and gave semi-quartic constants wrong by up to 17~cm$^{-1}$;
+the grids above removed the error. The RI approximation for the Coulomb
+term (\texttt{RIJONX} with \texttt{def2/J}) gave errors below
+0.35~cm$^{-1}$; \texttt{RIJCOSX} gave 5--9~cm$^{-1}$ even with the finest
+COSX grids, and is not recommended for this purpose.
 
 \paragraph{Command.}
 \begin{lstlisting}
