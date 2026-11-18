@@ -23,6 +23,7 @@ program & what it does & section \\
 \multicolumn{3}{l}{\emph{Tools (\file{tools/}, Python)}} \\
 \prog{gaussian2ac.py} & input files from a Gaussian log & \ref{sec:run-gaussian2ac} \\
 \prog{orca2ac.py} & input files from an ORCA VPT2 job & \ref{sec:run-orca2ac} \\
+\prog{anh\_fd.py} & input files from one job per displaced geometry & \ref{sec:run-fd} \\
 \prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
 \prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
 \prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
@@ -308,6 +309,109 @@ of the semi-quartic constants that ORCA gives more than once, and the
 asymmetry of the second dipole derivatives, which must be small (about
 $10^{-6}$~a.u.\ for water and formaldehyde; a large value means wrong mode
 signs).
+
+\section{\prog{anh\_fd.py}}\label{sec:run-fd}
+
+Instead of the anharmonic option of a quantum-chemistry code, this tool
+computes the force field from Hessians at displaced geometries that are
+run as independent jobs, for example as a Slurm job array: each job is a
+harmonic frequency calculation (analytic Hessian and dipole derivatives)
+at one geometry. It works in two steps, \texttt{prepare} and
+\texttt{collect}, and gives the same files, in the same conventions, as
+\prog{gaussian2ac.py} and \prog{orca2ac.py}.
+
+\paragraph{Where.} In an empty directory for the jobs (or anywhere with
+\texttt{-{}-dir}). It needs a harmonic frequency calculation at the
+optimised geometry, either a Gaussian formatted checkpoint file
+(\file{.fchk}, from \prog{formchk}) or an ORCA \file{.hess} file, and a
+template of the input of one job.
+
+\paragraph{Template.} The input of one job, with \texttt{\{GEOMETRY\}}
+where the Cartesian coordinates go (lines ``symbol x y z'', in
+angstrom), and optionally \texttt{\{NAME\}} (the name of the job,
+for example for the checkpoint file) and \texttt{\{TITLE\}} (a line that
+says which displacement it is). It must compute an analytic Hessian with
+dipole derivatives at the given geometry, with the same method, basis
+set, grid and convergence as the reference calculation, and must not
+move the molecule. For Gaussian, \texttt{nosymm} is required:
+\begin{lstlisting}
+%chk={NAME}.chk
+#p PBEPBE/4-31G int=superfine nosymm freq
+
+{TITLE}
+
+0 1
+{GEOMETRY}
+
+\end{lstlisting}
+For ORCA, \texttt{Freq} (or \texttt{AnFreq}) and no \texttt{VPT2}:
+\begin{lstlisting}
+! B3LYP 6-31G(d) VeryTightSCF Freq
+* xyz 0 1
+{GEOMETRY}
+*
+\end{lstlisting}
+The semi-quartic constants are second differences of Hessians divided by
+the square of the step (400 times the difference for the default step),
+so any numerical noise of the Hessians is amplified: use a fine
+integration grid and tight convergence.
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_fd.py prepare REF --code CODE --template TEMPLATE \
+        [--step 0.05] [--dir DIR] [--symmetry]
+  ... run the jobs ...
+python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR]
+\end{lstlisting}
+(\texttt{anh python3 TOOLS/anh\_fd.py ...} in the container). REF is the
+\file{.fchk} or \file{.hess} file, CODE is \texttt{gaussian} or
+\texttt{orca}, and \texttt{-{}-step} is the displacement in the
+dimensionless normal coordinates $q$. \texttt{prepare} computes the
+normal modes from the Hessian of REF and writes in DIR the input of each
+job (\file{d000} at the reference geometry, \file{dKKKp} and
+\file{dKKKm} at $q_k=\pm$step, with the extension \file{.gjf} or
+\file{.inp}), the list of the jobs \file{jobs.txt} and
+\file{manifest.json}, which \texttt{collect} needs. Run the jobs in DIR,
+one after the other,
+\begin{lstlisting}
+for j in $(cat jobs.txt); do
+  g16 < $j.gjf > $j.log; formchk $j.chk $j.fchk
+done
+for j in $(cat jobs.txt); do orca $j.inp > $j.out; done
+\end{lstlisting}
+or as a job array, each task taking the line of \file{jobs.txt} of its
+index (\texttt{j=\$(sed -n \$\{SLURM\_ARRAY\_TASK\_ID\}p jobs.txt)}).
+\texttt{collect} reads \file{NAME.fchk} (Gaussian) or \file{NAME.hess}
+(ORCA) of every job; it stops if a result is missing or belongs to
+another geometry.
+
+\paragraph{Symmetry.} With \texttt{-{}-symmetry}, \texttt{prepare} finds
+the point group of the molecule from the reference geometry (each atom
+must lie within \texttt{-{}-symtol} bohr, default 0.01, of the image of
+an atom of the same element), makes the geometry and the Hessian exactly
+symmetric, and writes fewer jobs: a displaced geometry and its images
+under the symmetry operations give the Hessian at all the equivalent
+geometries, so a single $+$step suffices for a mode that an operation
+turns into minus itself, and one displacement along a combination of the
+modes of a degenerate pair or triple (jobs \file{dKKKxN}) suffices for
+the whole set. Benzene ($D_{6h}$) needs 23 jobs instead of 61, C$_{60}$
+($I_h$) 49 instead of 349; a molecule without symmetry gains nothing.
+The jobs themselves are still run without symmetry (\texttt{nosymm} in
+Gaussian). \texttt{collect} needs nothing more: the operations are in
+\file{manifest.json}.
+
+\paragraph{Result.} \file{freqsfile}, \file{phi3file}, \file{phi4file},
+\file{dmu2file} and \file{dmu3file} in OUTDIR (default: the current
+directory), with the semi-quartic constants $\Phi_{ijkk}$ and the
+semidiagonal third dipole derivatives, as from Gaussian and ORCA;
+\texttt{-{}-phinoisethres} and \texttt{-{}-dmunoisethres} work as in
+\prog{gaussian2ac.py}. The tool prints how many results it had to rotate
+back to the orientation of their input (some codes move the molecule)
+and measures of the numerical noise: the spread of the cubic and
+semi-quartic constants obtained from more than one displacement, the
+asymmetry of the second dipole derivatives and, with
+\texttt{-{}-symmetry}, the agreement of the symmetry-equivalent
+displacements.
 
 \section{\prog{anh\_sample.py}}\label{sec:run-sample}
 
