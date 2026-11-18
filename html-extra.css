@@ -1,0 +1,4 @@
+/* Extra style for the HTML manual (make html): the page of the index of
+   options where an option is defined is in bold, as in the PDF
+   (\idxdef in macros.tex). */
+.ltx_font_idxdef { font-weight: bold; }
