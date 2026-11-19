@@ -24,6 +24,7 @@ program & what it does & section \\
 \prog{gaussian2ac.py} & input files from a Gaussian log & \ref{sec:run-gaussian2ac} \\
 \prog{orca2ac.py} & input files from an ORCA VPT2 job & \ref{sec:run-orca2ac} \\
 \prog{anh\_fd.py} & input files from one job per displaced geometry & \ref{sec:run-fd} \\
+\prog{anh\_ffcompare.py} & comparison of two force fields & \ref{sec:run-ffcompare} \\
 \prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
 \prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
 \prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
@@ -323,7 +324,9 @@ at one geometry. It works in two steps, \texttt{prepare} and
 \paragraph{Where.} In an empty directory for the jobs (or anywhere with
 \texttt{-{}-dir}). It needs a harmonic frequency calculation at the
 optimised geometry, either a Gaussian formatted checkpoint file
-(\file{.fchk}, from \prog{formchk}) or an ORCA \file{.hess} file, and a
+(\file{.fchk}, from \prog{formchk}), an ORCA \file{.hess} file or an
+NWChem frequency run (its \file{NAME.fd\_ddipole}, with \file{NAME.hess}
+and \file{NAME.out} next to it), and a
 template of the input of one job.
 
 \paragraph{Template.} The input of one job, with \texttt{\{GEOMETRY\}}
@@ -362,6 +365,39 @@ end
 {GEOMETRY}
 *
 \end{lstlisting}
+For NWChem, the files of each job must be named after it
+(\texttt{start \{NAME\}}) and written next to the input
+(\texttt{permanent\_dir .}); the geometry block must keep the molecule
+where it is, and the task must be a frequency calculation; the
+coordinates are written in bohr when the geometry block says
+\texttt{units au}, in angstrom otherwise:
+\begin{lstlisting}
+start {NAME}
+title "{TITLE}"
+permanent_dir .
+geometry units au noautoz noautosym nocenter
+ symmetry c1
+{GEOMETRY}
+end
+basis spherical
+ * library 6-31G
+end
+dft
+ xc b3lyp
+ grid xfine nodisk
+ convergence energy 1d-11 density 1d-9 gradient 1d-8
+end
+set dft:no_prune T
+set cphf:thresh 1d-10
+hessian
+ thresh 1d-10
+end
+task dft freq
+\end{lstlisting}
+NWChem's \texttt{b3lyp} uses the VWN functional of Gaussian (VWN1-RPA);
+ORCA's B3LYP uses VWN5. NWChem is accurate here (unpruned grids, tight
+CP-SCF) but slower than ORCA: about three times on benzene.
+
 With \texttt{-{}-code pyscf} the jobs are run by PySCF or, on a GPU,
 by gpu4pyscf, through the driver \prog{anh\_fd\_pyscf.py} that
 \texttt{prepare} copies into the directory of the jobs. The template is
@@ -399,6 +435,28 @@ A quick check is the sum rule of the dipole derivatives printed by
 \texttt{collect}: it must be well below $10^{-6}$~a.u., and
 \texttt{collect} warns otherwise.
 
+The largest Lebedev grid of ORCA (\texttt{AngularGrid 7}, 770 points;
+590 for hydrogen with the default \texttt{HGridReduced true}) still
+leaves an error of a few tenths of cm$^{-1}$ in the semi-quartic constants
+of soft modes: on benzene (B3LYP/6-31G), $\Phi_{1111}$ and $\Phi_{1122}$
+of the lowest degenerate pair come out about 1\,\% too large, and
+$\Phi_{2222}-3\Phi_{1122}$, zero by symmetry, is $-0.4$~cm$^{-1}$. A
+product grid removes this, at about four times the cost of each Hessian:
+replace the grid lines of the template above with
+\begin{lstlisting}
+  AngularGrid 0
+  NThetaMax 0.4
+  HGridReduced false
+  IntAcc 8.0
+  GridPruning Unpruned
+  Z_GridXC 0
+  Z_IntAccXC 8.0
+\end{lstlisting}
+which then agrees with NWChem and gpu4pyscf within a few hundredths of cm$^{-1}$ on these
+constants. Do not use \texttt{RotInvGrid}: the grid then changes
+discontinuously between displaced geometries, which gave an error of
+20~cm$^{-1}$ in one semi-quartic constant of benzene.
+
 \paragraph{Command.}
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_fd.py prepare REF --code CODE --template TEMPLATE \
@@ -407,13 +465,13 @@ python3 CODEDIR/tools/anh_fd.py prepare REF --code CODE --template TEMPLATE \
 python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR]
 \end{lstlisting}
 (\texttt{anh python3 TOOLS/anh\_fd.py ...} in the container). REF is the
-\file{.fchk} or \file{.hess} file, CODE is \texttt{gaussian},
-\texttt{orca} or \texttt{pyscf}, and \texttt{-{}-step} is the displacement in the
+\file{.fchk}, \file{.hess} or \file{.fd\_ddipole} file, CODE is
+\texttt{gaussian}, \texttt{orca}, \texttt{nwchem} or \texttt{pyscf}, and \texttt{-{}-step} is the displacement in the
 dimensionless normal coordinates $q$. \texttt{prepare} computes the
 normal modes from the Hessian of REF and writes in DIR the input of each
 job (\file{d000} at the reference geometry, \file{dKKKp} and
 \file{dKKKm} at $q_k=\pm$step, with the extension \file{.gjf} or
-\file{.inp}; for PySCF, \file{NAME.json}), the list of the jobs \file{jobs.txt} and
+\file{.inp} or \file{.nw}; for PySCF, \file{NAME.json}), the list of the jobs \file{jobs.txt} and
 \file{manifest.json}, which \texttt{collect} needs. Run the jobs in DIR,
 one after the other,
 \begin{lstlisting}
@@ -421,12 +479,14 @@ for j in $(cat jobs.txt); do
   g16 < $j.gjf > $j.log; formchk $j.chk $j.fchk
 done
 for j in $(cat jobs.txt); do orca $j.inp > $j.out; done
+for j in $(cat jobs.txt); do nwchem $j.nw > $j.out; done
 for j in $(cat jobs.txt); do python3 anh_fd_pyscf.py $j.json; done
 \end{lstlisting}
 or as a job array, each task taking the line of \file{jobs.txt} of its
 index (\texttt{j=\$(sed -n \$\{SLURM\_ARRAY\_TASK\_ID\}p jobs.txt)}).
-\texttt{collect} reads \file{NAME.fchk} (Gaussian) or \file{NAME.hess}
-(ORCA, and PySCF, whose driver writes the same format) of every job; it stops if a result is missing or belongs to
+\texttt{collect} reads \file{NAME.fchk} (Gaussian), \file{NAME.hess}
+(ORCA, and PySCF, whose driver writes the same format) or \file{NAME.hess}, \file{NAME.fd\_ddipole} and \file{NAME.out}
+(NWChem; its \file{.hess} is not ORCA's) of every job; it stops if a result is missing or belongs to
 another geometry.
 
 \paragraph{Symmetry.} With \texttt{-{}-symmetry}, \texttt{prepare} finds
@@ -456,6 +516,68 @@ semi-quartic constants obtained from more than one displacement, the
 asymmetry of the second dipole derivatives and, with
 \texttt{-{}-symmetry}, the agreement of the symmetry-equivalent
 displacements.
+
+\section{\prog{anh\_ffcompare.py}}\label{sec:run-ffcompare}
+
+Compares two force fields of the same molecule, for example from two
+codes, two levels of theory or \prog{anh\_fd.py} with and without
+\texttt{-{}-symmetry}. The files depend on the choice of the normal
+modes: their order, the sign of each mode and, for degenerate modes, any
+rotation within the degenerate set. Two calculations can make different
+choices, and then a comparison entry by entry is meaningless (a cubic
+constant can change sign, or be spread over several entries). The tool
+finds which mode of one run is which mode of the other and compares the
+two in the basis of the first.
+
+\paragraph{Where.} Anywhere. It reads two directories with
+\file{freqsfile}, \file{phi3file}, \file{phi4file}, \file{dmu2file} and
+\file{dmu3file} (compressed \file{.xz} files are read too; missing files
+are skipped), and, when there is one, the \file{manifest.json} of
+\prog{anh\_fd.py} with the normal modes of each run.
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_ffcompare.py DIR1 DIR2 [--modes1 MANIFEST] \
+        [--modes2 MANIFEST] [--nomodes] [--degtol 0.5] [--write DIR] \
+        [--list all|changed|none]
+\end{lstlisting}
+\texttt{-{}-modes1} and \texttt{-{}-modes2} give the manifests when they
+are not in DIR1 and DIR2 (for \prog{anh\_fd.py}, the manifest is in the
+directory of the jobs). Modes closer than \texttt{-{}-degtol}~cm$^{-1}$
+in either run form a degenerate set; use \texttt{-{}-degtol 0} for a
+molecule without degenerate modes, so that accidentally close modes are
+still compared entry by entry.
+
+\paragraph{How the modes are matched.} With the manifests of both runs,
+the two geometries are aligned (same atoms in the same order) and the
+overlaps of the normal modes give the sign of each mode, the order, and
+the rotation within each degenerate set; the dipole derivatives are
+rotated to the frame of the first run. Without them (for example the
+files of Tutorial~1, from a Gaussian anharmonic run), the modes are
+matched by increasing wavenumber, the signs are fitted to the cubic and
+semi-quartic constants, and the dipole derivatives are compared through
+their lengths; a rotation within a degenerate set cannot be found, and
+such sets are compared through quantities that do not depend on it. The
+tool prints how well the signs fit (1 means that every constant agrees
+in sign) and how many signs no constant fixes (no quantity compared
+depends on them).
+
+\paragraph{Result.} On the standard output, in Markdown: the
+correspondence of the modes (by default only the modes that change index
+or sign, and the degenerate sets), then for each quantity the largest and
+the typical (median) difference, with the modes where the largest one
+is, separately for entries with a degenerate mode, an X--H stretch
+(above 2500~cm$^{-1}$), an out-of-plane mode (planar molecules, when the
+modes are known) and none of these. The cubic constants and the second
+dipole derivatives are compared entry by entry; the files hold only the
+semi-quartic constants $\Phi_{ijkk}$ and the third dipole derivatives
+$\partial^3\mu/\partial q_k^2\partial q_j$, so for degenerate sets these
+are compared through sums over the set, such as
+$\sum_{k\in P,\,l\in Q}\Phi_{kkll}$ for the sets $P$ and $Q$, which do
+not depend on the rotation. With \texttt{-{}-write DIR} the force field
+of DIR2 is written in the basis of DIR1, in the same file formats;
+\file{phi4file} and \file{dmu3file} only when no degenerate set is
+rotated, since they would need entries that are not in the files.
 
 \section{\prog{anh\_sample.py}}\label{sec:run-sample}
 
