@@ -79,7 +79,12 @@ most for inputs written for 2026.11:
 \item \opt{minhopcoupling} is 0.5~cm$^{-1}$ by default, which makes the
   polyads smaller (0 gives back the polyads of 2026.11);
 \item \opt{verbosity} no longer changes what is computed (in 2026.11,
-  without bit~4 the spectra were empty).
+  without bit~4 the spectra were empty);
+\item since the release after 2026.11.2, \opt{closureterms} is 1 by
+  default: the resonant couplings include the closure terms, which
+  changes some couplings by a few cm$^{-1}$ and the 3.3~$\mu$m band by
+  about 1~cm$^{-1}$ (Chapter~\ref{ch:tut-pyrene}); \opt{closureterms}~$=0$
+  gives back the results of 2026.11.2 and earlier.
 \end{itemize}
 
 \section{How to read this manual}

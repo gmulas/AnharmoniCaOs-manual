@@ -52,13 +52,16 @@ fermithres = thres
 ddthres = thres
 \end{lstlisting}
 which is handy when testing how the results depend on them.
-\file{run.sh} takes about 1 min 40~s on a 4-core laptop: phase 1 about
-20~s, phase 2a 4~s, phase 2b about 70~s. Phase 1 finds 1785 resonances
-(1609 E4, 89 B3, 79 D4, 8 G2) and writes \file{bandlist} with 31
+\file{run.sh} takes about 1 min 20~s on a laptop with 4 processes: phase 1
+about 11~s, phase 2a 4~s, phase 2b about 56~s. Phase 1 finds 1842 resonances
+(1638 E4, 89 B3, 107 D4, 8 G2) and writes \file{bandlist} with 31
 fundamentals (the modes with a nonzero dipole derivative) and 1264
-overtone, combination and difference bands. The largest polyad has 2363
+overtone, combination and difference bands. The largest polyad has 3094
 states. (With \opt{minhopcoupling}~$=0$, the default of 2026.11, it has
-3582 and phase 2b takes about four times longer.)
+4529 and phase 2b takes about 2.4 times longer. With
+\opt{closureterms}~$=0$, the default up to 2026.11.2, phase 1 finds 1785
+resonances, the largest polyad has 2363 states and phase 2b takes half
+the time; see the end of this chapter.)
 
 Phase 1 prints two warnings:
 \begin{lstlisting}
@@ -96,7 +99,7 @@ lines and draws Figure~\ref{fig:pyrene}:
 \begin{lstlisting}
 python3 plot_spectrum.py . 8
 \end{lstlisting}
-The run gives 3963 lines with a total of 446.1~km/mol. The strongest are:
+The run gives 4245 lines with a total of 446.1~km/mol. The strongest are:
 \begin{center}
 \begin{tabular}{rr}
 \toprule
@@ -104,12 +107,12 @@ wavenumber (cm$^{-1}$) & intensity (km/mol) \\
 \midrule
 844.79 & 109.92 \\
 711.91 & 43.95 \\
-3035.46 & 38.69 \\
+3034.57 & 41.85 \\
 742.61 & 16.00 \\
-3037.83 & 14.11 \\
+3037.70 & 13.68 \\
 1184.00 & 12.16 \\
 202.22 & 10.19 \\
-3042.34 & 9.97 \\
+3043.19 & 8.31 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -124,9 +127,9 @@ split among the states they are in resonance with.}
 \label{fig:pyrene}
 \end{figure}
 
-These numbers and the figure come from a run of \file{run.sh} with
-AnharmoniCaOs 2026.11.1 (\texttt{git 88b3b13}, the release candidate; the
-programs of the release are the same) on a 4-core laptop.
+These numbers and the figure come from a run of \file{run.sh} with the
+development version that follows 2026.11.2 (\texttt{git 86430f8}, the first
+with \opt{closureterms}~$=1$ by default) on a laptop, with 4 processes.
 
 \subsection*{Choice of the eigensolver}
 
@@ -146,17 +149,16 @@ phase 2b:
   polyads of 3400 states and more, without any error.
 \end{itemize}
 
-Wall time of phase 2b of this tutorial on a 4-core laptop, with
-AnharmoniCaOs 2026.11.1 (\texttt{git 88b3b13}); the three runs give the
-same total, 446.08~km/mol:
+Wall time of phase 2b of this tutorial on a laptop, with the same version
+(\texttt{git 86430f8}); the three runs give the same total, 446.06~km/mol:
 \begin{center}
 \begin{tabular}{lrr}
 \hline
 eigensolver & processes $\times$ threads & wall time \\
 \hline
-\texttt{pdsyevx} (2) & $4\times1$ & 1:05 \\
-ELPA one-stage (3) & $1\times1$ & 0:27 \\
-\opt{spectral}~$=1$, \opt{spectralexactmax}~$=3000$ & $1\times4$ & 0:06 \\
+\texttt{pdsyevx} (2) & $4\times1$ & 0:56 \\
+ELPA one-stage (3) & $1\times1$ & 0:39 \\
+\opt{spectral}~$=1$, \opt{spectralexactmax}~$=3100$ & $1\times4$ & 0:04 \\
 \hline
 \end{tabular}
 \end{center}
@@ -172,9 +174,14 @@ the spectrum agrees with the other solvers within its resolution
 
 The same run with the options of Chapter~\ref{ch:inputs}:
 \begin{itemize}
-\item \opt{shiftgeometry}: lines shift by up to about 3~cm$^{-1}$, and some
-  intensities change by 10--30\%;
-\item \opt{closureterms}: only weak lines change;
+\item \opt{shiftgeometry}: lines shift by up to about 4~cm$^{-1}$, and some
+  intensities change by 10--15\%;
+\item \opt{closureterms}~$=0$ (the default up to 2026.11.2): 57 fewer
+  resonances and 112 couplings change, by up to 6~cm$^{-1}$. The total
+  and every band below 3000~cm$^{-1}$ stay the same; the strongest CH
+  stretch line moves from 3034.57 to 3035.46~cm$^{-1}$, the shoulder near
+  3043~cm$^{-1}$ moves to 3042.34, and the relative L1 distance between
+  the two spectra at 5~cm$^{-1}$ resolution is 6.7\%;
 \item \opt{dipole3}: the CH stretches go from 7.5\% to 10.3\% of the total
   intensity.
 \end{itemize}
