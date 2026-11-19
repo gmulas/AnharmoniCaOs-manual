@@ -398,6 +398,27 @@ NWChem's \texttt{b3lyp} uses the VWN functional of Gaussian (VWN1-RPA);
 ORCA's B3LYP uses VWN5. NWChem is accurate here (unpruned grids, tight
 CP-SCF) but slower than ORCA: about three times on benzene.
 
+With \texttt{-{}-code pyscf} the jobs are run by PySCF or, on a GPU,
+by gpu4pyscf, through the driver \prog{anh\_fd\_pyscf.py} that
+\texttt{prepare} copies into the directory of the jobs. The template is
+then a JSON file with the settings, for example
+\begin{lstlisting}
+{"xc": "b3lyp5", "basis": "6-31g", "grid": [150, 974]}
+\end{lstlisting}
+(the defaults are listed by \texttt{python3 anh\_fd\_pyscf.py}; note that
+PySCF's \texttt{b3lyp} uses the VWN functional of Gaussian, and
+\texttt{b3lyp5} that of ORCA). The Hessians must include the response of
+the integration grid (\texttt{grid\_response}, the default, available in
+gpu4pyscf only): without it the sum rule of the dipole derivatives is
+broken and the semi-quartic constants carry errors of tenths of
+cm$^{-1}$, so \texttt{prepare} refuses \texttt{"grid\_response": false}
+unless \texttt{-{}-allow-no-grid-response} is given. The reference
+calculation is computed with the same settings, at a geometry optimised
+with them, by
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_fd_pyscf.py --ref GEOM.xyz TEMPLATE REF.hess
+\end{lstlisting}
+
 The semi-quartic constants are second differences of Hessians divided by
 the square of the step (400 times the difference for the default step),
 so any numerical noise of the Hessians is amplified. With ORCA, use fine
@@ -445,12 +466,12 @@ python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR]
 \end{lstlisting}
 (\texttt{anh python3 TOOLS/anh\_fd.py ...} in the container). REF is the
 \file{.fchk}, \file{.hess} or \file{.fd\_ddipole} file, CODE is
-\texttt{gaussian}, \texttt{orca} or \texttt{nwchem}, and \texttt{-{}-step} is the displacement in the
+\texttt{gaussian}, \texttt{orca}, \texttt{nwchem} or \texttt{pyscf}, and \texttt{-{}-step} is the displacement in the
 dimensionless normal coordinates $q$. \texttt{prepare} computes the
 normal modes from the Hessian of REF and writes in DIR the input of each
 job (\file{d000} at the reference geometry, \file{dKKKp} and
 \file{dKKKm} at $q_k=\pm$step, with the extension \file{.gjf} or
-\file{.inp} or \file{.nw}), the list of the jobs \file{jobs.txt} and
+\file{.inp} or \file{.nw}; for PySCF, \file{NAME.json}), the list of the jobs \file{jobs.txt} and
 \file{manifest.json}, which \texttt{collect} needs. Run the jobs in DIR,
 one after the other,
 \begin{lstlisting}
@@ -459,11 +480,12 @@ for j in $(cat jobs.txt); do
 done
 for j in $(cat jobs.txt); do orca $j.inp > $j.out; done
 for j in $(cat jobs.txt); do nwchem $j.nw > $j.out; done
+for j in $(cat jobs.txt); do python3 anh_fd_pyscf.py $j.json; done
 \end{lstlisting}
 or as a job array, each task taking the line of \file{jobs.txt} of its
 index (\texttt{j=\$(sed -n \$\{SLURM\_ARRAY\_TASK\_ID\}p jobs.txt)}).
 \texttt{collect} reads \file{NAME.fchk} (Gaussian), \file{NAME.hess}
-(ORCA) or \file{NAME.hess}, \file{NAME.fd\_ddipole} and \file{NAME.out}
+(ORCA, and PySCF, whose driver writes the same format) or \file{NAME.hess}, \file{NAME.fd\_ddipole} and \file{NAME.out}
 (NWChem; its \file{.hess} is not ORCA's) of every job; it stops if a result is missing or belongs to
 another geometry.
 
