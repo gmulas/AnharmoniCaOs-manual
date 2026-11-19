@@ -183,10 +183,23 @@ which is set by the PETSc option \texttt{--with-64-bit-indices}.
   test of its integer size; it lists the ones it skipped. It then tests
   the libraries actually used, including those given by the user, and
   stops if one of them uses the other size, and names it.
-  \flag{--disable-int-check} turns the error into a warning. BLACS and ELPA
-  are not checked: make sure they were built for the same integer size
-  (for ELPA, a 64-bit build is usually configured with
-  \texttt{--enable-64bit-integer-math-support}).
+  \flag{--disable-int-check} turns the error into a warning. BLACS is not
+  checked: make sure it was built for the same integer size.
+\item \emph{ELPA.} \devonly{} An installed ELPA does not say which integer
+  size it was built for (a 64-bit build is configured with
+  \texttt{--enable-64bit-integer-math-support}), and one linked by its own
+  \prog{configure} to the libraries of the other size makes phase 2b crash
+  or give wrong eigenvalues with \opt{eigensolver}~=~3. \prog{configure}
+  therefore tests the integer size of each BLAS, LAPACK and ScaLAPACK
+  library that \file{libelpa.so} loads, reads \texttt{blas\_kind} when
+  ELPA has debug information, and runs a small ELPA problem (order 200,
+  one- and two-stage solvers, one MPI process) linked with the libraries
+  of phase 2b. If any of these fails it stops, names the libraries and
+  says how to rebuild ELPA. Where MPI programs cannot run, for example on
+  some cluster front ends, the test problem is skipped with a warning (set
+  \texttt{MPIEXEC} if the launcher is not found next to \prog{mpicc});
+  \flag{--disable-elpa-check} skips it and turns a mismatch into a
+  warning. The check adds a few seconds to \prog{configure}.
 \end{itemize}
 
 \paragraph{Licences of the libraries.} \ac{} is distributed under the GNU
