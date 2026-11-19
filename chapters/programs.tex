@@ -432,7 +432,9 @@ e.g.\ \texttt{VeryTightSCF}) is far too loose for this purpose: use
 \texttt{Z\_Tol 1e-8} and \texttt{ExtremeSCF} as above, in every job and
 in the reference calculation, which makes each Hessian somewhat slower.
 A quick check is the sum rule of the dipole derivatives printed by
-\texttt{collect}: it must be well below $10^{-6}$~a.u., and
+\texttt{collect} (their sum over the atoms, which must be zero for a
+neutral molecule and the charge times the unit matrix for an ion, which
+\texttt{collect} subtracts): it must be well below $10^{-6}$~a.u., and
 \texttt{collect} warns otherwise.
 
 The largest Lebedev grid of ORCA (\texttt{AngularGrid 7}, 770 points;
