@@ -78,8 +78,8 @@ E|+1)$, with a scale calibrated on model polyads: in one-dimensional Fermi and
 Wannier--Stark ladders, the polyad then reproduces, within 1~cm$^{-1}$ and
 with overlap at least 0.95, the eigenstates carrying 95\% of the target
 weight. On pyrene the default \opt{costscale}~$=6$ gives polyads a
-little smaller than \opt{hsizescalepar}~$=8$ (largest 3264 states against
-3582, with \opt{maxtothops}~$=4$ and \opt{minhopcoupling}~$=0$). With the default \opt{minhopcoupling}~$=0.5$ the largest polyad of pyrene has 2363 states, and the 0~K spectrum differs from the one with \opt{minhopcoupling}~$=0$ by 0.7\% (relative L1 distance at 5~cm$^{-1}$ resolution). The cap \opt{maxtothops} stays necessary: without it the largest
+little smaller than \opt{hsizescalepar}~$=8$ (largest 3853 states against
+4529, with \opt{maxtothops}~$=4$ and \opt{minhopcoupling}~$=0$). With the default \opt{minhopcoupling}~$=0.5$ the largest polyad of pyrene has 3094 states, and the 0~K spectrum differs from the one with \opt{minhopcoupling}~$=0$ by 0.6\% (relative L1 distance at 5~cm$^{-1}$ resolution). The cap \opt{maxtothops} stays necessary: without it the largest
 polyad of pyrene has over 100\,000 states.
 
 \paragraph{How large can a polyad get?} Since every step costs at least
@@ -97,14 +97,17 @@ python3 tools/anh_hopball.py resonanceslist --hops 4 \
 Its line for $H=0$ equals the ``fewest hops'' count for 0 in the
 \texttt{growth} lines of phase~2a (\opt{verbosity} bit \texttt{timings}),
 and the counts for $H=1,2,\ldots$ show how much of the possible polyad the
-credit keeps. For the ground state of Tutorial~1 (version 2026.11.1) the
-tool gives 577, 3271, 19\,176, 120\,393 and 785\,907 states within 0--4
-steps, while phase~2a keeps 11\,484 in all (577, 1777, 4514, 3405 and
-1211 at 0--4 steps): the credit, not \opt{maxtothops}, limits the growth.
+credit keeps. For the ground state of Tutorial~1 (\opt{closureterms}~$=1$,
+the default since the release after 2026.11.2) the tool gives 577, 3738,
+24\,963, 173\,586 and 1\,219\,727 states within 0--4 steps, while phase~2a
+keeps 14\,680 in all (577, 2224, 6405, 3878 and 1596 at 0--4 steps): the
+credit, not \opt{maxtothops}, limits the growth. (With
+\opt{closureterms}~$=0$: 577, 3271, 19\,176, 120\,393 and 785\,907 within
+reach, 11\,484 kept.)
 Without \texttt{--quanta} the tool counts the displacements within $H$
 steps, which do not depend on the starting state once all its quantum
 numbers are large (exactly for $H\le2$, by Monte Carlo for 3 and 4): on
-pyrene $2.7\cdot10^6$ within two steps and about $10^{12}$ within four.
+pyrene $3.0\cdot10^6$ within two steps and about $10^{12}$ within four.
 These counts are upper bounds: phase~2a also needs every state on the way
 to be reachable within the credit.
 
