@@ -520,6 +520,25 @@ asymmetry of the second dipole derivatives and, with
 \texttt{-{}-symmetry}, the agreement of the symmetry-equivalent
 displacements.
 
+\paragraph{Same electronic state.} The semi-quartic constants come from
+$H(+h)+H(-h)-2H(0)$, so every job must be on the electronic state of
+\file{d000}; a job whose SCF converged to another state (possible with
+nearly degenerate states, as in radical cations) spoils them without any
+other sign. \texttt{collect} therefore reads the energy, the dipole and,
+for unrestricted calculations, $\langle S^2\rangle$ of every job (from the
+\file{.fchk} of Gaussian, the \file{.out} of ORCA and NWChem, the result
+file of PySCF), predicts the energy and the dipole of each displaced
+geometry from the force field it has just derived, and compares. It
+prints the largest deviations, and warns, naming the jobs, when the energy
+differs by more than \texttt{-{}-echeck} (default 0.1~cm$^{-1}$), the
+dipole by more than \texttt{-{}-mucheck} (default $10^{-3}$~a.u.), or
+$\langle S^2\rangle$ from that of \file{d000} by more than
+\texttt{-{}-s2check} (default 0.01). On benzene the energies of all the
+jobs agree within a few $10^{-3}$~cm$^{-1}$ and the dipoles within a few
+$10^{-5}$~a.u., while a job on another state differs by hundreds of
+cm$^{-1}$. Jobs without these values are only skipped, and the check never
+changes the files.
+
 \section{\prog{anh\_ffcompare.py}}\label{sec:run-ffcompare}
 
 Compares two force fields of the same molecule, for example from two
