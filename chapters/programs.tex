@@ -24,6 +24,7 @@ program & what it does & section \\
 \prog{gaussian2ac.py} & input files from a Gaussian log & \ref{sec:run-gaussian2ac} \\
 \prog{orca2ac.py} & input files from an ORCA VPT2 job & \ref{sec:run-orca2ac} \\
 \prog{anh\_fd.py} & input files from one job per displaced geometry & \ref{sec:run-fd} \\
+\prog{anh\_ffcompare.py} & comparison of two force fields & \ref{sec:run-ffcompare} \\
 \prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
 \prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
 \prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
@@ -434,6 +435,68 @@ semi-quartic constants obtained from more than one displacement, the
 asymmetry of the second dipole derivatives and, with
 \texttt{-{}-symmetry}, the agreement of the symmetry-equivalent
 displacements.
+
+\section{\prog{anh\_ffcompare.py}}\label{sec:run-ffcompare}
+
+Compares two force fields of the same molecule, for example from two
+codes, two levels of theory or \prog{anh\_fd.py} with and without
+\texttt{-{}-symmetry}. The files depend on the choice of the normal
+modes: their order, the sign of each mode and, for degenerate modes, any
+rotation within the degenerate set. Two calculations can make different
+choices, and then a comparison entry by entry is meaningless (a cubic
+constant can change sign, or be spread over several entries). The tool
+finds which mode of one run is which mode of the other and compares the
+two in the basis of the first.
+
+\paragraph{Where.} Anywhere. It reads two directories with
+\file{freqsfile}, \file{phi3file}, \file{phi4file}, \file{dmu2file} and
+\file{dmu3file} (compressed \file{.xz} files are read too; missing files
+are skipped), and, when there is one, the \file{manifest.json} of
+\prog{anh\_fd.py} with the normal modes of each run.
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_ffcompare.py DIR1 DIR2 [--modes1 MANIFEST] \
+        [--modes2 MANIFEST] [--nomodes] [--degtol 0.5] [--write DIR] \
+        [--list all|changed|none]
+\end{lstlisting}
+\texttt{-{}-modes1} and \texttt{-{}-modes2} give the manifests when they
+are not in DIR1 and DIR2 (for \prog{anh\_fd.py}, the manifest is in the
+directory of the jobs). Modes closer than \texttt{-{}-degtol}~cm$^{-1}$
+in either run form a degenerate set; use \texttt{-{}-degtol 0} for a
+molecule without degenerate modes, so that accidentally close modes are
+still compared entry by entry.
+
+\paragraph{How the modes are matched.} With the manifests of both runs,
+the two geometries are aligned (same atoms in the same order) and the
+overlaps of the normal modes give the sign of each mode, the order, and
+the rotation within each degenerate set; the dipole derivatives are
+rotated to the frame of the first run. Without them (for example the
+files of Tutorial~1, from a Gaussian anharmonic run), the modes are
+matched by increasing wavenumber, the signs are fitted to the cubic and
+semi-quartic constants, and the dipole derivatives are compared through
+their lengths; a rotation within a degenerate set cannot be found, and
+such sets are compared through quantities that do not depend on it. The
+tool prints how well the signs fit (1 means that every constant agrees
+in sign) and how many signs no constant fixes (no quantity compared
+depends on them).
+
+\paragraph{Result.} On the standard output, in Markdown: the
+correspondence of the modes (by default only the modes that change index
+or sign, and the degenerate sets), then for each quantity the largest and
+the typical (median) difference, with the modes where the largest one
+is, separately for entries with a degenerate mode, an X--H stretch
+(above 2500~cm$^{-1}$), an out-of-plane mode (planar molecules, when the
+modes are known) and none of these. The cubic constants and the second
+dipole derivatives are compared entry by entry; the files hold only the
+semi-quartic constants $\Phi_{ijkk}$ and the third dipole derivatives
+$\partial^3\mu/\partial q_k^2\partial q_j$, so for degenerate sets these
+are compared through sums over the set, such as
+$\sum_{k\in P,\,l\in Q}\Phi_{kkll}$ for the sets $P$ and $Q$, which do
+not depend on the rotation. With \texttt{-{}-write DIR} the force field
+of DIR2 is written in the basis of DIR1, in the same file formats;
+\file{phi4file} and \file{dmu3file} only when no degenerate set is
+rotated, since they would need entries that are not in the files.
 
 \section{\prog{anh\_sample.py}}\label{sec:run-sample}
 
