@@ -110,7 +110,7 @@ number) and where it is mentioned or used.
 \optentry{harmdiffthres}{1e-6}{1}{Detunings smaller than this (cm$^{-1}$) are treated as exact degeneracies.}
 \optentry{phi4cutoff}{1}{1}{For an exactly degenerate quartic term of type C4 (all four quanta created), the smallest coupling (cm$^{-1}$) that makes it resonant.}
 \optentry{samesignresonances}{0}{1}{Also accept terms whose detuning is a single frequency.}
-\optentry{closureterms}{0}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}. Changes results.}
+\optentry{closureterms}{1}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}: the products of one resonant and one nonresonant first-order term, which the effective Hamiltonian needs when the set of resonances is not closed. The default since the release after 2026.11.2; 0 leaves them out and reproduces the results of 2026.11.2 and earlier.}
 \optentry{enablequarticresons}{1}{1}{With 0, the iterative search for the resonances that appear through the effective second-order couplings is skipped, and only the first pass of the quartic test is done. A test option; changes results.}
 \optentry{diophantineiter}{0}{1}{If nonzero, close the set of resonances under integer combinations, with the PARI library. It can produce very many resonances. Not available in builds without PARI.}
 \optentry{paristacksize}{200000000}{1}{With \opt{diophantineiter}: the stack of PARI, in bytes.}
