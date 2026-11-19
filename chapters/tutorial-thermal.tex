@@ -331,16 +331,19 @@ default.
 \file{inp} of every job.
 \end{description}
 
-\paragraph{How long it takes.} With AnharmoniCaOs 2026.11.1
-(\texttt{git 88b3b13}):
+\paragraph{How long it takes.} With the development version that follows
+2026.11.2 (\texttt{git 86430f8}, \opt{closureterms}~$=1$ by default):
 \begin{itemize}
-\item on a 4-core laptop, the 51 states take about one hour (phase~2a
-about 8~minutes, phase~2b the rest);
 \item on the cluster of the authors, as 13 jobs of 4 states with 8
-threads each, all running at the same time, they take 5~min~33~s.
+threads each, all running at the same time, they take 7~min~45~s
+(5~min~33~s with 2026.11.1, which left out the closure terms);
+\item on a 4-core laptop they take about an hour and a quarter: with
+2026.11.1 they took about one hour (phase~2a about 8~minutes, phase~2b the
+rest), and the closure terms make the jobs about a third longer.
 \end{itemize}
 The cost is uneven: the polyads grow quickly with the energy of the
-starting state, and one of these 51 states has a polyad of 22320 states.
+starting state, and one of these 51 states has a polyad of 26498 states
+(22320 without the closure terms).
 Its job is the slowest even though it is not the highest in energy.
 
 \paragraph{Profiles.}\label{sec:thermal-profiles} A profile is a JSON file
@@ -411,20 +414,24 @@ simpler choice, and the one of the previous versions.
 \end{description}
 
 \paragraph{Results.} The absorption totals (\texttt{absorption total} in
-the header of \file{thermal\_T*.dat}), in km/mol, with AnharmoniCaOs
-2026.11.1 (\texttt{git 88b3b13}); the laptop and the cluster runs give
-the same numbers:
+the header of \file{thermal\_T*.dat}), in km/mol, with the same version
+(\texttt{git 86430f8}), and in parentheses with 2026.11.1, which left out
+the closure terms (\opt{closureterms}~$=0$ gives them back exactly):
 \begin{center}
 \begin{tabular}{rrr}
 \toprule
 $T$ (K) & \texttt{anharmonic} & \texttt{harmonic} \\
 \midrule
-0 & 446.078 & 446.078 \\
-100 & 448.044 & 448.038 \\
-200 & 455.458 & 450.261 \\
+0 & 446.062 (446.078) & 446.062 (446.078) \\
+100 & 448.028 (448.044) & 448.022 (448.038) \\
+200 & 455.441 (455.458) & 450.116 (450.261) \\
 \bottomrule
 \end{tabular}
 \end{center}
+The closure terms change the totals by less than 0.2~km/mol and leave the
+bands below 3000~cm$^{-1}$ as they are; the 3.3~$\mu$m band peaks about
+1~cm$^{-1}$ lower at every temperature (3034.0 instead of 3035.1~cm$^{-1}$
+at 200~K, at 5~cm$^{-1}$ resolution) and is a little wider.
 At 0~K both are the spectrum of Tutorial~1. At 200~K the two schemes
 differ by 1\,\%: the anharmonic energies of the excited states are lower
 than the harmonic ones, so the two schemes give them different
