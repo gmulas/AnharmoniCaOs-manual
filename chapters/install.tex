@@ -125,7 +125,14 @@ chapter.
   (\opt{diophantineiter}).
 \item The \texttt{oct\_parser} library, which reads the input file. It is
   included as the submodule \file{external/oct-parser}.
-\item Any indirect depencencies of the above libraries, e.~g. the LAPACK and BLAS PETSc, SLEPc, and ScaLAPACK rely on, the MPI stack used by PETSc and SLEPc, the GNU Scientific Library used by \texttt{oct\_parser}, and so on.
+\item The libraries that these depend on in turn, which must be installed
+  too and be consistent with each other: the BLAS and LAPACK used by PETSc,
+  SLEPc, ScaLAPACK and ELPA (all with the same integer size, see ELPA above),
+  the MPI with which PETSc, SLEPc, ScaLAPACK and ELPA were built (the same one
+  used to build the code), the GSL used by \texttt{oct\_parser}, and so on.
+  The packages of a Linux distribution and the modules of a cluster usually
+  bring them in by themselves; for a library built by hand, check with
+  \texttt{ldd} that it links the intended ones.
 \end{itemize}
 
 \section{Building}
