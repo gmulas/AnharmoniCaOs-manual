@@ -492,6 +492,36 @@ index (\texttt{j=\$(sed -n \$\{SLURM\_ARRAY\_TASK\_ID\}p jobs.txt)}).
 (NWChem; its \file{.hess} is not ORCA's) of every job; it stops if a result is missing or belongs to
 another geometry.
 
+\paragraph{Initial guess and stability.} Every displaced job must be on
+the electronic state of the reference \file{d000}, so by default
+\texttt{prepare} makes the displaced jobs start from the converged orbitals
+of \file{d000}, and \file{d000} check that its SCF solution is stable:
+\begin{itemize}
+\item Gaussian: \file{d000} first runs \texttt{stable=opt} (the route
+  without \texttt{freq}), then, after \texttt{-{}-Link1-{}-}, the template
+  with \texttt{guess=read}; the other jobs get \texttt{\%oldchk=d000.chk}
+  and \texttt{guess=read} (and \texttt{\%chk=\{NAME\}.chk}, if the template
+  has none);
+\item ORCA: \file{d000} gets \texttt{\%scf STABPerform true end}, the other
+  jobs \texttt{! MORead} and \texttt{\%moinp "d000.gbw"};
+\item NWChem: the other jobs get \texttt{vectors input d000.movecs} in the
+  \texttt{dft} (or \texttt{scf}) block; NWChem has no stability analysis;
+\item PySCF: \file{d000} runs \texttt{mf.stability()} and saves its orbitals
+  in \file{d000.chk}, which the other jobs project onto their geometry.
+\end{itemize}
+\file{d000} must therefore finish before the other jobs start: it is the
+first line of \file{jobs.txt}, and with Slurm the other jobs go in a second
+array that waits for it:
+\begin{lstlisting}
+j=$(sbatch --parsable --array=1 job.sh)
+sbatch --dependency=afterok:$j --array=2-N job.sh
+\end{lstlisting}
+(N the number of lines of \file{jobs.txt}). This changes only where each
+SCF starts (on water the displaced jobs need about 20--35\,\% fewer SCF
+cycles), not the force field, unless a job used to converge to another
+state. A template that already sets a guess is refused;
+\texttt{-{}-no-guess-from-ref} writes the template as it is.
+
 \paragraph{Symmetry.} With \texttt{-{}-symmetry}, \texttt{prepare} finds
 the point group of the molecule from the reference geometry (each atom
 must lie within \texttt{-{}-symtol} bohr, default 0.01, of the image of
