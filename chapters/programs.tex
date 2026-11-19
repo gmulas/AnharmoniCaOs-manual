@@ -379,6 +379,28 @@ A quick check is the sum rule of the dipole derivatives printed by
 \texttt{collect}: it must be well below $10^{-6}$~a.u., and
 \texttt{collect} warns otherwise.
 
+The largest Lebedev grid of ORCA (\texttt{AngularGrid 7}, 770 points;
+590 for hydrogen with the default \texttt{HGridReduced true}) still
+leaves an error of a few tenths of cm$^{-1}$ in the semi-quartic constants
+of soft modes: on benzene (B3LYP/6-31G), $\Phi_{1111}$ and $\Phi_{1122}$
+of the lowest degenerate pair come out about 1\,\% too large, and
+$\Phi_{2222}-3\Phi_{1122}$, zero by symmetry, is $-0.4$~cm$^{-1}$. A
+product grid removes this, at about four times the cost of each Hessian:
+replace the grid lines of the template above with
+\begin{lstlisting}
+  AngularGrid 0
+  NThetaMax 0.4
+  HGridReduced false
+  IntAcc 8.0
+  GridPruning Unpruned
+  Z_GridXC 0
+  Z_IntAccXC 8.0
+\end{lstlisting}
+which then agrees with NWChem and gpu4pyscf within a few hundredths of cm$^{-1}$ on these
+constants. Do not use \texttt{RotInvGrid}: the grid then changes
+discontinuously between displaced geometries, which gave an error of
+20~cm$^{-1}$ in one semi-quartic constant of benzene.
+
 \paragraph{Command.}
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_fd.py prepare REF --code CODE --template TEMPLATE \
