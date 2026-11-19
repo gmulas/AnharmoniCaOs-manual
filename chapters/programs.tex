@@ -441,19 +441,22 @@ leaves an error of a few tenths of cm$^{-1}$ in the semi-quartic constants
 of soft modes: on benzene (B3LYP/6-31G), $\Phi_{1111}$ and $\Phi_{1122}$
 of the lowest degenerate pair come out about 1\,\% too large, and
 $\Phi_{2222}-3\Phi_{1122}$, zero by symmetry, is $-0.4$~cm$^{-1}$. A
-product grid removes this, at about four times the cost of each Hessian:
+product grid removes this, at about three times the cost of each Hessian:
 replace the grid lines of the template above with
 \begin{lstlisting}
   AngularGrid 0
-  NThetaMax 0.4
+  NThetaMax 0.3
   HGridReduced false
   IntAcc 8.0
   GridPruning Unpruned
   Z_GridXC 0
   Z_IntAccXC 8.0
 \end{lstlisting}
-which then agrees with NWChem and gpu4pyscf within a few hundredths of cm$^{-1}$ on these
-constants. Do not use \texttt{RotInvGrid}: the grid then changes
+which then agrees within a few hundredths of cm$^{-1}$ on these constants
+with NWChem, gpu4pyscf and a finer product grid (\texttt{NThetaMax 0.4},
+which costs about four times the Lebedev grid); a coarser one
+(\texttt{NThetaMax 0.25}) makes the pair symmetric but still leaves
+$\Phi_{1111}$ too large by 0.2~cm$^{-1}$. Do not use \texttt{RotInvGrid}: the grid then changes
 discontinuously between displaced geometries, which gave an error of
 20~cm$^{-1}$ in one semi-quartic constant of benzene.
 
