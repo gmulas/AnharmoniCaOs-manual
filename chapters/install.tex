@@ -257,7 +257,8 @@ shows whether the process uses it.
 
 The tools of Chapter~\ref{ch:workflow} (\prog{anh\_sample.py},
 \prog{anh\_jobs.py}, \prog{anh\_assemble.py}, \prog{anh\_hopball.py},
-\prog{gaussian2ac.py}, \prog{orca2ac.py}), the scripts of the examples and the checks are
+\prog{gaussian2ac.py}, \prog{orca2ac.py}, \prog{anh\_fd.py},
+\prog{anh\_ffcompare.py}), the scripts of the examples and the checks are
 written in Python~3 (3.8 or later). They need numpy; matplotlib only for
 the figures, and scipy only for one check. The file
 \file{requirements.txt} of the code lists them. To install them in a
@@ -272,6 +273,33 @@ cluster, create the environment with the Python of the cluster (for
 example from a module) on a file system visible from the nodes, and
 activate it in the job scripts. The container image already has numpy and
 matplotlib.
+
+\paragraph{Quantum-chemistry codes.} The force field and the dipole
+derivatives come from a quantum-chemistry code, which is not part of
+AnharmoniCaOs and is installed separately. The tools can use:
+\begin{itemize}
+\item Gaussian (\url{https://gaussian.com}), commercial: a Gaussian
+  anharmonic run for \prog{gaussian2ac.py}, or the jobs of
+  \prog{anh\_fd.py};
+\item ORCA (\url{https://www.faccts.de/orca/}), free for academic use
+  after registration: an ORCA VPT2 run for \prog{orca2ac.py}, or the jobs
+  of \prog{anh\_fd.py};
+\item NWChem (\url{https://nwchemgit.github.io}), open source: the jobs of
+  \prog{anh\_fd.py};
+\item PySCF (\url{https://pyscf.org}) and its GPU extension gpu4pyscf
+  (\url{https://github.com/pyscf/gpu4pyscf}), open source: the jobs of
+  \prog{anh\_fd.py}, through the driver \prog{anh\_fd\_pyscf.py}.
+\end{itemize}
+Section~\ref{sec:run-fd} says which settings each of them needs for
+accurate constants. Several of these codes may already be available as
+packages that install directly: on a cluster, as modules
+(\texttt{module avail}); NWChem in the package managers of the common
+Linux distributions (for example \texttt{apt install nwchem}) and in
+conda-forge; PySCF and gpu4pyscf with pip (\texttt{pip install pyscf};
+for gpu4pyscf the package that matches the CUDA version of the machine,
+for example \texttt{pip install gpu4pyscf-cuda12x}), in the same virtual
+environment as the tools. ORCA is distributed as binaries from its
+download page; Gaussian through its licence.
 
 \section{Checking the build}\label{sec:checks}
 
