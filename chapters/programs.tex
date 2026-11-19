@@ -346,15 +346,17 @@ move the molecule. For Gaussian, \texttt{nosymm} is required:
 \end{lstlisting}
 For ORCA, \texttt{Freq} (or \texttt{AnFreq}) and no \texttt{VPT2}, with
 fine integration grids without pruning, for the SCF and for the
-coupled-perturbed equations:
+coupled-perturbed (CP-SCF) equations, and with both converged tightly:
 \begin{lstlisting}
-! B3LYP 6-31G(d) NoRI NoCOSX VeryTightSCF Freq
+! B3LYP 6-31G(d) NoRI NoCOSX ExtremeSCF Freq
 %method
   AngularGrid 7
   IntAcc 8.0
   GridPruning Unpruned
   Z_GridXC 7
   Z_IntAccXC 8.0
+  Z_Tol 1e-8
+  Z_MaxIter 256
 end
 * xyz 0 1
 {GEOMETRY}
@@ -368,7 +370,13 @@ grids without pruning, as above: the default adaptive grids
 symmetric reference geometry, which spoils the semi-quartic constants.
 The RI approximation for the Coulomb term alone (\texttt{RIJONX} with
 \texttt{def2/J}) is acceptable; \texttt{RIJCOSX} is not recommended for
-this purpose, not even with the finest COSX grids.
+this purpose, not even with the finest COSX grids. The default tolerance of the CP-SCF equations (set by the SCF keyword,
+e.g.\ \texttt{VeryTightSCF}) is far too loose for this purpose: use
+\texttt{Z\_Tol 1e-8} and \texttt{ExtremeSCF} as above, in every job and
+in the reference calculation, which makes each Hessian somewhat slower.
+A quick check is the sum rule of the dipole derivatives printed by
+\texttt{collect}: it must be well below $10^{-6}$~a.u., and
+\texttt{collect} warns otherwise.
 
 \paragraph{Command.}
 \begin{lstlisting}
