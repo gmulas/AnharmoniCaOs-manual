@@ -324,7 +324,9 @@ at one geometry. It works in two steps, \texttt{prepare} and
 \paragraph{Where.} In an empty directory for the jobs (or anywhere with
 \texttt{-{}-dir}). It needs a harmonic frequency calculation at the
 optimised geometry, either a Gaussian formatted checkpoint file
-(\file{.fchk}, from \prog{formchk}) or an ORCA \file{.hess} file, and a
+(\file{.fchk}, from \prog{formchk}), an ORCA \file{.hess} file or an
+NWChem frequency run (its \file{NAME.fd\_ddipole}, with \file{NAME.hess}
+and \file{NAME.out} next to it), and a
 template of the input of one job.
 
 \paragraph{Template.} The input of one job, with \texttt{\{GEOMETRY\}}
@@ -363,6 +365,39 @@ end
 {GEOMETRY}
 *
 \end{lstlisting}
+For NWChem, the files of each job must be named after it
+(\texttt{start \{NAME\}}) and written next to the input
+(\texttt{permanent\_dir .}); the geometry block must keep the molecule
+where it is, and the task must be a frequency calculation; the
+coordinates are written in bohr when the geometry block says
+\texttt{units au}, in angstrom otherwise:
+\begin{lstlisting}
+start {NAME}
+title "{TITLE}"
+permanent_dir .
+geometry units au noautoz noautosym nocenter
+ symmetry c1
+{GEOMETRY}
+end
+basis spherical
+ * library 6-31G
+end
+dft
+ xc b3lyp
+ grid xfine nodisk
+ convergence energy 1d-11 density 1d-9 gradient 1d-8
+end
+set dft:no_prune T
+set cphf:thresh 1d-10
+hessian
+ thresh 1d-10
+end
+task dft freq
+\end{lstlisting}
+NWChem's \texttt{b3lyp} uses the VWN functional of Gaussian (VWN1-RPA);
+ORCA's B3LYP uses VWN5. NWChem is accurate here (unpruned grids, tight
+CP-SCF) but slower than ORCA: about three times on benzene.
+
 The semi-quartic constants are second differences of Hessians divided by
 the square of the step (400 times the difference for the default step),
 so any numerical noise of the Hessians is amplified. With ORCA, use fine
@@ -409,13 +444,13 @@ python3 CODEDIR/tools/anh_fd.py prepare REF --code CODE --template TEMPLATE \
 python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR]
 \end{lstlisting}
 (\texttt{anh python3 TOOLS/anh\_fd.py ...} in the container). REF is the
-\file{.fchk} or \file{.hess} file, CODE is \texttt{gaussian} or
-\texttt{orca}, and \texttt{-{}-step} is the displacement in the
+\file{.fchk}, \file{.hess} or \file{.fd\_ddipole} file, CODE is
+\texttt{gaussian}, \texttt{orca} or \texttt{nwchem}, and \texttt{-{}-step} is the displacement in the
 dimensionless normal coordinates $q$. \texttt{prepare} computes the
 normal modes from the Hessian of REF and writes in DIR the input of each
 job (\file{d000} at the reference geometry, \file{dKKKp} and
 \file{dKKKm} at $q_k=\pm$step, with the extension \file{.gjf} or
-\file{.inp}), the list of the jobs \file{jobs.txt} and
+\file{.inp} or \file{.nw}), the list of the jobs \file{jobs.txt} and
 \file{manifest.json}, which \texttt{collect} needs. Run the jobs in DIR,
 one after the other,
 \begin{lstlisting}
@@ -423,11 +458,13 @@ for j in $(cat jobs.txt); do
   g16 < $j.gjf > $j.log; formchk $j.chk $j.fchk
 done
 for j in $(cat jobs.txt); do orca $j.inp > $j.out; done
+for j in $(cat jobs.txt); do nwchem $j.nw > $j.out; done
 \end{lstlisting}
 or as a job array, each task taking the line of \file{jobs.txt} of its
 index (\texttt{j=\$(sed -n \$\{SLURM\_ARRAY\_TASK\_ID\}p jobs.txt)}).
-\texttt{collect} reads \file{NAME.fchk} (Gaussian) or \file{NAME.hess}
-(ORCA) of every job; it stops if a result is missing or belongs to
+\texttt{collect} reads \file{NAME.fchk} (Gaussian), \file{NAME.hess}
+(ORCA) or \file{NAME.hess}, \file{NAME.fd\_ddipole} and \file{NAME.out}
+(NWChem; its \file{.hess} is not ORCA's) of every job; it stops if a result is missing or belongs to
 another geometry.
 
 \paragraph{Symmetry.} With \texttt{-{}-symmetry}, \texttt{prepare} finds
