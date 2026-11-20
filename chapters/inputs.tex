@@ -209,9 +209,10 @@ number) and where it is mentioned or used.
 \subsection*{Spectral method}
 \begin{description}
 \optentry{spectral}{0}{2b}{Kernel polynomial (spectral) method instead of eigenvectors, for every starting state \notes{§12}; it needs \opt{eigensolver}~$=0$ and one MPI process (OpenMP threads with \texttt{OMP\_NUM\_THREADS}). Lines become Gaussians of width about $\opt{spectraldelta}\sqrt2$. Changes results.}
-\optentry{spectraldelta}{0.1}{2b}{The resolution (cm$^{-1}$), both in the starting and in the final energy. The default \opt{wnumhiststep} becomes \opt{spectraldelta}/2.}
+\optentry{spectraldelta}{0.1}{2b}{The resolution (cm$^{-1}$), both in the starting and in the final energy: the width of the energy windows of the starting state and of the lines. The default \opt{wnumhiststep} becomes \opt{spectraldelta}/2. Do not raise it to make the border reject fewer windows: the bands broaden accordingly (on the starting states of Tutorial~3 at 200~K the error on the band shapes goes from about 4\,\% with 0.1 to 11\,\% with 0.5 and 48\,\% with 2); use \opt{spectralborderthres} instead.}
 \optentry{spectralwmin}{1e-6}{2b}{Energy windows of the starting state with a smaller weight are skipped.}
-\optentry{spectralborder}{1}{2b}{An energy window is skipped when its second-order shift from the states excluded from the polyad is at least \opt{spectraldelta}; the weight rejected is logged (\texttt{spectral border:}).}
+\optentry{spectralborder}{1}{2b}{An energy window is skipped when its second-order shift from the states excluded from the polyad is at least \opt{spectralborderthres}; the weight rejected is logged (\texttt{spectral border:}).}
+\optentry{spectralborderthres}{spectraldelta}{2b}{With \opt{spectralborder}~$=1$: the threshold (cm$^{-1}$) of the border test. It does not change the resolution, which stays \opt{spectraldelta}. A larger value rejects fewer windows; a very large one is the same as \opt{spectralborder}~$=0$. Changes results.}
 \optentry{spectralexactmax}{0}{2b}{With \opt{spectral}~$=1$: a starting polyad of at most this many states is diagonalised, and its eigenstates replace the energy windows of the starting state (much faster for starting states in small polyads, such as the ground state). The destination polyads are still treated spectrally. Changes the spectra within the resolution; 0 switches it off.}
 \optentry{spectralteams}{0}{2b}{1: the largest destination polyads run at the same time in teams of threads. A performance option; it does not change the histograms.}
 \end{description}
