@@ -122,8 +122,10 @@ expensive phase. It runs with MPI and is the one to submit to a cluster.
 
 \paragraph{The border of the spectral method.} With \opt{spectral}~$=1$
 the starting state is cut into energy windows of width
-\opt{spectraldelta}, which is also the resolution of the spectra. With
-\opt{spectralborder}~$=1$ (the default) a window is skipped when the
+\opt{spectraldelta}, which is also the resolution of the spectra. By
+default every window is used, and each starting state is normalised to
+weight 1 (\opt{startnorm}). With
+\opt{spectralborder}~$=1$ (the default up to 2026.11.2) a window is skipped when the
 states left out of the polyad would shift it by at least
 \opt{spectralborderthres} (by default equal to \opt{spectraldelta}); the
 \texttt{spectral border:} line of each \file{proclog\_n*} gives the weight
