@@ -68,7 +68,10 @@ rescandthres = thres/20  # an expression
 \item[\file{dmu3file}] Optional, with \opt{dipole3}: lines
   \texttt{i j k dx dy dz}. Missing entries are taken as zero.
 \item[\opt{modepopfile}] Starting states: the quantum numbers of all modes,
-  then the repetition count.
+  then the repetition count, optionally followed by a group number
+  (\opt{polyadreuse}, written by \prog{anh\_polyadgroups.py},
+  Section~\ref{sec:run-polyadgroups}); without \opt{polyadreuse} it is
+  ignored.
 \item[\opt{gradientfile}] Optional: the classical gradient at the reference
   geometry, lines \texttt{i g\_i} (written by \opt{shiftgeometry}).
 \item[\opt{bandlistfile}, \opt{resonanceoverrides}] Edited copies of
@@ -168,6 +171,9 @@ number) and where it is mentioned or used.
 \optentry{maxqueued}{0}{2a}{A limit on the states queued for one starting state (0: no limit). When it is reached, the growth of that starting state stops: the log gets a \texttt{growth stopped} summary and stderr a warning, its polyads are not written, and it is listed in \file{processedmodepopfile.stopped} instead of the files read by phase~2b. Phase~2a goes on with the next starting state; if the ground-state step reaches the limit, phase~2a stops. A queued state takes about 375 bytes (0.5~kB in large growths), so \texttt{maxqueued = 1e8} is about 40--50~GB. The largest polyad reported for a stopped starting state is a lower bound: the polyads were still growing.}
 \optentry{sizesonly}{0}{2a}{1: grow the polyads of the ground state (if \opt{computeground}) and of every starting state as usual, and write only their sizes to \file{growthsizes}, without building the Hamiltonians. Nothing that phase~2b reads is written (no \file{dir\_n*}, \file{processedquantas}, \file{processeddirs} or \file{polyadsizes}). This measures cheaply how expensive the starting states are, before choosing which ones to compute; the sizes are those of a normal run with the same options. Starting states stopped by \opt{maxqueued} are listed too, flagged.}
 \optentry{growthsizes}{"growthsizes"}{2a}{With \opt{sizesonly}~=~1, the name of the output file; it must not exist.}
+\optentry{closureonly}{0}{2a}{1: grow only the polyad of the ground state (if \opt{computeground}) and of every starting state, without the band destinations, and write to \file{startclosure} whether it is closed (Section~\ref{sec:out-2a}), with its states. Nothing that phase~2b reads is written. It takes seconds for hundreds of low-energy states; \prog{anh\_polyadgroups.py} reads the file. It cannot be combined with \opt{sizesonly}.}
+\optentry{startclosure}{"startclosure"}{2a}{With \opt{closureonly}~=~1, the name of the output file; it must not exist.}
+\optentry{polyadreuse}{0}{2a}{1: consecutive lines of \opt{modepopfile} with the same group number (the column after the weight, written by \prog{anh\_polyadgroups.py}) are starting states that lie in one closed polyad. Phase~2a grows them together, with the band destinations of all of them, in one directory, and phase~2b diagonalises its polyads once and computes the transitions from each starting state with its own weight. Lines without a group number are computed as usual. The spectra are not exactly those of separate directories: the destination polyads of a group are grown from the band destinations of all its states, so they can be larger; the polyad of the starting states is the same. A group whose states are not all in one closed polyad (a grouped file made with other inputs) stops phase~2a with an error.}
 \optentry{anharmflag}{0}{2a, 2b}{0: the diagonal anharmonic energies are included in the polyad matrices before the diagonalisation; 1: they are added to the eigenvalues afterwards. Changes results.}
 \optentry{cutcorrflag}{0}{2a}{1: a coupling to a state outside the polyad is replaced by a two-level correction of the diagonal element. Changes results.}
 \optentry{zerodistinctdd}{0}{2a, 2b}{1: set to zero the couplings of the resonances with four distinct modes, whose quartic part may be missing; a sensitivity test. Changes results.}

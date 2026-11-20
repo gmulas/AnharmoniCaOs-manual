@@ -26,6 +26,7 @@ program & what it does & section \\
 \prog{anh\_fd.py} & input files from one job per displaced geometry & \ref{sec:run-fd} \\
 \prog{anh\_ffcompare.py} & comparison of two force fields & \ref{sec:run-ffcompare} \\
 \prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
+\prog{anh\_polyadgroups.py} & starting states that share a closed polyad & \ref{sec:run-polyadgroups} \\
 \prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
 \prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
 \prog{anh\_hopball.py} & largest possible size of the polyads & \ref{sec:run-hopball} \\
@@ -766,6 +767,36 @@ overwrites the files of the first.
 with \texttt{-{}-per-bin}, the blocks \file{PREFIX\_quanta\_block000},
 \ldots{} in the \file{quantafile} format; with \texttt{-{}-require}, also
 \file{PREFIX\_require.dat} (Section~\ref{sec:thermal-sample}).
+
+\section{\prog{anh\_polyadgroups.py}}\label{sec:run-polyadgroups}
+
+\paragraph{What.} When the polyad of a starting state is closed
+(Section~\ref{sec:out-2a}), its eigenstates do not depend on the truncation
+of the growth, and every other state in it has the same polyad. Starting
+states that fall in one closed polyad can then be computed together, with
+\opt{polyadreuse}~$=1$: one directory, one diagonalisation, the transitions
+from each of them with its own weight. This happens mostly at low energy,
+where all the states are enumerated (\prog{anh\_sample.py}
+\texttt{-{}-enum}) and the polyads are small: on pyrene, below
+1000~cm$^{-1}$, about one starting state in six lies in the closed polyad of
+another one. In a sample of a few states per energy bin it is rare.
+
+\paragraph{Where.} In a directory with the phase~1 files and the quanta
+file, before phase~2a and before \prog{anh\_jobs.py}.
+
+\paragraph{Command.} First phase~2a with \opt{closureonly}~$=1$ on the
+quanta file (same inputs as the real run), then
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_polyadgroups.py startclosure quantafile grouped
+\end{lstlisting}
+\paragraph{Output.} \file{grouped}: the same starting states, with those
+that lie in the closed polyad of an earlier line moved right after it and
+all of them followed by a group number (the line of the first one). The
+other lines are unchanged. It prints how many lines were grouped. Use it as
+\opt{modepopfile} with \opt{polyadreuse}~$=1$, or give it to
+\prog{anh\_jobs.py} \texttt{-{}-states}, which keeps each group in one
+job and sets \opt{polyadreuse}~$=1$. The file stays a valid quanta file:
+without \opt{polyadreuse} the group numbers are ignored.
 
 \section{\prog{anh\_jobs.py}}\label{sec:run-jobs}
 
