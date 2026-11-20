@@ -32,7 +32,7 @@
 \item[\file{dumpedparams}] Binary, read by phases 2a and 2b. It must come
   from the same version of phase 1.
 \end{description}
-\section{Phase 2a}
+\section{Phase 2a}\label{sec:out-2a}
 \begin{description}
 \item[\file{dir\_nNNNNN}] One directory per starting state, with the
   polyad structures and Hamiltonians.
@@ -46,6 +46,20 @@
   wall time of the growth (s), 1 if \opt{maxqueued} stopped the growth (the
   sizes are then lower bounds), harmonic and deperturbed anharmonic energy
   above the ground state (cm$^{-1}$), weight, quantum numbers.
+\item[\file{proclog\_n00000}] The log of phase~2a. For each starting
+  state, whatever \opt{verbosity}, a line \texttt{starting polyad:} with
+  the size of the polyad of the starting state and whether it is
+  \emph{closed}: no resonance that the growth could follow, given enough
+  credit, leads from one of its states to a state outside it (resonances
+  too weak to be followed, below \opt{minhopcoupling}, do not count). The
+  eigenstates of a closed polyad do not depend on the truncation of the
+  growth. An open polyad is given with the number of such resonance hops
+  that leave it. The same line counts the band destinations of all the
+  states of the starting polyad, and how many of them are not in any polyad
+  of this starting state: phase~2b computes no transitions to those. With
+  \opt{verbosity} bit~1 a second line gives how many of all the polyads are
+  closed, and how many of those band destinations fall in polyads that are
+  not; this check takes about a third more time in phase~2a.
 \end{description}
 \section{Phase 2b}
 \begin{description}
