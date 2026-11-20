@@ -462,10 +462,78 @@ $\Phi_{1111}$ too large by 0.2~cm$^{-1}$. Do not use \texttt{RotInvGrid}: the gr
 discontinuously between displaced geometries, which gave an error of
 20~cm$^{-1}$ in one semi-quartic constant of benzene.
 
+\paragraph{Which code.} Table~\ref{tab:fd-codes} lists the codes in
+order of speed, with the measured time of one job (Hessian and dipole
+derivatives) and the machine of each measurement: a laptop (Intel Core
+i7-10750H, 6 cores), a cluster node (two AMD EPYC 7313, 32 cores in all),
+and one NVIDIA A40 GPU of such a node (with 8 of its cores). Times on
+different machines are not directly comparable, and no other kind of
+machine was measured.
+
+{\small
+\begin{longtable}{p{0.13\textwidth}p{0.15\textwidth}p{0.34\textwidth}p{0.11\textwidth}p{0.17\textwidth}}
+\caption{Codes for \prog{anh\_fd.py}, fastest first: the time of one job
+as measured with the settings of this section.}\label{tab:fd-codes}\\
+\toprule
+\raggedright code & \raggedright runs on, licence & \raggedright time of one job & \raggedright memory & \raggedright main caveat \tabularnewline
+\midrule
+\endfirsthead
+\toprule
+\raggedright code & \raggedright runs on, licence & \raggedright time of one job & \raggedright memory & \raggedright main caveat \tabularnewline
+\midrule
+\endhead
+\raggedright gpu4pyscf 1.9 &
+  \raggedright GPU; Apache 2.0 &
+  \raggedright benzene B3LYP/6-31G, grid (150,\,974): 62--91~s, mean 71~s (one A40);
+  pyrene B97-1/TZ2P (474 basis functions): 30~min (one A40) &
+  \raggedright GPU 1.9--2.7~GB (benzene), 4.5~GB (pyrene) &
+  \raggedright closed shell only; needs the grid response (GPU only) \tabularnewline
+\raggedright ORCA 6.1.1, Lebedev grid (template above) &
+  \raggedright CPU; free for academic use &
+  \raggedright benzene B3LYP/6-31G: 3.7--6.1~min (4 cores of the node);
+  pyrene B97-1/TZ2P: 2.3~h (32 cores of the node); with 16 cores, with
+  \texttt{RIJONX} or with the product grid: to be measured &
+  \raggedright 1.1~GB (benzene), 19.5~GB (pyrene) &
+  \raggedright semi-quartics of soft modes off by a few tenths of cm$^{-1}$ \tabularnewline
+\raggedright ORCA 6.1.1, product grid \texttt{NThetaMax 0.3} &
+  \raggedright CPU; free for academic use &
+  \raggedright benzene B3LYP/6-31G: 8--14~min, mean 12.6~min (4 cores of the node);
+  with \texttt{NThetaMax 0.4}: 17.6~min &
+  \raggedright 1.6~GB (0.3), 2.2~GB (0.4) &
+  \raggedright three to four times the Lebedev grid \tabularnewline
+\raggedright NWChem 7.3 &
+  \raggedright CPU; ECL 2.0 &
+  \raggedright benzene B3LYP/6-31G, \texttt{xfine}: 11--12~min (4 cores of the laptop) &
+  \raggedright not measured &
+  \raggedright slowest; no stability analysis of the SCF \tabularnewline
+\raggedright PySCF 2.15 (CPU) &
+  \raggedright CPU; Apache 2.0 &
+  \raggedright benzene B3LYP/6-31G, grid (99,\,590): 41~min (16 cores of the node,
+  shared with other jobs) &
+  \raggedright 1.1~GB &
+  \raggedright no grid response: noisy constants, not recommended \tabularnewline
+\raggedright Gaussian 16 &
+  \raggedright CPU; commercial &
+  \raggedright benzene PBEPBE/4-31G (a cheaper level, not comparable with the rows
+  above): 55--61~s (4 cores of the laptop) &
+  \raggedright not measured &
+  \raggedright \texttt{nosymm} required \tabularnewline
+\bottomrule
+\end{longtable}}
+
+With a GPU, use gpu4pyscf: it is the fastest by far and computes the
+response of the grid. With CPUs only, use ORCA with the product grid
+(or the Lebedev grid when tenths of cm$^{-1}$ in the soft modes do not
+matter), or Gaussian if you have a licence. NWChem is slower, but it is
+an independent check of the others. Before running the jobs,
+\texttt{prepare} estimates how long they will take from your own
+reference calculation (\emph{Time} below).
+
 \paragraph{Command.}
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_fd.py prepare REF --code CODE --template TEMPLATE \
-        [--step 0.05] [--dir DIR] [--symmetry]
+        [--step 0.05] [--dir DIR] [--symmetry] \
+        [--refout FILE | --ref-time SECONDS] [--jobs-at-once K]
   ... run the jobs ...
 python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR]
 \end{lstlisting}
@@ -493,6 +561,43 @@ index (\texttt{j=\$(sed -n \$\{SLURM\_ARRAY\_TASK\_ID\}p jobs.txt)}).
 (ORCA, and PySCF, whose driver writes the same format) or \file{NAME.hess}, \file{NAME.fd\_ddipole} and \file{NAME.out}
 (NWChem; its \file{.hess} is not ORCA's) of every job; it stops if a result is missing or belongs to
 another geometry.
+
+\paragraph{Time.} \devonly{} \texttt{prepare} ends by estimating how
+long the jobs will take, from the time of the frequency calculation of
+the reference, which it reads from the output of that calculation:
+\begin{itemize}
+\item Gaussian: the \file{.log}, the elapsed time of the step with
+  \texttt{freq}, without the optimisation before it;
+\item ORCA: the \file{.out}, the total run time of a frequency job, or
+  the frequency part of an optimisation followed by frequencies, from the
+  timings of its modules;
+\item NWChem: the \file{.out}, the wall time of the \texttt{freq} task;
+\item PySCF: the time that \prog{anh\_fd\_pyscf.py -{}-ref} writes in
+  the first line of its \file{.hess}, or the line it prints.
+\end{itemize}
+It looks for the \file{.log} or \file{.out} next to REF; give another
+file with \texttt{-{}-refout FILE}, or the time of one job directly with
+\texttt{-{}-ref-time SECONDS}. \texttt{-{}-jobs-at-once K} (default 1) is
+the number of jobs that will run at the same time. \texttt{prepare} prints
+the number of jobs, the time of one, the total and the wall time; the
+displaced jobs may be a little faster, since they start from the
+orbitals of \file{d000}. The estimate assumes that the jobs run on the
+same resources as the reference: \texttt{prepare} notes when the
+template asks for another number of processes. For example, benzene with
+gpu4pyscf and \texttt{-{}-symmetry}, with the reference computed by
+\prog{anh\_fd\_pyscf.py -{}-ref} on one A40 (68~s) and two GPUs for the
+jobs:
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_fd.py prepare ref.hess --code pyscf \
+        --template b3lyp.json --symmetry --dir sym --jobs-at-once 2
+...
+time: 23 jobs; one Hessian took 68 s in the reference calculation
+(ref.hess, anh_fd_pyscf.py, the .hess comment); total about 26 min of
+compute time, about 14 min with 2 jobs at once (d000 first)
+\end{lstlisting}
+(the 23 jobs of this example, run one after the other on one A40, took
+26~min in all). \texttt{collect} prints the mean and the longest time of
+the jobs, from their outputs, to compare with the estimate.
 
 \paragraph{Initial guess and stability.} Every displaced job must be on
 the electronic state of the reference \file{d000}, so by default
