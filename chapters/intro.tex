@@ -84,7 +84,11 @@ most for inputs written for 2026.11:
   default: the resonant couplings include the closure terms, which
   changes some couplings by a few cm$^{-1}$ and the 3.3~$\mu$m band by
   about 1~cm$^{-1}$ (Chapter~\ref{ch:tut-pyrene}); \opt{closureterms}~$=0$
-  gives back the results of 2026.11.2 and earlier.
+  gives back the results of 2026.11.2 and earlier;
+\item since the release after 2026.11.2, phases~2a and~2b stop at the
+  start if a starting state is outside the \opt{Ehistmin}..\opt{Ehistmax}
+  bins, which earlier versions left out of the spectra without a message
+  (\opt{allowoutsidehist}).
 \end{itemize}
 
 \section{How to read this manual}
