@@ -28,7 +28,7 @@ program & what it does & section \\
 \prog{anh\_symm.py} & point group, mode species, symmetry noise, principal axes & \ref{sec:run-symm} \\
 \prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
 \prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
-\prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
+\prog{anh\_assemble.py} & spectra from the histograms of the jobs, per dipole component & \ref{sec:run-assemble} \\
 \prog{anh\_hopball.py} & largest possible size of the polyads & \ref{sec:run-hopball} \\
 \midrule
 \multicolumn{3}{l}{\emph{Checks}} \\
@@ -1029,7 +1029,78 @@ also writes figures (matplotlib).
 
 \paragraph{Result.} In \file{res/}: the summed \file{hist\_*},
 \file{spectra\_by\_energy.dat}, \file{spectra\_by\_anh\_energy.dat}, and,
-with \texttt{-{}-T}, \file{thermal\_T<T>.dat}.
+with \texttt{-{}-T}, \file{thermal\_T<T>.dat} and
+\file{thermal\_T<T>\_components.dat}. The second file is the same thermal
+spectrum with the three components of the dipole kept apart. Its columns
+are:
+\begin{itemize}
+\item the wavenumber (lower edge of the bin, cm$^{-1}$);
+\item the absorption (km/mol): total, then components 0, 1, 2;
+\item the spontaneous emission (s$^{-1}$): total, then components 0, 1, 2.
+\end{itemize}
+The totals are those of \file{thermal\_T<T>.dat}, and the components add
+up to them.
+
+\paragraph{Spectra per principal axis.} Phase~2b writes one histogram per
+component of the dipole (\file{hist\_abs\_0}, \file{\_1}, \file{\_2}).
+They are the components along the axes of the frame in which phase~1 was
+given the dipole derivatives. They are a-, b- and c-type bands only if
+that frame is the principal-axis frame of the molecule. That cannot be
+fixed after phase~2b, so check it before phase~1 with
+\prog{anh\_symm.py} (Section~\ref{sec:run-symm}):
+\begin{itemize}
+\item if the report says the frame is already principal, keep the files
+  and note which of $x$, $y$, $z$ is $a$, $b$, $c$;
+\item otherwise write the files with \texttt{-{}-principal-axes} and run
+  phase~1 on them.
+\end{itemize}
+Then give the axes to \prog{anh\_assemble.py}:
+\begin{itemize}
+\item \texttt{-{}-axes FILE} reads the \file{principal\_axes} file of
+  \prog{anh\_symm.py}: its \texttt{output components} line if present,
+  otherwise \texttt{input components};
+\item \texttt{-{}-axes c,b,a} gives the three labels by hand.
+\end{itemize}
+The header of \file{thermal\_T<T>\_components.dat} names them. Without
+\texttt{-{}-axes} it calls them ``Cartesian 0/1/2 of the input frame''.
+
+\paragraph{Rotational envelopes.} With \texttt{-{}-envelope a=FILE b=FILE
+c=FILE} each component is convolved with the rotational contour of its band
+type, and the sum is written in \file{thermal\_T<T>\_envelope.dat}, with the
+same columns as the \file{\_components} file.
+\begin{itemize}
+\item \textbf{Envelope files:} two columns, the offset from the band
+  centre (cm$^{-1}$) and the intensity, at any step.
+\item \textbf{Temperature:} \texttt{\{T\}} in a file name is replaced
+  by each temperature of \texttt{-{}-T}, so that each one gets its own
+  contour, for example \texttt{a=pyrene\_a\_\{T\}K.dat}.
+\item \textbf{Normalisation:} the envelope is integrated over each
+  wavenumber bin of the histograms and normalised to unit area, so the
+  intensity of each component is kept, apart from what moves past the
+  ends of the wavenumber grid.
+\item \textbf{Emission:} the same envelope is applied to emission.
+\item \textbf{Requirement:} \texttt{-{}-envelope} needs \texttt{-{}-axes}
+  with the labels $a$, $b$, $c$.
+\end{itemize}
+The contours can be computed, for example, with PGOPHER~\cite{pgopher},
+from the rotational constants that \prog{anh\_symm.py} reports: an a-,
+b- or c-type band of an asymmetric top at the temperature of the
+experiment, exported as a profile against the offset from the band origin.
+
+\paragraph{Example.} Tutorial~1 pyrene. Its files come without the
+harmonic output, so \prog{anh\_symm.py} cannot check their frame. Compared
+with another calculation of pyrene, the frame is already principal: the
+normal to the plane is $x$ ($c$), the long axis is $z$ ($a$), and the
+short in-plane axis is $y$ ($b$). In the directory of the tutorial, after
+phase~2b:
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_assemble.py --dirs . --out res --T 0 --axes c,b,a
+\end{lstlisting}
+\file{res/thermal\_T0\_components.dat} gives 135.2~km/mol of a-type
+absorption, 123.9 of b-type and 186.9 of c-type (out-of-plane modes),
+446.06 in all. Adding
+\texttt{-{}-envelope a=A.dat b=B.dat c=C.dat}, with contours computed for
+the experiment, writes \file{res/thermal\_T0\_envelope.dat}.
 
 \section{\prog{anh\_hopball.py}}\label{sec:run-hopball}
 
