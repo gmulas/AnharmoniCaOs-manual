@@ -781,6 +781,52 @@ with \texttt{-{}-per-bin}, the blocks \file{PREFIX\_quanta\_block000},
 \ldots{} in the \file{quantafile} format; with \texttt{-{}-require}, also
 \file{PREFIX\_require.dat} (Section~\ref{sec:thermal-sample}).
 
+\paragraph{Symmetry species (optional).} With \texttt{-{}-species FILE},
+the species file of \prog{anh\_symm.py} (one line per mode, with its
+characters $\pm1$ under the operations of an Abelian group such as
+D$_{2h}$, named in the header), the tool records the species of every
+state, the product of the characters of its quanta. It writes
+\file{PREFIX\_states.species} and, next to each block,
+\file{PREFIX\_quanta\_block000.species}, \ldots: one line per row of the
+corresponding file, which does not change (phases 2a and 2b do not read
+the species). \file{PREFIX\_species.dat} gives, for every bin, the exact
+fraction of the harmonic states of each species and, in the bins of the
+Wang--Landau walks, the fraction among the states visited. The exact
+fraction comes from the enumeration below E$_\mathrm{enum}$ and, above it,
+from
+\[
+N_\Gamma(E) = \frac{1}{|H|}\sum_{h\in H}\chi_\Gamma(h)\,N_h(E),\qquad
+N_h(E)=\sum_{\text{states}}\prod_k \chi_k(h)^{n_k},
+\]
+a Beyer--Swinehart count in which mode $k$ has the weight $\chi_k(h)$
+(frequencies rounded to \texttt{-{}-bs-grain}); with
+\texttt{-{}-require}, for the qualifying states. Harmonic energies only.
+
+\paragraph{Stratified sampling (optional, changes the weights).} With
+\texttt{-{}-stratify} (and \texttt{-{}-species}) every bin of every block
+takes first one state of each species whose exact fraction $p_\Gamma$ is
+above \texttt{-{}-strat-min-fraction} (default 0), and then the rest of
+its \texttt{-{}-per-bin} states as without the option. A state of
+species $\Gamma$ gets the weight $K p_\Gamma/(n_\Gamma P)$, with $K$ the
+states of the bin in the block, $n_\Gamma$ those of species $\Gamma$ and
+$P$ the sum of $p_\Gamma$ over the species present: each species keeps its
+fraction of the bin, and the bin its total weight. The average of the bin,
+$\sum_\Gamma p_\Gamma\,\bar f_\Gamma$, is then unbiased, and its variance
+is smaller than with uniform sampling when states of different species
+have different spectra. The weight is written in the last column of the
+\file{quantafile} as an integer, \texttt{round(-{}-strat-scale} $\times$
+weight\texttt{)} (default scale 1000, about 1000 per state): phase~2b
+reads it as the number of repetitions of the state and divides the
+histograms of each bin by the sum of the weights of its states, so only
+their ratios matter, and a scale of 1000 keeps the rounding of the
+fractions below 0.1\,\%. The output of the tool gives, for each block, the
+largest relative error of a species fraction due to the rounding, the
+species and weights of every bin, and the weight of species without
+listed states, left out (the fractions of the others are then
+renormalised). The species fractions become equal (1/8 each in D$_{2h}$)
+quickly as the energy grows, so stratification matters most when the
+spectra depend on the species and the bins hold few sampled states.
+
 \section{\prog{anh\_jobs.py}}\label{sec:run-jobs}
 
 \paragraph{Where.} Anywhere: \texttt{-{}-base} is the directory where
