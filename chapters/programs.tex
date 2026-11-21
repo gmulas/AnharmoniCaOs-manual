@@ -25,7 +25,7 @@ program & what it does & section \\
 \prog{orca2ac.py} & input files from an ORCA VPT2 job & \ref{sec:run-orca2ac} \\
 \prog{anh\_fd.py} & input files from one job per displaced geometry & \ref{sec:run-fd} \\
 \prog{anh\_ffcompare.py} & comparison of two force fields & \ref{sec:run-ffcompare} \\
-\prog{anh\_symm.py} & point group, mode species, symmetry noise & \ref{sec:run-symm} \\
+\prog{anh\_symm.py} & point group, mode species, symmetry noise, principal axes & \ref{sec:run-symm} \\
 \prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
 \prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
 \prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
@@ -764,7 +764,10 @@ without symmetry (the anharmonic run of Gaussian or ORCA, or
 \prog{anh\_fd.py} without \texttt{-{}-symmetry}) carry such values; above
 \opt{minhopcoupling} they couple states of different symmetry, and they
 can create resonances that the molecule does not have. With
-\texttt{-{}-zero} the tool writes the files without them. It never
+\texttt{-{}-zero} the tool writes the files without them. It also finds
+the principal axes of inertia, and with \texttt{-{}-principal-axes} writes
+the dipole derivatives along them, so that the three components of the
+spectra are a-, b- and c-type bands (Section~\ref{sec:run-assemble}). It never
 changes its input files.
 
 \paragraph{Where.} Anywhere. It reads the harmonic calculation that
@@ -776,6 +779,7 @@ skipped).
 \paragraph{Command.}
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_symm.py SOURCE FFDIR [--outdir DIR] [--zero] \
+        [--principal-axes] [--inertiatol 1e-5] \
         [--symtol 0.01] [--freqtol 1] [--phiwarn 0.5] [--dmuwarn 1e-4] \
         [--phifloor 1e-3] [--dmufloor 1e-8] [--list 20]
 \end{lstlisting}
@@ -814,8 +818,42 @@ which are not in the files. Where an operation needs them, they are
 chosen to make the violation smallest, so the violation reported is a
 lower bound.
 
+\paragraph{Principal axes.} From the geometry and the masses of SOURCE
+the tool computes the principal moments of inertia, named so that
+$I_a \le I_b \le I_c$, and reports:
+\begin{itemize}
+\item the rotational constants $A \ge B \ge C$ in cm$^{-1}$, as a program of
+  rotational contours such as PGOPHER~\cite{pgopher} needs them;
+\item the asymmetry parameter $\kappa = (2B-A-C)/(A-C)$;
+\item the inertia defect $I_c - I_a - I_b$, which is zero for a planar
+  molecule (then $c$ is perpendicular to the plane, and the out-of-plane
+  modes are c-type);
+\item whether the frame of the dipole derivatives is already the
+  principal-axis frame, and which of $x$, $y$, $z$ is $a$, $b$, $c$.
+\end{itemize}
+Two moments equal within \texttt{-{}-inertiatol} (relative) make a
+symmetric top. The two axes in its degenerate plane are then free: the
+tool takes the Cartesian axes of the frame that lie in that plane, if
+there are two, and otherwise any orthogonal pair, and says which.
+
+The three components of the dipole derivatives can be read as a-, b- and
+c-type bands only if they are taken along the principal axes: once phase~2b
+has summed $|\mu_x|^2$, $|\mu_y|^2$, $|\mu_z|^2$, $|\mu_a|^2$ cannot be
+recovered from them. With \texttt{-{}-principal-axes} the files written
+in \texttt{-{}-outdir} have the dipole derivatives (those of
+\file{freqsfile}, \file{dmu2file} and \file{dmu3file}) along $a$, $b$,
+$c$, in this order. Nothing else changes: the wavenumbers and the force
+constants are copied as they are, and so phase~1 finds the same
+resonances. In a frame that is already principal the dipole values are
+only permuted, digit for digit. The option can be combined with
+\texttt{-{}-zero}. Run phase~1 on the files written; the histograms
+\file{hist\_*\_0}, \file{\_1}, \file{\_2} of phase~2b are then the a-,
+b- and c-type spectra. Gaussian's standard orientation is often, but not
+always, the principal-axis frame, and its $x$, $y$, $z$ need not be $a$,
+$b$, $c$. ORCA and \prog{anh\_fd.py} keep the frame of the input geometry.
+
 \paragraph{Result.} The report on the standard output and in
-\file{symm\_report.txt}: the groups, the degenerate sets, and for each
+\file{symm\_report.txt}: the principal axes, the groups, the degenerate sets, and for each
 file the number of entries with forbidden noise, the largest and the rms,
 by index pattern ($iij$, $ijk$, \dots) and Cartesian component, with the
 largest entries named; a warning when they exceed \texttt{-{}-phiwarn}
@@ -823,11 +861,23 @@ largest entries named; a warning when they exceed \texttt{-{}-phiwarn}
 \texttt{-{}-dmuwarn} (a.u.). Forbidden parts below \texttt{-{}-phifloor}
 and \texttt{-{}-dmufloor} are counted apart, as the rounding of the
 numbers in the files. In \texttt{-{}-outdir} (default
-\file{FFDIR/symm}): \file{forbidden}, the entries with forbidden noise, one
-per line; \file{species}, the species of every mode and its characters
-under the operations named in the header; and, with \texttt{-{}-zero} or
-when the basis is rotated, the five input files without the forbidden
-noise (lines that do not change are copied as they are). For molecules
+\file{FFDIR/symm}):
+\begin{itemize}
+\item \file{forbidden}: the entries with forbidden noise, one per line;
+\item \file{species}: the species of every mode and its characters
+  under the operations named in the header, in the frame of SOURCE;
+\item \file{principal\_axes}: the moments, the rotational constants,
+  the rotation (rows $a$, $b$, $c$ in the frame of SOURCE), and the axis of
+  each dipole component: of the input files (\texttt{input components:},
+  for example \texttt{c b a}, or $x$, $y$, $z$ for a component that is not
+  along a principal axis) and, with \texttt{-{}-principal-axes}, of the
+  files written (\texttt{output components: a b c}).
+  \prog{anh\_assemble.py~-{}-axes} reads it;
+\item with \texttt{-{}-zero} or \texttt{-{}-principal-axes}, or when the
+  basis is rotated: the five input files, without the forbidden noise or
+  with the dipoles along $a$, $b$, $c$ (lines that do not change are
+  copied as they are).
+\end{itemize} For molecules
 with degenerate modes, the resonances that phase~1 finds depend on the
 basis of each degenerate set; run phase~1 on the files in the adapted
 basis to compare with and without \texttt{-{}-zero}.
@@ -836,7 +886,10 @@ basis to compare with and without \texttt{-{}-zero}.
 (\file{examples/hexahydropyrene}), converted with \prog{gaussian2ac.py}:
 the job ran without symmetry (Gaussian prints C$_1$), but the geometry is
 C$_{2v}$, and the tool finds that group and no forbidden constant above
-the threshold of \prog{gaussian2ac.py}.
+the threshold of \prog{gaussian2ac.py}. The frame of the log is already
+the principal-axis frame, with $a = x$, $b = y$, $c = z$
+($A = 0.03218$, $B = 0.01643$, $C = 0.01117$~cm$^{-1}$, $\kappa = -0.499$;
+the molecule is not planar, inertia defect $-41$~amu~\AA$^2$).
 
 \section{\prog{anh\_sample.py}}\label{sec:run-sample}
 
