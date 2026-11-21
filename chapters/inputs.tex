@@ -129,8 +129,7 @@ number) and where it is mentioned or used.
 \subsection*{Geometry and dipole}
 \begin{description}
 \optentry{shiftgeometry}{0}{1}{Move the reference geometry and the normal modes so that the linear terms of the normal-ordered Hamiltonian vanish exactly; frequencies, force constants and dipole derivatives are replaced by those of the new modes. The new quantities are written to \file{*.shifted} (Chapter~\ref{ch:outputs}). A run that reads the \file{*.shifted} files with \opt{shiftgeometry}~$=0$, \opt{gradientfile}~$=$~\texttt{"gradient.shifted"}, \opt{phi3threshold}~$=$~\opt{phi4threshold}~$=$~\opt{dmu2threshold}~$=$~\opt{fundthres}~$=0$ and \opt{bandlistfile} set to a copy of the \file{bandlist} of the shifted run reproduces the shifted run exactly (\opt{fundthres}~$=0$ keeps the small dipole derivatives that the shift gives to the symmetry-forbidden modes; the band list keeps the same fundamentals active). Changes results.}
-\optentry{dipole3}{0}{1}{Third-order transformed dipole for fundamentals and hot bands. Changes intensities; it cannot be combined with \opt{conserveint}.}
-\optentry{conserveint}{0}{1}{A heuristic renormalisation of the fundamental intensities. Changes intensities.}
+\optentry{dipole3}{0}{1}{Third-order transformed dipole for fundamentals and hot bands. Changes intensities.}
 \end{description}
 
 \subsection*{Bands}
@@ -169,7 +168,6 @@ number) and where it is mentioned or used.
 \optentry{sizesonly}{0}{2a}{1: grow the polyads of the ground state (if \opt{computeground}) and of every starting state as usual, and write only their sizes to \file{growthsizes}, without building the Hamiltonians. Nothing that phase~2b reads is written (no \file{dir\_n*}, \file{processedquantas}, \file{processeddirs} or \file{polyadsizes}). This measures cheaply how expensive the starting states are, before choosing which ones to compute; the sizes are those of a normal run with the same options. Starting states stopped by \opt{maxqueued} are listed too, flagged.}
 \optentry{growthsizes}{"growthsizes"}{2a}{With \opt{sizesonly}~=~1, the name of the output file; it must not exist.}
 \optentry{anharmflag}{0}{2a, 2b}{0: the diagonal anharmonic energies are included in the polyad matrices before the diagonalisation; 1: they are added to the eigenvalues afterwards. Changes results.}
-\optentry{cutcorrflag}{0}{2a}{1: a coupling to a state outside the polyad is replaced by a two-level correction of the diagonal element. Changes results.}
 \optentry{zerodistinctdd}{0}{2a, 2b}{1: set to zero the couplings of the resonances with four distinct modes, whose quartic part may be missing; a sensitivity test. Changes results.}
 \end{description}
 
@@ -290,3 +288,11 @@ weights come from the sampling of the starting states and from
 \opt{resintensitythres} is no longer accepted: phase~1 stops with a
 message, because the intensity test of \opt{rescriterion} is now relative
 (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}).
+
+After version 2026.11.2 two more options were removed:
+\opt{conserveint} (a heuristic renormalisation of the fundamental
+intensities) and \opt{cutcorrflag} (a two-level correction of the
+diagonal for the couplings to states outside the polyad). Both were 0 by
+default, and the programs now always behave as with 0: an input file
+that still sets either of them gets the same warning, and the results of
+the default.
