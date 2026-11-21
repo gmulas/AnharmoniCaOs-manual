@@ -35,7 +35,10 @@
 \section{Phase 2a}\label{sec:out-2a}
 \begin{description}
 \item[\file{dir\_nNNNNN}] One directory per starting state, with the
-  polyad structures and Hamiltonians.
+  polyad structures and Hamiltonians. With \opt{polyadreuse}, one directory
+  per group of starting states, named after the first, with a file
+  \file{startstates}: for each starting state its index among the states
+  of the directory, its weight and its quantum numbers.
 \item[\file{processedquantas}, \file{processeddirs}] The starting states
   and their directories.
 \item[\file{polyadsizes}] The polyad sizes.
@@ -60,6 +63,14 @@
   \opt{verbosity} bit~1 a second line gives how many of all the polyads are
   closed, and how many of those band destinations fall in polyads that are
   not; this check takes about a third more time in phase~2a.
+\item[\file{startclosure}] Only with \opt{closureonly}~=~1. For each
+  starting state (after a header line \texttt{\#}) a line with its index
+  (0 = ground state), 1 if its polyad is closed, the size of the polyad, the
+  weight and the quantum numbers; if the polyad is closed, the quantum
+  numbers of its other states follow, one per line, indented.
+\item[\file{processedquantas}] With \opt{polyadreuse}, all the starting
+  states of a group, one per line, while \file{processeddirs} has one line
+  per directory.
 \end{description}
 \section{Phase 2b}
 \begin{description}
