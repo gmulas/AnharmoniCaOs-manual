@@ -295,3 +295,11 @@ diagonal for the couplings to states outside the polyad). Both were 0 by
 default, and the programs now always behave as with 0: an input file
 that still sets either of them gets the same warning, and the results of
 the default.
+
+\opt{anharmflag} was removed after version 2026.11.2 as well. The
+diagonal anharmonic energies are always included in the polyad matrices
+before the diagonalisation, as with the old default 0. An input file
+with \opt{anharmflag}~$=0$ gets the same warning and runs; one with
+\opt{anharmflag}~$=1$ (\texttt{after}: the energies added to the
+eigenvalues afterwards) stops at the start with an error, because that
+result can no longer be obtained.
