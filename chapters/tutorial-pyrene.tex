@@ -35,6 +35,15 @@ wnumhistmax = 9000
 wnumhiststep = 0.01
 modepopfile = "quantafile"
 \end{lstlisting}
+Every option that \file{inp} does not set takes its default
+(Section~\ref{sec:options}). Each phase writes to \file{out.oct} all the
+options with the value it used, marked \texttt{\# default} when
+\file{inp} does not give them (Section~\ref{sec:inp}).
+
+The thresholds 0.2 are a choice of cost: the default of
+\opt{fermithres} and \opt{ddthres} is 0.1, which treats more terms as
+resonant, builds larger polyads and makes phase 2b about nine times
+slower on this input (Section~\ref{sec:tut-pyrene-var}).
 
 \section{Running}
 
@@ -170,7 +179,7 @@ large as the largest polyad all the polyads are diagonalised exactly and
 the spectrum agrees with the other solvers within its resolution
 (relative L1 distance 0.5\%).
 
-\section{Variations}
+\section{Variations}\label{sec:tut-pyrene-var}
 
 The same run with the options of Chapter~\ref{ch:inputs}:
 \begin{itemize}
@@ -184,4 +193,12 @@ The same run with the options of Chapter~\ref{ch:inputs}:
   the two spectra at 5~cm$^{-1}$ resolution is 6.7\%;
 \item \opt{dipole3}: the CH stretches go from 7.5\% to 10.3\% of the total
   intensity.
+\item \opt{fermithres}~$=$~\opt{ddthres}~$=0.1$, the default: phase 1
+  finds 3078 resonances (2700 E4, 183 B3, 185 D4, 10 G2), the largest
+  polyad has 7179 states instead of 3094, and phase 2b takes about nine
+  times longer (\texttt{git 4dc7bdb}, 4 processes). The total goes from
+  446.06 to 441.72~km/mol ($-1$\%), the CH stretch band at
+  5~cm$^{-1}$ resolution peaks at 3041.9 instead of 3035.0~cm$^{-1}$, and
+  the relative L1 distance between the two spectra at 5~cm$^{-1}$
+  resolution is 32\%. The tutorial uses 0.2 only because it is cheaper.
 \end{itemize}

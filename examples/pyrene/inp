@@ -6,10 +6,6 @@ nmodes = 72
 verbosity = 27
 
 ## Limits ##
-cutcorrflag = 0
-cutintensity = 1.e-8
-tolerance = 1.e-4
-vectolerance = 5.e-3
 vectolerance3 = 5.e-2
 fermithres = 0.20
 ddthres = 0.20
@@ -35,6 +31,5 @@ danharmhistmin = -1000
 danharmhistmax = 1000
 danharmhiststep = 5.
 
-maxlapack = 100
 
 modepopfile = "quantafile"
