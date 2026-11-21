@@ -60,6 +60,16 @@
   \opt{verbosity} bit~1 a second line gives how many of all the polyads are
   closed, and how many of those band destinations fall in polyads that are
   not; this check takes about a third more time in phase~2a.
+
+  Two starting states that lie in the same closed polyad have the same
+  starting polyad. Computing both from one directory was tried (November
+  2026) and does not pay: in thermal samples of the usual size no two
+  rows fall in the same closed polyad, and where they do (complete
+  enumerations below about 1000~cm$^{-1}$) the destination polyads of the
+  two rows, grown in one directory, merge into larger blocks, so that
+  phase~2b takes more time, not less (2.4 times on pyrene), and the
+  spectra change by a few per cent \notes{Sec.~``Reusing closed polyads''}.
+  Run such rows separately, as now.
 \end{description}
 \section{Phase 2b}
 \begin{description}
