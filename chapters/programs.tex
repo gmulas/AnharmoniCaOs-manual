@@ -25,6 +25,7 @@ program & what it does & section \\
 \prog{orca2ac.py} & input files from an ORCA VPT2 job & \ref{sec:run-orca2ac} \\
 \prog{anh\_fd.py} & input files from one job per displaced geometry & \ref{sec:run-fd} \\
 \prog{anh\_ffcompare.py} & comparison of two force fields & \ref{sec:run-ffcompare} \\
+\prog{anh\_symm.py} & point group, mode species, symmetry noise & \ref{sec:run-symm} \\
 \prog{anh\_sample.py} & starting states for $T>0$, density of states & \ref{sec:run-sample} \\
 \prog{anh\_jobs.py} & many starting states split into jobs & \ref{sec:run-jobs} \\
 \prog{anh\_assemble.py} & spectra from the histograms of the jobs & \ref{sec:run-assemble} \\
@@ -751,6 +752,91 @@ not depend on the rotation. With \texttt{-{}-write DIR} the force field
 of DIR2 is written in the basis of DIR1, in the same file formats;
 \file{phi4file} and \file{dmu3file} only when no degenerate set is
 rotated, since they would need entries that are not in the files.
+
+\section{\prog{anh\_symm.py}}\label{sec:run-symm}
+
+Finds the point group of the molecule and the symmetry species of every
+normal mode, and reports the \emph{symmetry noise} of a force field: the
+cubic and quartic constants, and the components of the dipole
+derivatives, that the symmetry of the molecule forbids but that are not
+zero in the files. Force fields from finite differences computed
+without symmetry (the anharmonic run of Gaussian or ORCA, or
+\prog{anh\_fd.py} without \texttt{-{}-symmetry}) carry such values; above
+\opt{minhopcoupling} they couple states of different symmetry, and they
+can create resonances that the molecule does not have. With
+\texttt{-{}-zero} the tool writes the files without them. It never
+changes its input files.
+
+\paragraph{Where.} Anywhere. It reads the harmonic calculation that
+defines the normal modes of the files, and a directory with
+\file{freqsfile}, \file{phi3file}, \file{phi4file}, \file{dmu2file} and
+\file{dmu3file} (\file{.xz} files are read too; missing files are
+skipped).
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_symm.py SOURCE FFDIR [--outdir DIR] [--zero] \
+        [--symtol 0.01] [--freqtol 1] [--phiwarn 0.5] [--dmuwarn 1e-4] \
+        [--phifloor 1e-3] [--dmufloor 1e-8] [--list 20]
+\end{lstlisting}
+SOURCE is the harmonic calculation of the same run as the files: a
+Gaussian \file{.fchk} (with its normal modes) or \file{.log} (the normal
+modes have more digits with \texttt{freq=HPModes}), an ORCA \file{.hess},
+or the directory of the jobs of \prog{anh\_fd.py} (its
+\file{manifest.json}). The dipole derivatives of the files must be in the
+Cartesian frame of its geometry, as they are with \prog{gaussian2ac.py},
+\prog{orca2ac.py} and \prog{anh\_fd.py}. The point group is made of the
+operations that map every atom onto an atom of the same element within
+\texttt{-{}-symtol} bohr. The modes are matched to those of
+\file{freqsfile} by wavenumber, within \texttt{-{}-freqtol}~cm$^{-1}$, in
+any order. SOURCE can also be a species file written by the tool (or by
+hand in its format) for a group whose operations are named \texttt{E},
+\texttt{i}, \texttt{C2x}, \texttt{C2y}, \texttt{C2z}, \texttt{sigmax},
+\texttt{sigmay}, \texttt{sigmaz}, with the files in a frame aligned with
+those axes: then the modes are taken in the order of the file.
+
+\paragraph{What it checks.} The tool uses the largest subgroup made of
+operations of order two (D$_{2h}$ or one of its subgroups): there every
+species has characters $\pm1$, every mode has a species, and so has
+every harmonic state (the product of the characters of its quanta). A
+constant is allowed if the product of the species of its modes is the
+totally symmetric one; a component of a dipole derivative over some
+modes is allowed if the product of their species is the species of that
+Cartesian component. In a frame not aligned with the symmetry elements
+the allowed part of each derivative is its projection onto the
+invariant subspace. Degenerate modes (benzene) are taken in a basis
+adapted to the subgroup; if the files use another basis, the tool says
+so and writes the species and the files in the adapted one. For the
+entries with degenerate modes it also checks the full group, such as
+$\Phi_{aaaa}=3\Phi_{aabb}$ for a degenerate pair, without correcting
+them: that would need the quartic constants with four distinct indices,
+which are not in the files. Where an operation needs them, they are
+chosen to make the violation smallest, so the violation reported is a
+lower bound.
+
+\paragraph{Result.} The report on the standard output and in
+\file{symm\_report.txt}: the groups, the degenerate sets, and for each
+file the number of entries with forbidden noise, the largest and the rms,
+by index pattern ($iij$, $ijk$, \dots) and Cartesian component, with the
+largest entries named; a warning when they exceed \texttt{-{}-phiwarn}
+(cm$^{-1}$, default 0.5, the default of \opt{minhopcoupling}) or
+\texttt{-{}-dmuwarn} (a.u.). Forbidden parts below \texttt{-{}-phifloor}
+and \texttt{-{}-dmufloor} are counted apart, as the rounding of the
+numbers in the files. In \texttt{-{}-outdir} (default
+\file{FFDIR/symm}): \file{forbidden}, the entries with forbidden noise, one
+per line; \file{species}, the species of every mode and its characters
+under the operations named in the header; and, with \texttt{-{}-zero} or
+when the basis is rotated, the five input files without the forbidden
+noise (lines that do not change are copied as they are). For molecules
+with degenerate modes, the resonances that phase~1 finds depend on the
+basis of each degenerate set; run phase~1 on the files in the adapted
+basis to compare with and without \texttt{-{}-zero}.
+
+\paragraph{Example.} The log of the hexahydropyrene example
+(\file{examples/hexahydropyrene}), converted with \prog{gaussian2ac.py}:
+the job ran without symmetry (Gaussian prints C$_1$), but the geometry is
+C$_{2v}$, and the tool finds that group and no forbidden constant above
+the threshold of \prog{gaussian2ac.py}.
 
 \section{\prog{anh\_sample.py}}\label{sec:run-sample}
 
