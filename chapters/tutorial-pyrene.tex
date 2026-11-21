@@ -108,20 +108,20 @@ lines and draws Figure~\ref{fig:pyrene}:
 \begin{lstlisting}
 python3 plot_spectrum.py . 8
 \end{lstlisting}
-The run gives 4245 lines with a total of 446.1~km/mol. The strongest are:
+The run gives 4245 lines with a total of 481.7~km/mol. The strongest are:
 \begin{center}
 \begin{tabular}{rr}
 \toprule
 wavenumber (cm$^{-1}$) & intensity (km/mol) \\
 \midrule
-844.79 & 109.92 \\
-711.91 & 43.95 \\
-3034.57 & 41.85 \\
-742.61 & 16.00 \\
-3037.70 & 13.68 \\
-1184.00 & 12.16 \\
-202.22 & 10.19 \\
-3043.19 & 8.31 \\
+844.79 & 111.50 \\
+3034.58 & 58.08 \\
+711.91 & 44.64 \\
+3037.70 & 20.58 \\
+742.61 & 15.98 \\
+1184.00 & 11.39 \\
+3043.19 & 11.06 \\
+202.22 & 10.94 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -137,8 +137,14 @@ split among the states they are in resonance with.}
 \end{figure}
 
 These numbers and the figure come from a run of \file{run.sh} with the
-development version that follows 2026.11.2 (\texttt{git 86430f8}, the first
-with \opt{closureterms}~$=1$ by default) on a laptop, with 4 processes.
+development version that follows 2026.11.2 (\texttt{git 966942c}, the first
+with \opt{dipole3balance}~$=1$ by default) on a laptop. With
+\opt{dipole3balance}~$=0$ the lines are at the same wavenumbers and the total
+is 446.06~km/mol: the balancing terms of the third-order dipole take
+intensity back to the fundamentals from the overtones and combinations it
+was lent to, mostly to the CH stretches (from 96.4 to 135.4~km/mol between
+2700 and 3200~cm$^{-1}$), while the band between 1000 and 2000~cm$^{-1}$
+loses 6.7~km/mol.
 
 \subsection*{Choice of the eigensolver}
 
@@ -158,8 +164,9 @@ phase 2b:
   polyads of 3400 states and more, without any error.
 \end{itemize}
 
-Wall time of phase 2b of this tutorial on a laptop, with the same version
-(\texttt{git 86430f8}); the three runs give the same total, 446.06~km/mol:
+Wall time of phase 2b of this tutorial on a laptop, with \texttt{git 86430f8}
+(before \opt{dipole3balance}~$=1$ became the default, which does not change
+the cost); the three runs give the same total, 446.06~km/mol:
 \begin{center}
 \begin{tabular}{lrr}
 \hline
@@ -181,7 +188,10 @@ the spectrum agrees with the other solvers within its resolution
 
 \section{Variations}\label{sec:tut-pyrene-var}
 
-The same run with the options of Chapter~\ref{ch:inputs}:
+The same run with the options of Chapter~\ref{ch:inputs}. Except for the
+third-order dipole, these variations were run before
+\opt{dipole3balance}~$=1$ became the default, so the totals they quote
+refer to 446.06~km/mol:
 \begin{itemize}
 \item \opt{shiftgeometry}: lines shift by up to about 4~cm$^{-1}$, and some
   intensities change by 10--15\%;
@@ -191,8 +201,12 @@ The same run with the options of Chapter~\ref{ch:inputs}:
   stretch line moves from 3034.57 to 3035.46~cm$^{-1}$, the shoulder near
   3043~cm$^{-1}$ moves to 3042.34, and the relative L1 distance between
   the two spectra at 5~cm$^{-1}$ resolution is 6.7\%;
-\item \opt{dipole3}: the CH stretches go from 7.5\% to 10.3\% of the total
-  intensity.
+\item \opt{dipole3}~$=1$, all the terms of the third-order dipole (no
+  \file{dmu3file} here): the total goes from 481.69 to 489.20~km/mol, the
+  CH stretches from 135.40 to 138.79 and the band between 1000 and
+  2000~cm$^{-1}$ from 111.08 to 112.27; \opt{dipole3balance}~$=0$, no
+  third-order dipole: 446.06, 96.40 and 117.82~km/mol (\texttt{git
+  966942c}).
 \item \opt{fermithres}~$=$~\opt{ddthres}~$=0.1$, the default: phase 1
   finds 3078 resonances (2700 E4, 183 B3, 185 D4, 10 G2), the largest
   polyad has 7179 states instead of 3094, and phase 2b takes about nine
