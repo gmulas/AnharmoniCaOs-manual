@@ -147,8 +147,10 @@ cm$^{-1}$.
 \begin{itemize}
 \item Keep E$_\mathrm{enum}$ low enough that the enumeration stays below
 a few million states.
-\item For phase~2b, \opt{Ehistmax} must be at least E$_\mathrm{max}$:
-phase~2b ignores starting states outside the energy histogram.
+\item For phases~2a and~2b, \opt{Ehistmax} must be above E$_\mathrm{max}$:
+they stop at the start if a starting state is outside the energy
+histogram (\opt{allowoutsidehist}). \prog{anh\_jobs.py} chooses a grid
+that covers all the starting states.
 \end{itemize}
 \item[\flag{--ehistmin}, \flag{--ehiststep}] The energy bins. They must be
 those of the phase~2b runs (\opt{Ehistmin}, \opt{Ehiststep}). By default

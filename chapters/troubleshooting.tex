@@ -24,6 +24,14 @@
   Choose the bands in \file{bandlist}.
 \item[\texttt{error reading updown for band}] \file{dumpedparams} was
   written by the phase 1 of an older version. Rerun phase 1.
+\item[\texttt{STARTING STATE(S) OUTSIDE THE Ehist* GRID}] Phase~2a or~2b
+  found starting states whose harmonic energy is outside
+  \opt{Ehistmin}..\opt{Ehistmax}, and stopped before any heavy work. The
+  message lists them (line of \opt{modepopfile} or \file{processedquantas},
+  energy, weight, quanta) and gives the values of \opt{Ehistmin} and
+  \opt{Ehistmax} that would include them. Change the grid (the same in all
+  the jobs added by \prog{anh\_assemble.py}), remove the states, or set
+  \opt{allowoutsidehist}~$=1$ to leave them out of the histograms.
 \item[\texttt{resintensitythres is no longer used}] Replace it by
   \opt{resintensityrel}.
 \end{description}
