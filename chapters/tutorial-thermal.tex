@@ -332,14 +332,19 @@ default.
 \end{description}
 
 \paragraph{How long it takes.} With the development version that follows
-2026.11.2 (\texttt{git 86430f8}, \opt{closureterms}~$=1$ by default):
+2026.11.2 (\texttt{git d257363}: \opt{closureterms}~$=1$,
+\opt{startnorm}~$=1$ and \opt{spectralborder}~$=0$ by default):
 \begin{itemize}
 \item on the cluster of the authors, as 13 jobs of 4 states with 8
-threads each, all running at the same time, they take 7~min~45~s
-(5~min~33~s with 2026.11.1, which left out the closure terms);
-\item on a 4-core laptop they take about an hour and a quarter: with
-2026.11.1 they took about one hour (phase~2a about 8~minutes, phase~2b the
-rest), and the closure terms make the jobs about a third longer.
+threads each, all running at the same time, they take 10~min (the
+slowest job), 48~minutes of jobs in all. With \opt{spectralborder}~$=1$
+and \opt{startnorm}~$=0$, the defaults up to \texttt{git 86430f8}, the
+same jobs on the same nodes take 5~min~32~s, 25~minutes in all: without
+the border phase~2b uses all the energy windows, and the jobs take about
+twice as long;
+\item on a 4-core laptop, with \texttt{git 86430f8}, they took about an
+hour and a quarter (about one hour with 2026.11.1, which left out the
+closure terms); with the new defaults expect about twice as long.
 \end{itemize}
 The cost is uneven: the polyads grow quickly with the energy of the
 starting state, and one of these 51 states has a polyad of 26498 states
@@ -415,30 +420,44 @@ simpler choice, and the one of the previous versions.
 
 \paragraph{Results.} The absorption totals (\texttt{absorption total} in
 the header of \file{thermal\_T*.dat}), in km/mol, with the same version
-(\texttt{git 86430f8}), and in parentheses with 2026.11.1, which left out
-the closure terms (\opt{closureterms}~$=0$ gives them back exactly):
+(\texttt{git d257363}), and in parentheses with \opt{startnorm}~$=0$ and
+\opt{spectralborder}~$=1$, which give back exactly the results of
+\texttt{git 86430f8}:
 \begin{center}
 \begin{tabular}{rrr}
 \toprule
 $T$ (K) & \texttt{anharmonic} & \texttt{harmonic} \\
 \midrule
-0 & 446.062 (446.078) & 446.062 (446.078) \\
-100 & 448.028 (448.044) & 448.022 (448.038) \\
-200 & 455.441 (455.458) & 450.116 (450.261) \\
+0 & 446.062 (446.062) & 446.062 (446.062) \\
+100 & 448.027 (448.028) & 448.028 (448.022) \\
+200 & 455.360 (455.441) & 455.240 (450.116) \\
 \bottomrule
 \end{tabular}
 \end{center}
-The closure terms change the totals by less than 0.2~km/mol and leave the
-bands below 3000~cm$^{-1}$ as they are; the 3.3~$\mu$m band peaks about
-1~cm$^{-1}$ lower at every temperature (3034.0 instead of 3035.1~cm$^{-1}$
-at 200~K, at 5~cm$^{-1}$ resolution) and is a little wider.
 At 0~K both are the spectrum of Tutorial~1. At 200~K the two schemes
-differ by 1\,\%: the anharmonic energies of the excited states are lower
-than the harmonic ones, so the two schemes give them different
-Boltzmann weights. With the harmonic scheme the tool also warns that
+differ by 0.03\,\%.
+\begin{itemize}
+\item \textbf{The normalisation.} With the border, some starting states
+lost part of their weight, and in the harmonic scheme their spectra
+lost the same fraction: at 200~K the total was 1.1\,\% lower, uniformly
+over the whole spectrum. The anharmonic scheme divides by the weight
+binned in each energy bin, so it was hardly affected (0.02\,\%).
+\item \textbf{The shapes.} Once the totals are divided out, the spectra at
+200~K differ from those with the border by 0.7\,\% (harmonic scheme)
+and 0.3\,\% (anharmonic), in relative L1 distance at a resolution of
+2~cm$^{-1}$. The 3.3~$\mu$m band peaks at 3034.0~cm$^{-1}$ at 200~K, at
+5~cm$^{-1}$ resolution, in both.
+\end{itemize}
+With the harmonic scheme the tool also warns that
 about 0.14\,\% of the population at 200~K lies above 2500~cm$^{-1}$
 (Section~\ref{sec:thermal-howhigh}); for higher temperatures the
 sampling must go higher.
+
+The closure terms (\opt{closureterms}~$=1$, the default after 2026.11.2)
+change these totals by less than 0.2~km/mol; they leave the bands below
+3000~cm$^{-1}$ as they are and move the 3.3~$\mu$m band about
+1~cm$^{-1}$ lower (3034.0 instead of 3035.1~cm$^{-1}$ at 200~K) and make
+it a little wider.
 
 \section{Where the temperature enters}
 
