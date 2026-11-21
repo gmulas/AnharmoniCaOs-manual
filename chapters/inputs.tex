@@ -260,7 +260,7 @@ number) and where it is mentioned or used.
 \hline
 bit & name & what is written \\
 \hline
-1 & \texttt{polyadlevels} & For each starting state, the basis states of its polyads, with the target states marked by \texttt{*}, and their levels. With \opt{spectral}~$=1$, a polyad that is not diagonalised says so and lists only its basis states; a starting polyad diagonalised with \opt{spectralexactmax} lists its eigenstates and their weight on the starting state. \\
+1 & \texttt{polyadlevels} & For each starting state, the basis states of its polyads, with the target states marked by \texttt{*}, and their levels. With \opt{spectral}~$=1$, a polyad that is not diagonalised says so and lists only its basis states; a starting polyad diagonalised with \opt{spectralexactmax} lists its eigenstates and their weight on the starting state. In phase~2a, the number of closed polyads (Section~\ref{sec:out-2a}). \\
 2 & \texttt{timings} & Timings and polyad sizes. In phase~2a, every 60~s and at the end of each starting state, a \texttt{growth:} line with histograms of the credit and hops of the waiting states, of the fewest hops of all the queued states, and of the hops taken per resonance type. With \opt{spectral}~$=1$, the summary lines \texttt{spectral:}, \texttt{spectral border:} and \texttt{spectral timing:} for each starting state. \\
 4 & \texttt{groundlines} & The lines of the ground state, with their assignment. They need \opt{groundtransitions}~$=1$. \\
 8 & \texttt{components} & The main components of the eigenstates. \\
