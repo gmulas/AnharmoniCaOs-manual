@@ -129,7 +129,12 @@ should not exceed the cores that the container sees, which
 \begin{lstlisting}
 anh nproc
 \end{lstlisting}
-prints. The self-tests use 2 processes and one thread, so that they run on
+prints. More threads per process help only up to a point: the spectral
+method of phase~2b on the ground state of the pyrene tutorial (with \opt{rescriterion}~$=1$, a polyad of 47\,000 states) ran 3.9 times faster with 8
+threads than with one, 5.8 times with 16 and 6.9 times with 32, and
+slower with 64 on the hyperthreads of a 32-core node. To use a large
+node, run several starting states at once with 8--16 threads each
+rather than one with all the cores (Section~\ref{sec:run-jobs}). The self-tests use 2 processes and one thread, so that they run on
 any machine; on a larger one, \texttt{OMP\_NUM\_THREADS=8 anh anh-selftest
 8} (Docker: \texttt{docker run -{}-rm -e OMP\_NUM\_THREADS=8 IMAGE
 anh-selftest 8}).
@@ -426,7 +431,7 @@ grids without pruning, as above: the default adaptive grids
 (\texttt{DefGrid2}, \texttt{DefGrid3}) change discontinuously at the
 symmetric reference geometry, which spoils the semi-quartic constants.
 The RI approximation for the Coulomb term alone (\texttt{RIJONX} with
-\texttt{def2/J}) is acceptable; \texttt{RIJCOSX} is not recommended for
+\texttt{def2/J}) is acceptable, with an explicit auxiliary basis: \texttt{AutoAux} on a small basis such as 6-31G shifts the Hessian and gave errors of up to 23~cm$^{-1}$ in semi-quartic constants; \texttt{RIJCOSX} is not recommended for
 this purpose, not even with the finest COSX grids. The default tolerance of the CP-SCF equations (set by the SCF keyword,
 e.g.\ \texttt{VeryTightSCF}) is far too loose for this purpose: use
 \texttt{Z\_Tol 1e-8} and \texttt{ExtremeSCF} as above, in every job and
@@ -443,7 +448,7 @@ leaves an error of a few tenths of cm$^{-1}$ in the semi-quartic constants
 of soft modes: on benzene (B3LYP/6-31G), $\Phi_{1111}$ and $\Phi_{1122}$
 of the lowest degenerate pair come out about 1\,\% too large, and
 $\Phi_{2222}-3\Phi_{1122}$, zero by symmetry, is $-0.4$~cm$^{-1}$. A
-product grid removes this, at about three times the cost of each Hessian:
+product grid removes this, at about three times the cost of each Hessian on benzene with 6-31G (with a larger basis the exact exchange dominates the cost and the grid matters little: one Hessian of pyrene with B97-1/TZ2P took no longer with this grid than with the Lebedev one):
 replace the grid lines of the template above with
 \begin{lstlisting}
   AngularGrid 0
@@ -461,6 +466,15 @@ which costs about four times the Lebedev grid); a coarser one
 $\Phi_{1111}$ too large by 0.2~cm$^{-1}$. Do not use \texttt{RotInvGrid}: the grid then changes
 discontinuously between displaced geometries, which gave an error of
 20~cm$^{-1}$ in one semi-quartic constant of benzene.
+
+\paragraph{Analytic higher derivatives.} Codes that compute cubic and
+quartic constants analytically would avoid the finite differences of
+Hessians, but none of those tried can be used with DFT functionals:
+LSDalton with OpenRSP gives analytic cubic constants and second dipole
+derivatives in B3LYP, but no analytic quartic constants for DFT (forcing
+them gives wrong results); PySCFAD gave a wrong B3LYP Hessian and has no
+B3LYP cubic constants. For now \prog{anh\_fd.py} with one of the codes
+below is the way.
 
 \paragraph{Which code.} Table~\ref{tab:fd-codes} lists the codes in
 order of speed, with the measured time of one job (Hessian and dipole
