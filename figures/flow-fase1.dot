@@ -1,0 +1,10 @@
+// User-level flow of phase 1 (chapter "Running the programs").
+// Regenerate: dot -Tpng -Gdpi=150 flow-fase1.dot -o flow-fase1.png
+digraph fase1 {
+  rankdir=TB; nodesep=0.25; ranksep=0.3;
+  node [fontname=Helvetica, fontsize=11]; edge [fontname=Helvetica, fontsize=10];
+  in [shape=note, label="inp\nfreqsfile, phi3file, phi4file,\ndmu2file (dmu3file)\n(bandlistfile, resonanceoverrides,\ngradientfile)"];
+  p1 [shape=box, style="rounded,bold", label="thermal_anharmonicity_fase1\n\nresonant terms: fermithres, ddthres\n(rescriterion, samesignresonances,\nclosureterms, dunhamfix)\nreference geometry: shiftgeometry\ndipole: dipole3balance, dipole3\nbands: bandthres, fundthres"];
+  out [shape=note, label="dumpedparams (for phases 2a, 2b)\nresonanceslist, resonancecandidates\ndunhamparams, bandlist\n(*.shifted with shiftgeometry)"];
+  in -> p1 -> out;
+}

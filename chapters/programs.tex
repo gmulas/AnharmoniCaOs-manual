@@ -184,6 +184,45 @@ Only the engines listed in Section~\ref{sec:container} have been tested.
 On Windows, building \ac{} from the sources inside WSL2, as on Linux,
 avoids the container but not the virtual machine.
 
+\section{What goes in and what comes out}\label{sec:run-flow}
+
+Figures~\ref{fig:flow-fase1}--\ref{fig:flow-fase2b} show, for each of the
+three programs, the files it reads, the options that matter most for what
+it does, and the files it writes; Figure~\ref{fig:flow-tools} shows how the
+tools connect them, from a quantum-chemistry calculation to the spectra at
+a temperature. All the options are in Chapter~\ref{ch:inputs}, all the
+files in Chapter~\ref{ch:outputs}. The three programs run one after the
+other in the same directory.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/flow-fase1.png}
+\caption{Phase~1: from the force field to the resonances, the effective
+Hamiltonian and the band list.}\label{fig:flow-fase1}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/flow-fase2a.png}
+\caption{Phase~2a: the polyads of each starting state and of the
+destinations of its bands.}\label{fig:flow-fase2a}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\textwidth]{figures/flow-fase2b.png}
+\caption{Phase~2b: diagonalisation (or spectral expansion), transitions
+and histograms.}\label{fig:flow-fase2b}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.55\textwidth]{figures/flow-tools.png}
+\caption{The tools: input files from a quantum-chemistry calculation
+(top), and spectra at a temperature from many starting states (bottom;
+Tutorial~3). Dashed: optional steps.}\label{fig:flow-tools}
+\end{figure}
+
 \section{\prog{thermal\_anharmonicity\_fase1}}\label{sec:run-fase1}
 
 \paragraph{Where.} In the directory that contains \file{inp} and the

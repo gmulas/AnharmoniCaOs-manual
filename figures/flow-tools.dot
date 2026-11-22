@@ -1,0 +1,21 @@
+// User-level flow of the tools (chapter "Running the programs").
+// Regenerate: dot -Tpng -Gdpi=150 flow-tools.dot -o flow-tools.png
+digraph tools {
+  rankdir=TB; nodesep=0.3; ranksep=0.35;
+  node [fontname=Helvetica, fontsize=11]; edge [fontname=Helvetica, fontsize=10];
+  qc  [shape=note, label="Gaussian or ORCA\nanharmonic run"];
+  ref [shape=note, label="harmonic run"];
+  g2a [shape=box, style=rounded, label="gaussian2ac.py\norca2ac.py"];
+  fd  [shape=box, style=rounded, label="anh_fd.py prepare\n→ jobs →\nanh_fd.py collect"];
+  ff  [shape=note, label="freqsfile, phi3file,\nphi4file, dmu2file,\ndmu3file"];
+  sym [shape=box, style=rounded, label="anh_symm.py\n(optional)"];
+  p1  [shape=box, style="rounded,bold", label="phase 1"];
+  smp [shape=box, style=rounded, label="anh_sample.py\nquantafiles,\ns_dos.dat"];
+  job [shape=box, style=rounded, label="anh_jobs.py\none directory\nper block"];
+  run [shape=box, style="rounded,bold", label="phases 2a, 2b\nin each job"];
+  asm [shape=box, style=rounded, label="anh_assemble.py\n--T, --lng s_dos.dat"];
+  sp  [shape=note, label="spectra at the\ntemperatures"];
+  qc -> g2a -> ff; ref -> fd -> ff; ff -> sym -> ff [style=dashed];
+  ff -> p1 -> smp -> job -> run -> asm -> sp;
+  smp -> asm [style=dashed];
+}

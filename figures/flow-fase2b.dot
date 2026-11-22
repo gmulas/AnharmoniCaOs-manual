@@ -1,0 +1,10 @@
+// User-level flow of phase 2b (chapter "Running the programs").
+// Regenerate: dot -Tpng -Gdpi=150 flow-fase2b.dot -o flow-fase2b.png
+digraph fase2b {
+  rankdir=TB; nodesep=0.25; ranksep=0.3;
+  node [fontname=Helvetica, fontsize=11]; edge [fontname=Helvetica, fontsize=10];
+  in [shape=note, label="inp\ndumpedparams (phase 1)\nprocessedquantas, processeddirs,\ndir_nNNNNN (phase 2a)"];
+  p2b [shape=box, style="rounded,bold", label="thermal_anharmonicity_fase2b\n\nfor each directory: diagonalise\n(eigensolver: slepc, pdsyevr, pdsyevx, elpa)\nor expand spectrally (spectral)\ntransitions of the bands, both directions\n(startnorm, vectolerance*, ltokeep)\nhistograms: Ehist*, wnumhist*"];
+  out [shape=note, label="hist_abs_0,1,2   hist_ems_0,1,2\nhist_anh_abs_*   hist_anh_ems_*\nhist_energy, hist_anhenergy, hist_err\n(written every saveeach states)\ndir_computed in each directory"];
+  in -> p2b -> out;
+}
