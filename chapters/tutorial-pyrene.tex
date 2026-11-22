@@ -61,13 +61,13 @@ fermithres = thres
 ddthres = thres
 \end{lstlisting}
 which is handy when testing how the results depend on them.
-\file{run.sh} takes about 1 min 20~s on a laptop with 4 processes: phase 1
-about 11~s, phase 2a 4~s, phase 2b about 56~s. Phase 1 finds 1842 resonances
+\file{run.sh} takes about 1~min on a laptop with 4 processes: phase 1
+about 13~s, phase 2a 4~s, phase 2b about 46~s. Phase 1 finds 1842 resonances
 (1638 E4, 89 B3, 107 D4, 8 G2) and writes \file{bandlist} with 31
 fundamentals (the modes with a nonzero dipole derivative) and 1264
 overtone, combination and difference bands. The largest polyad has 3094
 states. (With \opt{minhopcoupling}~$=0$, the default of 2026.11, it has
-4529 and phase 2b takes about 2.4 times longer. With
+4529 and phase 2b takes about 2.8 times longer. With
 \opt{closureterms}~$=0$, the default up to 2026.11.2, phase 1 finds 1785
 resonances, the largest polyad has 2363 states and phase 2b takes half
 the time; see the end of this chapter.)
@@ -154,26 +154,25 @@ phase 2b:
 \item \texttt{2}, ScaLAPACK \texttt{pdsyevx}: used in all the tutorials;
 \item \texttt{1}, ScaLAPACK \texttt{pdsyevr}: same spectra;
 \item \texttt{0}, SLEPc: the lines it finds agree with ScaLAPACK, but
-  some weak lines are missing (on the same input with \opt{hsizescalepar}~=~4,
-  1439 lines and 2\% of the total intensity); the reason is being
-  investigated;
+  some weak lines are missing, most of them above 3200~cm$^{-1}$ (on this
+  tutorial 2319 lines instead of 4245, and 463.60~km/mol instead of
+  481.69, $-3.8$\%); the reason is being investigated;
 \item \texttt{3}, ELPA: same spectra (relative L1 distance below
-  $10^{-7}$, the same transition energies), and the fastest. Its two-stage
+  $10^{-10}$, the same transition energies), and the fastest. Its two-stage
   solver (\opt{elpasolver}~=~2) needs blocks of at most 64
   (\opt{elpablock}); with blocks of 300 it gave wrong eigenvalues on the
   polyads of 3400 states and more, without any error.
 \end{itemize}
 
-Wall time of phase 2b of this tutorial on a laptop, with \texttt{git 86430f8}
-(before \opt{dipole3balance}~$=1$ became the default, which does not change
-the cost); the three runs give the same total, 446.06~km/mol:
+Wall time of phase 2b of this tutorial on a laptop, with 2026.11.3
+(\texttt{git 47d1c5f}); the three runs give the same total, 481.69~km/mol:
 \begin{center}
 \begin{tabular}{lrr}
 \hline
 eigensolver & processes $\times$ threads & wall time \\
 \hline
-\texttt{pdsyevx} (2) & $4\times1$ & 0:56 \\
-ELPA one-stage (3) & $1\times1$ & 0:39 \\
+\texttt{pdsyevx} (2) & $4\times1$ & 0:46 \\
+ELPA one-stage (3) & $1\times1$ & 0:28 \\
 \opt{spectral}~$=1$, \opt{spectralexactmax}~$=3100$ & $1\times4$ & 0:04 \\
 \hline
 \end{tabular}
@@ -188,31 +187,30 @@ the spectrum agrees with the other solvers within its resolution
 
 \section{Variations}\label{sec:tut-pyrene-var}
 
-The same run with the options of Chapter~\ref{ch:inputs}. Except for the
-third-order dipole, these variations were run before
-\opt{dipole3balance}~$=1$ became the default, so the totals they quote
-refer to 446.06~km/mol:
+The same run with the options of Chapter~\ref{ch:inputs}, all with
+2026.11.3 (\texttt{git 47d1c5f}) on a laptop; the totals they quote refer
+to 481.69~km/mol:
 \begin{itemize}
-\item \opt{shiftgeometry}: lines shift by up to about 4~cm$^{-1}$, and some
-  intensities change by 10--15\%;
+\item \opt{shiftgeometry}: lines below 3000~cm$^{-1}$ shift by up to about
+  4~cm$^{-1}$, some intensities change by up to about 20\%, and the total
+  goes to 477.06~km/mol;
 \item \opt{closureterms}~$=0$ (the default up to 2026.11.2): 57 fewer
   resonances and 112 couplings change, by up to 6~cm$^{-1}$. The total
   and every band below 3000~cm$^{-1}$ stay the same; the strongest CH
   stretch line moves from 3034.57 to 3035.46~cm$^{-1}$, the shoulder near
   3043~cm$^{-1}$ moves to 3042.34, and the relative L1 distance between
-  the two spectra at 5~cm$^{-1}$ resolution is 6.7\%;
+  the two spectra at 5~cm$^{-1}$ resolution is 8.2\%; phase 2b takes half
+  the time;
 \item \opt{dipole3}~$=1$, all the terms of the third-order dipole (no
   \file{dmu3file} here): the total goes from 481.69 to 489.20~km/mol, the
   CH stretches from 135.40 to 138.79 and the band between 1000 and
   2000~cm$^{-1}$ from 111.08 to 112.27; \opt{dipole3balance}~$=0$, no
-  third-order dipole: 446.06, 96.40 and 117.82~km/mol (\texttt{git
-  966942c}).
+  third-order dipole: 446.06, 96.40 and 117.82~km/mol.
 \item \opt{fermithres}~$=$~\opt{ddthres}~$=0.1$, the default: phase 1
   finds 3078 resonances (2700 E4, 183 B3, 185 D4, 10 G2), the largest
   polyad has 7179 states instead of 3094, and phase 2b takes about nine
-  times longer (\texttt{git 4dc7bdb}, 4 processes). The total goes from
-  446.06 to 441.72~km/mol ($-1$\%), the CH stretch band at
-  5~cm$^{-1}$ resolution peaks at 3041.9 instead of 3035.0~cm$^{-1}$, and
-  the relative L1 distance between the two spectra at 5~cm$^{-1}$
-  resolution is 32\%. The tutorial uses 0.2 only because it is cheaper.
+  times longer (4 processes). The total goes from 481.69 to
+  481.01~km/mol, the CH stretch band at 5~cm$^{-1}$ resolution peaks at
+  3041.7 instead of 3035.0~cm$^{-1}$, and the relative L1 distance between
+  the two spectra at 5~cm$^{-1}$ resolution is 36\%. The tutorial uses 0.2 only because it is cheaper.
 \end{itemize}
