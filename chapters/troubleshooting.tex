@@ -35,3 +35,15 @@
 \item[\texttt{resintensitythres is no longer used}] Replace it by
   \opt{resintensityrel}.
 \end{description}
+
+\section*{Known issues}
+
+\paragraph{Emission at $T>0$ is underestimated.} Phase~2b leaves out,
+without any message, the band transitions whose destination state is not
+among the polyads built by phase~2a; these are mostly transitions from
+the basis states of the starting polyad other than the nominal starting
+state. At 0~K nothing is lost. At 200~K on pyrene (the starting states of
+Tutorial~3) the emission is underestimated by about 5--40\,\%, depending
+on the resonance thresholds, and by up to 99\,\% for the starting states
+that emit most; the absorption by less than 0.2\,\%. A fix is planned
+for the next release.
