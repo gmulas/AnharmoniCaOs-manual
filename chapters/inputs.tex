@@ -110,7 +110,7 @@ number) and where it is mentioned or used.
 \optentry{harmdiffthres}{1e-6}{1}{Detunings smaller than this (cm$^{-1}$) are treated as exact degeneracies.}
 \optentry{phi4cutoff}{1}{1}{For an exactly degenerate quartic term of type C4 (all four quanta created), the smallest coupling (cm$^{-1}$) that makes it resonant.}
 \optentry{samesignresonances}{0}{1}{Also accept terms whose detuning is a single frequency.}
-\optentry{closureterms}{1}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}: the products of one resonant and one nonresonant first-order term, which the effective Hamiltonian needs when the set of resonances is not closed. The default since the release after 2026.11.2; 0 leaves them out and reproduces the results of 2026.11.2 and earlier.}
+\optentry{closureterms}{1}{1}{Add the closure terms $-P[S_1,PH_1]$ to the resonant couplings \notes{Eq.~163}: the products of one resonant and one nonresonant first-order term, which the effective Hamiltonian needs when the set of resonances is not closed. The default since 2026.11.3; 0 leaves them out and reproduces the results of 2026.11.2 and earlier.}
 \optentry{enablequarticresons}{1}{1}{With 0, the iterative search for the resonances that appear through the effective second-order couplings is skipped, and only the first pass of the quartic test is done. A test option; changes results.}
 \optentry{diophantineiter}{0}{1}{If nonzero, close the set of resonances under integer combinations, with the PARI library. It can produce very many resonances. Not available in builds without PARI.}
 \optentry{paristacksize}{200000000}{1}{With \opt{diophantineiter}: the stack of PARI, in bytes.}
@@ -129,7 +129,7 @@ number) and where it is mentioned or used.
 \subsection*{Geometry and dipole}
 \begin{description}
 \optentry{shiftgeometry}{0}{1}{Move the reference geometry and the normal modes so that the linear terms of the normal-ordered Hamiltonian vanish exactly; frequencies, force constants and dipole derivatives are replaced by those of the new modes. The new quantities are written to \file{*.shifted} (Chapter~\ref{ch:outputs}). A run that reads the \file{*.shifted} files with \opt{shiftgeometry}~$=0$, \opt{gradientfile}~$=$~\texttt{"gradient.shifted"}, \opt{phi3threshold}~$=$~\opt{phi4threshold}~$=$~\opt{dmu2threshold}~$=$~\opt{fundthres}~$=0$ and \opt{bandlistfile} set to a copy of the \file{bandlist} of the shifted run reproduces the shifted run exactly (\opt{fundthres}~$=0$ keeps the small dipole derivatives that the shift gives to the symmetry-forbidden modes; the band list keeps the same fundamentals active). Changes results.}
-\optentry{dipole3balance}{1}{1}{Add to the fundamentals and hot bands the balancing part of the third-order transformed dipole, the two terms that contain only the first-order generator \notes{Sec.~cl:dipole3}. At second order the nonresonant terms lend intensity from the fundamentals to overtones and combinations; these terms take the same dipole strength away from the fundamentals, as the unitarity of the transformation requires. \file{dmu3file} is not needed. In Tutorial~1 the total absorption goes from 446.06 to 481.69~km/mol and the CH stretches from 96.4 to 135.4~km/mol. The default since the release after 2026.11.2; 0 reproduces the results of earlier releases (with \opt{dipole3}~$=0$). Ignored with \opt{dipole3}~$=1$, which includes these terms. Changes intensities.}
+\optentry{dipole3balance}{1}{1}{Add to the fundamentals and hot bands the balancing part of the third-order transformed dipole, the two terms that contain only the first-order generator \notes{Sec.~cl:dipole3}. At second order the nonresonant terms lend intensity from the fundamentals to overtones and combinations; these terms take the same dipole strength away from the fundamentals, as the unitarity of the transformation requires. \file{dmu3file} is not needed. In Tutorial~1 the total absorption goes from 446.06 to 481.69~km/mol and the CH stretches from 96.4 to 135.4~km/mol. The default since 2026.11.3; 0 reproduces the results of earlier releases (with \opt{dipole3}~$=0$). Ignored with \opt{dipole3}~$=1$, which includes these terms. Changes intensities.}
 \optentry{dipole3}{0}{1}{All the terms of the third-order transformed dipole for fundamentals and hot bands: the balancing part of \opt{dipole3balance} and the third-order anharmonicity proper, with the third derivatives of the dipole of \file{dmu3file} if present. In Tutorial~1 (no \file{dmu3file}) the total absorption is 489.20~km/mol. Changes intensities.}
 \end{description}
 
@@ -290,7 +290,7 @@ weights come from the sampling of the starting states and from
 message, because the intensity test of \opt{rescriterion} is now relative
 (\opt{resintensityrel}, \opt{resdarkrel}, \opt{resdarkmin}).
 
-After version 2026.11.2 two more options were removed:
+In version 2026.11.3 two more options were removed:
 \opt{conserveint} (a heuristic renormalisation of the fundamental
 intensities) and \opt{cutcorrflag} (a two-level correction of the
 diagonal for the couplings to states outside the polyad). Both were 0 by
@@ -298,7 +298,7 @@ default, and the programs now always behave as with 0: an input file
 that still sets either of them gets the same warning, and the results of
 the default.
 
-\opt{anharmflag} was removed after version 2026.11.2 as well. The
+\opt{anharmflag} was removed in version 2026.11.3 as well. The
 diagonal anharmonic energies are always included in the polyad matrices
 before the diagonalisation, as with the old default 0. An input file
 with \opt{anharmflag}~$=0$ gets the same warning and runs; one with
