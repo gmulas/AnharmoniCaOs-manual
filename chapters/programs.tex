@@ -586,10 +586,11 @@ reference calculation (\emph{Time} below).
 \paragraph{Command.}
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_fd.py prepare REF --code CODE --template TEMPLATE \
-        [--step 0.05] [--dir DIR] [--symmetry] \
+        [--step 0.05] [--dir DIR] [--symmetry [--symops auto|all|perm] \
+        [--gridtol 0.1] [--gridref D000_RESULT] [--orient]] \
         [--refout FILE | --ref-time SECONDS] [--jobs-at-once K]
   ... run the jobs ...
-python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR]
+python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR] [--gridtol 0.1]
 \end{lstlisting}
 (\texttt{anh python3 TOOLS/anh\_fd.py ...} in the container). REF is the
 \file{.fchk}, \file{.hess} or \file{.fd\_ddipole} file, CODE is
@@ -698,6 +699,81 @@ The jobs themselves are still run without symmetry (\texttt{nosymm} in
 Gaussian). \texttt{collect} needs nothing more: the operations are in
 \file{manifest.json}.
 
+\paragraph{Symmetry and integration grids.} The image of a Hessian under
+a symmetry operation is the Hessian at the image geometry only if the
+calculation does not depend on how the molecule is oriented in the
+frame. DFT integration grids (and the COSX grids) of ORCA, Gaussian,
+NWChem and PySCF are fixed in the frame of the input. A Lebedev grid is
+invariant under the operations that permute $x$, $y$, $z$ with signs
+(the octahedral group with its axes along $x$, $y$, $z$); a product
+grid (ORCA \texttt{AngularGrid 0}) under fewer. Under any other
+operation the image is a Hessian on another grid, and the difference,
+divided by the square of the step, goes into the semi-quartic constants:
+for pyrene with B97-1/TZ2P, ORCA product grids and a frame oblique to
+the symmetry axes, up to 3.3~cm$^{-1}$, while the 145 jobs computed
+without symmetry agree within 0.13~cm$^{-1}$. For benzene with a Lebedev grid in an
+oblique frame the 23 jobs agreed with the 61 within 0.2~cm$^{-1}$: the
+size of the error depends on the system and the grid. \texttt{prepare
+-{}-symmetry} therefore checks the grid and can use fewer operations:
+\begin{itemize}
+\item It prints, for every operation $g$, the largest element of
+  $g K(0) g^T - K(0)$, with $K(0)$ the Hessian in the normal
+  coordinates, and that divided by the square of the step. The second
+  number is a pessimistic bound on the error of the semi-quartic
+  constants (the differences $H(u) - H(0)$ cancel most of a fixed grid
+  error: pyrene 3.3~cm$^{-1}$ seen against a bound of 44). It also says
+  whether $g$ permutes the axes with signs in the frame of the jobs.
+\item The test needs a Hessian at the symmetric geometry, computed with
+  the settings of the jobs. An optimised reference is not exactly
+  symmetric, and its residuals include that asymmetry. So run
+  \file{d000} first (it is at the symmetrised geometry, with the
+  settings of the jobs), then \texttt{prepare} again with
+  \texttt{-{}-gridref DIR/d000.hess} (\file{.fchk}, ...). The files of
+  \file{d000} do not change. Without \texttt{-{}-gridref}, and with a
+  reference that is not symmetric within $10^{-6}$~bohr, all the
+  operations are used as before and \texttt{prepare} only warns.
+\item \texttt{-{}-symops} chooses the operations:
+  \begin{itemize}
+  \item \texttt{auto} (the default): the largest subgroup of those whose
+    bound is below \texttt{-{}-gridtol}, 0.1~cm$^{-1}$ by default;
+  \item \texttt{all}: every operation, for calculations without a grid
+    (Hartree--Fock without COSX or RI-K) or with a rotationally
+    invariant one (ORCA \texttt{RotInvGrid});
+  \item \texttt{perm}: the operations that permute the axes, enough for
+    Lebedev grids.
+  \end{itemize}
+  The jobs that the other operations would have supplied are then
+  computed. For pyrene in an oblique frame, with a product grid, only
+  the identity passes, so 145 jobs are needed instead of 86.
+\item \texttt{-{}-orient} writes all the jobs, \file{d000} included, in a
+  frame where as many operations as possible permute the axes:
+  \begin{itemize}
+  \item $D_{2h}$ with its three twofold axes along $x$, $y$, $z$: all 8;
+  \item $D_{6h}$: a $D_{3d}$ subgroup of 12;
+  \item $I_h$: a $T_h$ subgroup of 24.
+  \end{itemize}
+  \texttt{collect} rotates the results back, so the files are in the
+  frame of the reference. \file{d000} then recomputes the reference in
+  the new frame, and the reference file cannot stand in for it. With
+  \texttt{-{}-orient}, \texttt{auto} uses the operations that permute the
+  axes in the new frame, unless \texttt{-{}-gridref} gives the
+  \file{d000} of the oriented run. With a product grid even these may
+  fail: for the pyrene template above inversion fails at the symmetric
+  geometry, so test with \texttt{-{}-gridref}.
+\item \texttt{collect} compares, for every operation (also those not
+  used), the image of each computed Hessian difference with the one
+  computed at the image displacement, whenever both exist. It prints the
+  largest difference and that divided by the square of the step, and
+  warns when an operation that was used exceeds \texttt{-{}-gridtol}.
+\end{itemize}
+Numbers of jobs (with all the operations, with the operations that
+permute the axes, the same after \texttt{-{}-orient}, and without
+symmetry): benzene in an oblique frame 23, 46, 23, 61; pyrene in an
+oblique frame 86, 109, 86, 145; C$_{60}$ in an oblique frame 49, 262, 90,
+349. Clean every force field from finite differences with
+\prog{anh\_symm.py -{}-zero} (Section~\ref{sec:run-symm}), with or without
+\texttt{-{}-symmetry}.
+
 \paragraph{Result.} \file{freqsfile}, \file{phi3file}, \file{phi4file},
 \file{dmu2file} and \file{dmu3file} in OUTDIR (default: the current
 directory), with the semi-quartic constants $\Phi_{ijkk}$ and the
@@ -803,7 +879,14 @@ without symmetry (the anharmonic run of Gaussian or ORCA, or
 \prog{anh\_fd.py} without \texttt{-{}-symmetry}) carry such values; above
 \opt{minhopcoupling} they couple states of different symmetry, and they
 can create resonances that the molecule does not have. With
-\texttt{-{}-zero} the tool writes the files without them. It also finds
+\texttt{-{}-zero} the tool writes the files without them. Do it for every
+force field from finite differences. For pyrene with B97-1/TZ2P (ORCA,
+145 jobs without symmetry), the forbidden constants reach
+0.08~cm$^{-1}$ (cubic) and 0.17~cm$^{-1}$ (quartic). They add 76
+resonances, all forbidden by symmetry, to the 1859 of the cleaned field.
+These resonances couple states by at most 0.19~cm$^{-1}$, below the
+default \opt{minhopcoupling} of 0.5, so the spectrum does not change. With
+\opt{minhopcoupling}~$= 0$ they bring new weak lines into the spectrum. It also finds
 the principal axes of inertia, and with \texttt{-{}-principal-axes} writes
 the dipole derivatives along them, so that the three components of the
 spectra are a-, b- and c-type bands (Section~\ref{sec:run-assemble}). It never
