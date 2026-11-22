@@ -65,7 +65,7 @@ rescandthres = thres/20  # an expression
   \opt{phi4threshold} (cm$^{-1}$) are dropped.
 \item[\file{dmu2file}] Lines \texttt{i j dx dy dz}: second derivatives of
   the dipole.
-\item[\file{dmu3file}] Optional, with \opt{dipole3}: lines
+\item[\file{dmu3file}] Optional, read only with \opt{dipole3}~$=1$: lines
   \texttt{i j k dx dy dz}. Missing entries are taken as zero.
 \item[\opt{modepopfile}] Starting states: the quantum numbers of all modes,
   then the repetition count.
@@ -129,7 +129,8 @@ number) and where it is mentioned or used.
 \subsection*{Geometry and dipole}
 \begin{description}
 \optentry{shiftgeometry}{0}{1}{Move the reference geometry and the normal modes so that the linear terms of the normal-ordered Hamiltonian vanish exactly; frequencies, force constants and dipole derivatives are replaced by those of the new modes. The new quantities are written to \file{*.shifted} (Chapter~\ref{ch:outputs}). A run that reads the \file{*.shifted} files with \opt{shiftgeometry}~$=0$, \opt{gradientfile}~$=$~\texttt{"gradient.shifted"}, \opt{phi3threshold}~$=$~\opt{phi4threshold}~$=$~\opt{dmu2threshold}~$=$~\opt{fundthres}~$=0$ and \opt{bandlistfile} set to a copy of the \file{bandlist} of the shifted run reproduces the shifted run exactly (\opt{fundthres}~$=0$ keeps the small dipole derivatives that the shift gives to the symmetry-forbidden modes; the band list keeps the same fundamentals active). Changes results.}
-\optentry{dipole3}{0}{1}{Third-order transformed dipole for fundamentals and hot bands. Changes intensities.}
+\optentry{dipole3balance}{1}{1}{Add to the fundamentals and hot bands the balancing part of the third-order transformed dipole, the two terms that contain only the first-order generator \notes{Sec.~cl:dipole3}. At second order the nonresonant terms lend intensity from the fundamentals to overtones and combinations; these terms take the same dipole strength away from the fundamentals, as the unitarity of the transformation requires. \file{dmu3file} is not needed. In Tutorial~1 the total absorption goes from 446.06 to 481.69~km/mol and the CH stretches from 96.4 to 135.4~km/mol. The default since the release after 2026.11.2; 0 reproduces the results of earlier releases (with \opt{dipole3}~$=0$). Ignored with \opt{dipole3}~$=1$, which includes these terms. Changes intensities.}
+\optentry{dipole3}{0}{1}{All the terms of the third-order transformed dipole for fundamentals and hot bands: the balancing part of \opt{dipole3balance} and the third-order anharmonicity proper, with the third derivatives of the dipole of \file{dmu3file} if present. In Tutorial~1 (no \file{dmu3file}) the total absorption is 489.20~km/mol. Changes intensities.}
 \end{description}
 
 \subsection*{Bands}
