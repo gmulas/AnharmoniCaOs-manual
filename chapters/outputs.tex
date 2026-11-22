@@ -88,7 +88,23 @@
   states per energy bin.
 \item[\file{proclog\_n*}] Logs of each process, with the truncation
   estimates when \opt{residualcheck} is on. What else they contain is set by
-  \opt{verbosity} (Table~\ref{tab:verbosity}).
+  \opt{verbosity} (Table~\ref{tab:verbosity}). Whatever \opt{verbosity}, for
+  each starting state, a line \texttt{skipped band terms (destination not
+  queued): N of M; estimated intensity lost: absorption \ldots, emission
+  \ldots}. Phase~2b computes the band transitions of every basis state of
+  the starting polyad only towards the states queued by phase~2a: $N$ of
+  the $M$ band terms of the starting polyad have a destination that is
+  not queued and are skipped. The percentages estimate the fraction of
+  the absorption and of the emission that this loses, in total and by
+  region of the wavenumber (0--1000, 1000--2000, 2000--2950, 2950--3200,
+  above 3200~cm$^{-1}$): the harmonic intensity of the skipped terms over
+  that of all the terms, each basis state weighted as its transitions are
+  in the histograms (sum rule, without the interference between bands).
+  The results do not depend on it.
+\item[\file{masterlog}] At the end, the same estimate over all the
+  starting states, each with the weight of its repetitions (not the
+  thermal weights, which are applied later by \prog{anh\_assemble.py}),
+  and the starting states that lose most.
 \end{description}
 % TODO: units and normalisation of the histograms; script to convert them
 % into a spectrum in km/mol.
