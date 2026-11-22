@@ -39,6 +39,11 @@
 \item[\file{processedquantas}, \file{processeddirs}] The starting states
   and their directories.
 \item[\file{polyadsizes}] The polyad sizes.
+\item[\file{processedquantas.stopped}] Written only if \opt{maxqueued}
+  stopped the growth of some starting states: their quantum numbers and
+  weights, in the format of \file{processedquantas}. These states are not
+  computed, and they are not in the three files above. The name is that
+  given by \opt{processedmodepops} followed by \file{.stopped}.
 \item[\file{growthsizes}] Only with \opt{sizesonly}~=~1, instead of all
   the files above. One line per starting state (after a header line
   \texttt{\#}): index (0 = ground state), states queued, number of
