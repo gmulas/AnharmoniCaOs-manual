@@ -1,0 +1,10 @@
+// User-level flow of phase 2a (chapter "Running the programs").
+// Regenerate: dot -Tpng -Gdpi=150 flow-fase2a.dot -o flow-fase2a.png
+digraph fase2a {
+  rankdir=TB; nodesep=0.25; ranksep=0.3;
+  node [fontname=Helvetica, fontsize=11]; edge [fontname=Helvetica, fontsize=10];
+  in [shape=note, label="inp\ndumpedparams (phase 1)\nmodepopfile: starting states,\none per line (quantafile)"];
+  p2a [shape=box, style="rounded,bold", label="thermal_anharmonicity_fase2a\n\nfor the ground state (computeground)\nand each starting state: polyads of\nthe state and of its band destinations\nsize: hsizescalepar or costmodel/costscale,\nmaxtothops (separatehops), minhopcoupling\nmaxqueued; sizesonly"];
+  out [shape=note, label="dir_n00000, dir_n00001, ...\n(polyads and their matrices)\nprocessedquantas, processeddirs,\npolyadsizes\n(processedquantas.stopped)\nsizesonly: growthsizes only"];
+  in -> p2a -> out;
+}
