@@ -36,6 +36,18 @@
   \opt{resintensityrel}.
 \end{description}
 
+\section*{Large linear terms and \opt{shiftgeometry}}
+
+\opt{shiftgeometry}~$=1$ is an option, not the default. With the default
+\opt{samesignresonances}~$=0$ the linear terms $a^\dagger_i$ (type C1) are
+never resonant. With \opt{samesignresonances}~$=1$ the C1 term of a soft
+mode can pass the threshold: its ratio in \file{resonanceslist} is
+$|L_i|/(\sqrt2\,\omega_i)$, with $L_i=\frac14\sum_k\Phi_{ikk}$. If it is
+above about 0.25 (0.30 for mode~12 of pyrene), run also with
+\opt{shiftgeometry}~$=1$, which removes the linear terms, and compare the
+two runs: they differ mostly in the low-frequency bands, and neither is
+more accurate in general.
+
 \section*{Known issues}
 
 \paragraph{Emission at $T>0$ is underestimated.} Phase~2b leaves out,
