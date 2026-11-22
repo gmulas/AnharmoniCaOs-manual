@@ -132,3 +132,20 @@ states left out of the polyad would shift it by at least
 used and the weight rejected. To reject fewer windows, raise
 \opt{spectralborderthres} or set \opt{spectralborder}~$=0$, not
 \opt{spectraldelta}: a larger \opt{spectraldelta} broadens every band.
+
+The windows of one eigenstate of the starting polyad share its shift, so
+the border usually drops whole eigenstates, and with \opt{startnorm}~$=1$
+their weight goes to the eigenstates kept. The shift is estimated well,
+but an eigenstate a few tenths of cm$^{-1}$ off is still a better
+approximation than none: on spectra compared at a resolution of a few
+cm$^{-1}$ the border then changes the band shapes and the total strength
+more than the shifts it avoids. In particular, a spectrum with
+\opt{spectralborder}~$=1$ is not expected to agree with the eigenvector
+version on the same polyads (\opt{eigensolver}): the border is meant to
+differ from the truncated polyad, and only a run with larger polyads
+(\opt{hsizescalepar}, \opt{maxtothops}) tells which of the two is closer.
+A smaller \opt{spectralborderthres} can end up rejecting nothing: when the
+border leaves a state less than \opt{startnormwmin} of its weight, the
+state is binned without the border, exactly as with
+\opt{spectralborder}~$=0$; the \texttt{startnorm:} line of the log says
+so.
