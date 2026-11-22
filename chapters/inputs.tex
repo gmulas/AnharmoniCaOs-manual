@@ -167,7 +167,6 @@ number) and where it is mentioned or used.
 \optentry{maxqueued}{0}{2a}{A limit on the states queued for one starting state (0: no limit). When it is reached, the growth of that starting state stops: the log gets a \texttt{growth stopped} summary and stderr a warning, its polyads are not written, and it is listed in \file{processedmodepopfile.stopped} instead of the files read by phase~2b. Phase~2a goes on with the next starting state; if the ground-state step reaches the limit, phase~2a stops. A queued state takes about 375 bytes (0.5~kB in large growths), so \texttt{maxqueued = 1e8} is about 40--50~GB. The largest polyad reported for a stopped starting state is a lower bound: the polyads were still growing.}
 \optentry{sizesonly}{0}{2a}{1: grow the polyads of the ground state (if \opt{computeground}) and of every starting state as usual, and write only their sizes to \file{growthsizes}, without building the Hamiltonians. Nothing that phase~2b reads is written (no \file{dir\_n*}, \file{processedquantas}, \file{processeddirs} or \file{polyadsizes}). This measures cheaply how expensive the starting states are, before choosing which ones to compute; the sizes are those of a normal run with the same options. Starting states stopped by \opt{maxqueued} are listed too, flagged.}
 \optentry{growthsizes}{"growthsizes"}{2a}{With \opt{sizesonly}~=~1, the name of the output file; it must not exist.}
-\optentry{anharmflag}{0}{2a, 2b}{0: the diagonal anharmonic energies are included in the polyad matrices before the diagonalisation; 1: they are added to the eigenvalues afterwards. Changes results.}
 \optentry{zerodistinctdd}{0}{2a, 2b}{1: set to zero the couplings of the resonances with four distinct modes, whose quartic part may be missing; a sensitivity test. Changes results.}
 \end{description}
 
@@ -297,3 +296,11 @@ diagonal for the couplings to states outside the polyad). Both were 0 by
 default, and the programs now always behave as with 0: an input file
 that still sets either of them gets the same warning, and the results of
 the default.
+
+\opt{anharmflag} was removed after version 2026.11.2 as well. The
+diagonal anharmonic energies are always included in the polyad matrices
+before the diagonalisation, as with the old default 0. An input file
+with \opt{anharmflag}~$=0$ gets the same warning and runs; one with
+\opt{anharmflag}~$=1$ (\texttt{after}: the energies added to the
+eigenvalues afterwards) stops at the start with an error, because that
+result can no longer be obtained.
