@@ -438,11 +438,15 @@ $T$ (K) & \texttt{anharmonic} & \texttt{harmonic} \\
 \end{center}
 At 0~K both are the spectrum of Tutorial~1. At 200~K the two schemes
 differ by 0.03\,\%. These runs predate \opt{dipole3balance}~$=1$, the
-default since \texttt{git 966942c}: add \opt{dipole3balance}~$=0$ with
-\texttt{--inp-extra} to reproduce them (with \texttt{git 966942c} this
-gives back the table above to the last digit). With the default, and with
-\opt{dipole3}~$=1$ (all the third-order terms of the dipole), the same
-jobs give, with \texttt{git 966942c} (anharmonic and harmonic scheme):
+default since \texttt{git 966942c}. \opt{dipole3balance} is an option of
+phase~1, which the jobs do not run again, so \texttt{--inp-extra} cannot
+change it: to reproduce the table, run phase~1 of Tutorial~1 with
+\opt{dipole3balance}~$=0$ and use that directory as \texttt{--base} (with
+2026.11.3, \texttt{git 47d1c5f}, this gives back the values outside the
+parentheses to the last digit). With the default, and with
+\opt{dipole3}~$=1$ (all the third-order terms of the dipole, again set in
+phase~1), the same jobs give, with \texttt{git 966942c} and with 2026.11.3
+alike (anharmonic and harmonic scheme):
 \begin{center}
 \begin{tabular}{rrr}
 \toprule

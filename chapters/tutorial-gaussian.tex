@@ -32,8 +32,12 @@ modes are renumbered by increasing wavenumber.
 \file{dunhamparams} uses the same convention as Gaussian's
 ``Total Anharmonic X Matrix'': each pair $i\le j$ is counted once.
 Gaussian's matrix includes the Coriolis contributions, which \ac{}
-neglects. Once these are subtracted, the two agree to the printed
+neglects. Once these are subtracted, and with no resonances in phase~1
+(\opt{fermithres}~$=$~\opt{ddthres}~$=10^6$), the two agree to the printed
 precision, except for the entries that Gaussian deperturbs for its Fermi
-resonances (129 of 4095 for this molecule). The zero-point energy agrees
+resonances (about 130 of 4095 for this molecule). With the default
+thresholds about 700 entries differ, because each program leaves out
+of $x_{ij}$ the terms of the resonances it treats, and the two sets of
+resonances are not the same. The zero-point energy agrees
 to 0.03~cm$^{-1}$.
 % TODO: script for this comparison; tables of fundamentals vs GVPT2.
