@@ -439,8 +439,28 @@ $T$ (K) & \texttt{anharmonic} & \texttt{harmonic} \\
 At 0~K both are the spectrum of Tutorial~1. At 200~K the two schemes
 differ by 0.03\,\%. These runs predate \opt{dipole3balance}~$=1$, the
 default since \texttt{git 966942c}: add \opt{dipole3balance}~$=0$ with
-\texttt{--inp-extra} to reproduce them; with the default the totals are
-larger, by 35.6~km/mol at 0~K (Tutorial~1).
+\texttt{--inp-extra} to reproduce them (with \texttt{git 966942c} this
+gives back the table above to the last digit). With the default, and with
+\opt{dipole3}~$=1$ (all the third-order terms of the dipole), the same
+jobs give, with \texttt{git 966942c} (anharmonic and harmonic scheme):
+\begin{center}
+\begin{tabular}{rrr}
+\toprule
+$T$ (K) & default & \opt{dipole3}~$=1$ \\
+\midrule
+0 & 481.697, 481.697 & 489.201, 489.201 \\
+100 & 483.484, 483.484 & 491.149, 491.149 \\
+200 & 489.539, 489.533 & 497.821, 497.805 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The default raises the totals by 8.0\,\% at 0~K and 7.5\,\% at 200~K. At
+200~K, as at 0~K (Tutorial~1), the change is in the 3.3~$\mu$m band,
+2700--3200~cm$^{-1}$, from 96.4 to 136.0~km/mol, and between 1000 and
+2000~cm$^{-1}$, from 118.5 to 111.2~km/mol. The band still peaks at
+3034.0~cm$^{-1}$ at 200~K, and its shape changes little: its width, the
+standard deviation between 2950 and 3150~cm$^{-1}$, goes from 24.4 to
+24.1~cm$^{-1}$.
 \begin{itemize}
 \item \textbf{The normalisation.} With the border, some starting states
 lost part of their weight, and in the harmonic scheme their spectra
