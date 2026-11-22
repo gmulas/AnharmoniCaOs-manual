@@ -50,13 +50,20 @@ more accurate in general.
 
 \section*{Known issues}
 
-\paragraph{Emission at $T>0$ is underestimated.} Phase~2b leaves out,
+\paragraph{Emission at $T>0$ is underestimated in version 2026.11.3 and earlier.} Phase~2b leaves out,
 without any message, the band transitions whose destination state is not
 among the polyads built by phase~2a; these are mostly transitions from
 the basis states of the starting polyad other than the nominal starting
-state. The \texttt{starting polyad:} lines of \file{proclog\_n00000} (phase~2a) give how
-many band destinations are not queued. At 0~K nothing is lost. At 200~K on pyrene (the starting states of
-Tutorial~3) the emission is underestimated by about 5--40\,\%, depending
-on the resonance thresholds, and by up to 99\,\% for the starting states
-that emit most; the absorption by less than 0.2\,\%. A fix is planned
-for the next release.
+state. Up to version 2026.11.3 phase~2a built destination polyads only
+from the nominal starting state: at 200~K on pyrene (the starting states
+of Tutorial~3) they computed 74--95\,\% of the emission, depending on
+the resonance thresholds, and as little as 1\,\% for the starting states
+that emit most; the absorption was underestimated by less than 0.2\,\%. At
+0~K nothing is lost. Since version 2026.11.4, \opt{emissiondestinations}~=~1
+(the default) queues all the destinations below the starting polyad, and
+phase~2b skips no emission term; results computed with older versions, or with
+\opt{emissiondestinations}~=~0, have the loss. The absorption loss (less
+than 0.2\,\% at 200~K) remains: the destinations above the starting
+polyad are still those of the nominal starting state. The
+\texttt{starting polyad:} lines of \file{proclog\_n00000} (phase~2a) give how
+many band destinations are not queued.
