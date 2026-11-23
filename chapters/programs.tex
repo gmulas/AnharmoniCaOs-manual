@@ -374,6 +374,38 @@ NWChem frequency run (its \file{NAME.fd\_ddipole}, with \file{NAME.hess}
 and \file{NAME.out} next to it), and a
 template of the input of one job.
 
+\paragraph{Reference geometry.} The force field is expanded around the
+reference geometry, which must therefore be a minimum converged as
+tightly as Gaussian's \texttt{opt=verytight} (largest gradient component
+$2\times10^{-6}$ atomic units). \texttt{prepare} prints the largest
+gradient component at the reference geometry, from the \file{.fchk} or
+from the last convergence table of the output next to the reference
+(\file{.log} or \file{.out}; another one with \texttt{-{}-refout}), and
+warns above that limit. ORCA's \texttt{VeryTightOpt} accepts a gradient
+of $3\times10^{-5}$: a pyrene geometry optimised with it stopped at
+$1.3\times10^{-5}$, $4\times10^{-4}$~bohr away from its $D_{2h}$
+symmetry. To reach the tolerances of Gaussian, optimise again from that
+geometry with its Hessian and the same method and grids:
+\begin{lstlisting}
+! ... VeryTightOpt
+%geom
+  TolE    1e-8
+  TolMaxG 2e-6
+  TolRMSG 1e-6
+  TolMaxD 6e-6
+  TolRMSD 4e-6
+  InHess  Read
+  InHessName "previous.hess"
+  MaxIter 50
+end
+\end{lstlisting}
+Starting from the exact Hessian, the steps are close to Newton steps and
+converge in a few cycles. Such tight tolerances need a gradient with
+little numerical noise: no RI or COSX approximations, a tight SCF and
+fine grids without pruning, as in the template below. If the
+optimisation oscillates without converging, add
+\texttt{coordsys cartesian} to the \texttt{\%geom} block.
+
 \paragraph{Template.} The input of one job, with \texttt{\{GEOMETRY\}}
 where the Cartesian coordinates go (lines ``symbol x y z'', in
 angstrom), and optionally \texttt{\{NAME\}} (the name of the job,
