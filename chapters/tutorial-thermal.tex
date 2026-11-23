@@ -443,10 +443,12 @@ phase~1, which the jobs do not run again, so \texttt{--inp-extra} cannot
 change it: to reproduce the table, run phase~1 of Tutorial~1 with
 \opt{dipole3balance}~$=0$ and use that directory as \texttt{--base} (with
 2026.11.3, \texttt{git 47d1c5f}, this gives back the values outside the
-parentheses to the last digit). With the default, and with
-\opt{dipole3}~$=1$ (all the third-order terms of the dipole, again set in
-phase~1), the same jobs give, with \texttt{git 966942c} and with 2026.11.3
-alike (anharmonic and harmonic scheme):
+parentheses to the last digit; with 2026.11.4 the anharmonic scheme gives
+455.366 at 200~K, see below, and \texttt{--inp-extra
+"emissiondestinations = 0"} gives back 455.360). With the default, and
+with \opt{dipole3}~$=1$ (all the third-order terms of the dipole, again
+set in phase~1), the same jobs give, with 2026.11.4 (anharmonic and
+harmonic scheme):
 \begin{center}
 \begin{tabular}{rrr}
 \toprule
@@ -454,10 +456,26 @@ $T$ (K) & default & \opt{dipole3}~$=1$ \\
 \midrule
 0 & 481.697, 481.697 & 489.201, 489.201 \\
 100 & 483.484, 483.484 & 491.149, 491.149 \\
-200 & 489.539, 489.533 & 497.821, 497.805 \\
+200 & 489.541, 489.533 & 497.825, 497.805 \\
 \bottomrule
 \end{tabular}
 \end{center}
+With \opt{emissiondestinations}~$=0$ (phase~2a, so it can be given with
+\texttt{--inp-extra}) the jobs give the files of 2026.11.3 byte for
+byte: 489.539 and 497.821 in the
+anharmonic scheme at 200~K, the rest as in the table. The default,
+\opt{emissiondestinations}~$=1$, adds the band destinations below every
+state of each starting polyad (Section~\ref{sec:options}), which shifts
+the anharmonic energies of a few states and so the bins of the
+anharmonic scheme; the harmonic scheme does not change. What it changes
+is the emission: at 200~K the \texttt{emission total} in the header of
+\file{thermal\_T200.dat} is 0.0534~s$^{-1}$ (anharmonic scheme) and
+0.0489~s$^{-1}$ (harmonic), 7.5\,\% and 5.0\,\% more than the 0.0497 and
+0.0466~s$^{-1}$ of \opt{emissiondestinations}~$=0$; at 100~K the two
+differ by less than 0.02\,\%. The \file{masterlog} of each job now
+reports no emission term skipped; the absorption terms still skipped
+(destinations above the starting polyad, Chapter~\ref{ch:trouble})
+are, for the 13 jobs, between 0 and 1.65\,\% of their absorption.
 The default raises the totals by 8.0\,\% at 0~K and 7.5\,\% at 200~K. At
 200~K, as at 0~K (Tutorial~1), the change is in the 3.3~$\mu$m band,
 2700--3200~cm$^{-1}$, from 96.4 to 136.0~km/mol, and between 1000 and
