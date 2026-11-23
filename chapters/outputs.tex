@@ -62,6 +62,10 @@
   that leave it. The same line counts the band destinations of all the
   states of the starting polyad, and how many of them are not in any polyad
   of this starting state: phase~2b computes no transitions to those. With
+  \opt{emissiondestinations}~=~1 (the default) the destinations below the
+  states of the starting polyad are all queued, and a line
+  \texttt{emissiondestinations:} gives how many targets were added for
+  them; those still missing are above the starting polyad. With
   \opt{verbosity} bit~1 a second line gives how many of all the polyads are
   closed, and how many of those band destinations fall in polyads that are
   not; this check takes about a third more time in phase~2a.
