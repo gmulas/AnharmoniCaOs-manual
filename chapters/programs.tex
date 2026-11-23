@@ -686,7 +686,7 @@ state. A template that already sets a guess is refused;
 
 \paragraph{Symmetry.} With \texttt{-{}-symmetry}, \texttt{prepare} finds
 the point group of the molecule from the reference geometry (each atom
-must lie within \texttt{-{}-symtol} bohr, default 0.01, of the image of
+must lie within \texttt{-{}-symtol} bohr, default 0.001, of the image of
 an atom of the same element), makes the geometry and the Hessian exactly
 symmetric, and writes fewer jobs: a displaced geometry and its images
 under the symmetry operations give the Hessian at all the equivalent
@@ -902,7 +902,7 @@ skipped).
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_symm.py SOURCE FFDIR [--outdir DIR] [--zero] \
         [--principal-axes] [--inertiatol 1e-5] \
-        [--symtol 0.01] [--freqtol 1] [--phiwarn 0.5] [--dmuwarn 1e-4] \
+        [--symtol 0.001] [--freqtol 1] [--phiwarn 0.5] [--dmuwarn 1e-4] \
         [--phifloor 1e-3] [--dmufloor 1e-8] [--list 20]
 \end{lstlisting}
 SOURCE is the harmonic calculation of the same run as the files: a
@@ -913,7 +913,13 @@ or the directory of the jobs of \prog{anh\_fd.py} (its
 Cartesian frame of its geometry, as they are with \prog{gaussian2ac.py},
 \prog{orca2ac.py} and \prog{anh\_fd.py}. The point group is made of the
 operations that map every atom onto an atom of the same element within
-\texttt{-{}-symtol} bohr. The modes are matched to those of
+\texttt{-{}-symtol} bohr (default 0.001); the report gives the largest
+distance of an atom from its image. Geometries optimised with symmetry
+are exactly symmetric; optimised without it, with Gaussian
+\texttt{opt=verytight} or ORCA \texttt{VeryTightOpt}, they were within
+$4\times10^{-4}$~bohr of their symmetry in all the cases we checked. A
+larger distance means a geometry not converged enough, or one that is
+really distorted: raise \texttt{-{}-symtol} only if you know which. The modes are matched to those of
 \file{freqsfile} by wavenumber, within \texttt{-{}-freqtol}~cm$^{-1}$, in
 any order. SOURCE can also be a species file written by the tool (or by
 hand in its format) for a group whose operations are named \texttt{E},
