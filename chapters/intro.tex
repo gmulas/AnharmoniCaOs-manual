@@ -68,7 +68,7 @@ can differ, because the two codes choose the resonances differently.
 
 This manual describes \ac{}~\acversion{}. Every program writes its version
 as the first line of its log, for example
-\texttt{AnharmoniCaOs 2026.11.3 (git v2026.11.3), phase 1}; the same line
+\texttt{AnharmoniCaOs 2026.11.4 (git v2026.11.4), phase 1}; the same line
 heads \file{bandlist}, \file{dunhamparams}, \file{resonancecandidates} and
 the files written by the tools. The changes from the previous version,
 2026.11, are listed in \file{NEWS.md} of the code. The ones that matter
@@ -88,7 +88,12 @@ most for inputs written for 2026.11:
 \item since 2026.11.3, phases~2a and~2b stop at the
   start if a starting state is outside the \opt{Ehistmin}..\opt{Ehistmax}
   bins, which earlier versions left out of the spectra without a message
-  (\opt{allowoutsidehist}).
+  (\opt{allowoutsidehist});
+\item since 2026.11.4, \opt{emissiondestinations} is 1 by default: the
+  emission of thermal spectra includes the band destinations below every
+  state of the starting polyad, which raises it by several per cent at
+  200~K (Chapter~\ref{ch:tut-thermal}); spectra at 0~K do not change, and
+  \opt{emissiondestinations}~$=0$ gives back the results of 2026.11.3.
 \end{itemize}
 
 \section{How to read this manual}
