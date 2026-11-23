@@ -70,6 +70,17 @@
   closed, and how many of those band destinations fall in polyads that are
   not; this check takes about a third more time in phase~2a.
 
+  \textbf{Phase 2b overwrites this file.} The three programs write their
+  logs to the same files (\opt{proclogprefix}, default \texttt{proclog})
+  and each starts them anew: after phase~2b, \file{proclog\_n00000}
+  holds only the log of phase~2b, and the \texttt{starting polyad:} and
+  \texttt{emissiondestinations:} lines are gone (the same holds for the
+  jobs written by \texttt{tools/anh\_jobs.py}). To keep them, copy the
+  file after phase~2a and before phase~2b, for example
+  \texttt{cp proclog\_n00000 proclog\_fase2a}, or change
+  \opt{proclogprefix} in \file{inp} before running phase~2b. Phase~2a
+  likewise overwrites the logs of phase~1.
+
   Two starting states that lie in the same closed polyad have the same
   starting polyad. Computing both from one directory was tried (November
   2026) and does not pay: in thermal samples of the usual size no two

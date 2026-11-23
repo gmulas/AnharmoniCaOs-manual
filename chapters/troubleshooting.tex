@@ -62,11 +62,16 @@ that emit most; the absorption was underestimated by less than 0.2\,\%. At
 0~K nothing is lost. Since version 2026.11.4, \opt{emissiondestinations}~=~1
 (the default) queues all the destinations below the starting polyad, and
 phase~2b skips no emission term; results computed with older versions, or with
-\opt{emissiondestinations}~=~0, have the loss. The absorption loss (less
-than 0.2\,\% at 200~K) remains: the destinations above the starting
-polyad are still those of the nominal starting state. The
+\opt{emissiondestinations}~=~0, have the loss. Part of the absorption is
+still lost: the destinations above the starting polyad are still those of
+the nominal starting state. With version 2026.11.4, on the starting states
+of Tutorial~3 weighted as in the spectrum at 200~K, this is 0.066\,\% of
+the absorption (2.5$\times10^{-5}$\,\% at 100~K); the starting state that
+loses most, at 1308~cm$^{-1}$, loses 3.7\,\% of its absorption, and the
+loss grows with the energy of the starting state. The
 \texttt{starting polyad:} lines of \file{proclog\_n00000} (phase~2a) give how
-many band destinations are not queued. Since version 2026.11.4 phase~2b also
+many band destinations are not queued; phase~2b overwrites that file, so
+read it, or copy it, before running phase~2b (Section~\ref{sec:out-2a}). Since version 2026.11.4 phase~2b also
 estimates, for each starting state, the fraction of the intensity lost, by
 direction and region of the spectrum (the \texttt{skipped band terms} line of
 its logs and the summary in \file{masterlog}, Section~\ref{sec:out-2b}).
