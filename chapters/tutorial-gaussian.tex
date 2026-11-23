@@ -16,6 +16,20 @@ prints the cubic and quartic force constants and the dipole derivatives
 in normal coordinates. \texttt{ReadFC} and \texttt{geom=check} reuse a
 previous optimisation and frequency calculation.
 
+Gaussian computes the cubic and quartic constants by differentiating
+analytic Hessians numerically along the normal modes, with a step of
+0.025~\AA{} by default (\texttt{Step=250} in \texttt{freq}, in units of
+$10^{-4}$~\AA). For this molecule the default step is converged. The
+calculation was repeated with \texttt{Step=100} (0.01~\AA) and
+\texttt{Step=500} (0.05~\AA), with \texttt{nosymm}. With 0.01~\AA{}
+three sets of numbers change by 0.02~cm$^{-1}$ at most: the GVPT2
+wavenumbers of the 16 CH stretches, their anharmonic shifts (from $-126$
+to $-147$~cm$^{-1}$), and the deperturbed fundamentals of phase~1
+(version 2026.11.4). With 0.05~\AA{} they are 0.3--0.8~cm$^{-1}$ lower.
+The large anharmonic shifts of the CH stretches are therefore not an
+artefact of the step, and there is no reason to change the default
+(the run with 0.01~\AA{} took 76~hours).
+
 \section{Converting the Gaussian output}
 
 \begin{lstlisting}
