@@ -66,4 +66,7 @@ phase~2b skips no emission term; results computed with older versions, or with
 than 0.2\,\% at 200~K) remains: the destinations above the starting
 polyad are still those of the nominal starting state. The
 \texttt{starting polyad:} lines of \file{proclog\_n00000} (phase~2a) give how
-many band destinations are not queued.
+many band destinations are not queued. Since version 2026.11.4 phase~2b also
+estimates, for each starting state, the fraction of the intensity lost, by
+direction and region of the spectrum (the \texttt{skipped band terms} line of
+its logs and the summary in \file{masterlog}, Section~\ref{sec:out-2b}).
