@@ -445,14 +445,14 @@ change it: to reproduce the table, run phase~1 of Tutorial~1 with
 2026.11.3, \texttt{git 47d1c5f}, this gives back the values outside the
 parentheses to the last digit; with 2026.11.4 the anharmonic scheme gives
 455.366 at 200~K, see below, and \texttt{--inp-extra
-"emissiondestinations = 0"} gives back 455.360). With the default, and
-with \opt{dipole3}~$=1$ (all the third-order terms of the dipole, again
-set in phase~1), the same jobs give, with 2026.11.4 (anharmonic and
+"emissiondestinations = 0"} gives back 455.360). With \opt{dipole3}~$=0$ (the default of 2026.11.3 and
+2026.11.4), and with \opt{dipole3}~$=1$ (all the third-order terms of the
+dipole, again set in phase~1; the default after 2026.11.4), the same jobs give, with 2026.11.4 (anharmonic and
 harmonic scheme):
 \begin{center}
 \begin{tabular}{rrr}
 \toprule
-$T$ (K) & default & \opt{dipole3}~$=1$ \\
+$T$ (K) & \opt{dipole3}~$=0$ & \opt{dipole3}~$=1$ \\
 \midrule
 0 & 481.697, 481.697 & 489.201, 489.201 \\
 100 & 483.484, 483.484 & 491.149, 491.149 \\
