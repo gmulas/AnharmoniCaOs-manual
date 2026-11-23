@@ -910,8 +910,17 @@ Gaussian \file{.fchk} (with its normal modes) or \file{.log} (the normal
 modes have more digits with \texttt{freq=HPModes}), an ORCA \file{.hess},
 or the directory of the jobs of \prog{anh\_fd.py} (its
 \file{manifest.json}). The dipole derivatives of the files must be in the
-Cartesian frame of its geometry, as they are with \prog{gaussian2ac.py},
-\prog{orca2ac.py} and \prog{anh\_fd.py}. The point group is made of the
+Cartesian frame of its geometry, up to a permutation of the axes. Gaussian
+writes the derivatives of an anharmonic run without symmetry
+(\texttt{nosymm}) in the Eckart orientation of its anharmonic section,
+which is the input orientation with the axes permuted, and
+\prog{gaussian2ac.py} copies them as they are. The tool therefore tries
+the permutations of the axes on the derivatives of the non-degenerate
+modes: if one makes their forbidden part over 100 times smaller, it
+takes the files to be in that frame, rotates the geometry and the modes
+of SOURCE to it, and says so in a line \texttt{frame:} of the report.
+Without that line the frame is that of SOURCE, as with
+\prog{orca2ac.py}, \prog{anh\_fd.py} and Gaussian runs with symmetry. The point group is made of the
 operations that map every atom onto an atom of the same element within
 \texttt{-{}-symtol} bohr. The modes are matched to those of
 \file{freqsfile} by wavenumber, within \texttt{-{}-freqtol}~cm$^{-1}$, in
