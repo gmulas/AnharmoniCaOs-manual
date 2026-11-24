@@ -387,7 +387,10 @@ also prints the totally symmetric part of the gradient and the rest. A
 gradient above the limit only in the rest means that the geometry is at
 a minimum within its symmetry, but the computed energy surface is not
 symmetric: with ORCA, a molecule not oriented along its symmetry axes
-(below). ORCA's \texttt{VeryTightOpt} accepts a gradient
+(below). An ORCA \texttt{Freq} run without optimisation prints neither a
+gradient nor a convergence table, so the gradient is then not checked:
+run \texttt{Opt Freq} in one job, or give the output of the optimisation
+with \texttt{-{}-refout}. ORCA's \texttt{VeryTightOpt} accepts a gradient
 of $3\times10^{-5}$: a pyrene geometry optimised with it stopped at
 $1.3\times10^{-5}$, $4\times10^{-4}$~bohr away from its D$_{2h}$
 symmetry. To reach the tolerances of Gaussian, optimise again from that
