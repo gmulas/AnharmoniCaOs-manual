@@ -374,6 +374,59 @@ NWChem frequency run (its \file{NAME.fd\_ddipole}, with \file{NAME.hess}
 and \file{NAME.out} next to it), and a
 template of the input of one job.
 
+\paragraph{Reference geometry.} The force field is expanded around the
+reference geometry, which must therefore be a minimum converged as
+tightly as Gaussian's \texttt{opt=verytight} (largest gradient component
+$2\times10^{-6}$ atomic units). \texttt{prepare} prints the largest
+gradient component at the reference geometry, from the \file{.fchk} or
+from the last convergence table of the output next to the reference
+(\file{.log} or \file{.out}; another one with \texttt{-{}-refout}), and
+warns above that limit. With the Cartesian gradient (the \file{.fchk}, or
+the \texttt{CARTESIAN GRADIENT} of an ORCA output) and a point group it
+also prints the totally symmetric part of the gradient and the rest. A
+gradient above the limit only in the rest means that the geometry is at
+a minimum within its symmetry, but the computed energy surface is not
+symmetric: with ORCA, a molecule not oriented along its symmetry axes
+(below). ORCA's \texttt{VeryTightOpt} accepts a gradient
+of $3\times10^{-5}$: a pyrene geometry optimised with it stopped at
+$1.3\times10^{-5}$, $4\times10^{-4}$~bohr away from its D$_{2h}$
+symmetry. To reach the tolerances of Gaussian, optimise again from that
+geometry with its Hessian and the same method and grids:
+\begin{lstlisting}
+! ... VeryTightOpt
+%geom
+  TolE    1e-8
+  TolMaxG 2e-6
+  TolRMSG 1e-6
+  TolMaxD 6e-6
+  TolRMSD 4e-6
+  InHess  Read
+  InHessName "previous.hess"
+  MaxIter 50
+end
+\end{lstlisting}
+Starting from the exact Hessian, the steps are close to Newton steps and
+converge in a few cycles (pyrene: 2 cycles, 6.5~minutes on 32 cores).
+Such tight tolerances need a gradient with little numerical noise: no RI
+or COSX approximations, a tight SCF and fine grids without pruning, as
+in the template below. If the optimisation oscillates without
+converging, add \texttt{coordsys cartesian} to the \texttt{\%geom} block.
+
+Put the molecule with its centre of mass at the origin and its symmetry
+axes along $x$, $y$, $z$ before optimising (for D$_{2h}$, C$_{2v}$ and
+C$_{2h}$: along the principal axes of inertia). ORCA's integration grids
+are fixed in the frame, so in a frame not aligned with the symmetry
+elements the computed energy surface is not symmetric, and its minimum
+is not either: the pyrene above, optimised with this block in its
+original oblique frame, reached the required gradient but stayed
+$2.4\times10^{-4}$~bohr away from D$_{2h}$, whereas in the aligned frame
+it came out symmetric within $10^{-7}$~bohr. Tighter tolerances do not
+help. The aligned frame is also the one in which the symmetry images of
+the displaced Hessians are exact (\texttt{-{}-orient}, below). For groups
+with operations that no orientation turns into permutations of the axes
+(D$_{6h}$, D$_{3h}$, \ldots) the asymmetry under those operations
+remains.
+
 \paragraph{Template.} The input of one job, with \texttt{\{GEOMETRY\}}
 where the Cartesian coordinates go (lines ``symbol x y z'', in
 angstrom), and optionally \texttt{\{NAME\}} (the name of the job,
