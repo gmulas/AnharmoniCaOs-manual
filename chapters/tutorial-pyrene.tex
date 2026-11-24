@@ -108,20 +108,20 @@ lines and draws Figure~\ref{fig:pyrene}:
 \begin{lstlisting}
 python3 plot_spectrum.py . 8
 \end{lstlisting}
-The run gives 4245 lines with a total of 481.7~km/mol. The strongest are:
+The run gives 4245 lines with a total of 489.2~km/mol. The strongest are:
 \begin{center}
 \begin{tabular}{rr}
 \toprule
 wavenumber (cm$^{-1}$) & intensity (km/mol) \\
 \midrule
-844.79 & 111.50 \\
-3034.58 & 58.08 \\
-711.91 & 44.64 \\
-3037.70 & 20.58 \\
-742.61 & 15.98 \\
-1184.00 & 11.39 \\
-3043.19 & 11.06 \\
-202.22 & 10.94 \\
+844.79 & 113.34 \\
+3034.58 & 59.62 \\
+711.91 & 46.29 \\
+3037.70 & 21.15 \\
+742.61 & 15.53 \\
+1184.00 & 11.54 \\
+3043.19 & 11.29 \\
+202.22 & 10.88 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -136,18 +136,20 @@ split among the states they are in resonance with.}
 \label{fig:pyrene}
 \end{figure}
 
-These numbers and the figure come from a run of \file{run.sh} with the
-development version that follows 2026.11.2 (\texttt{git 966942c}, the first
-with \opt{dipole3balance}~$=1$ by default) on a laptop. With
-\opt{dipole3balance}~$=0$ the lines are at the same wavenumbers and the total
-is 446.06~km/mol: the balancing terms of the third-order dipole take
-intensity back to the fundamentals from the overtones and combinations it
-was lent to, mostly to the CH stretches (from 96.4 to 135.4~km/mol between
-2700 and 3200~cm$^{-1}$), while the band between 1000 and 2000~cm$^{-1}$
-loses 6.7~km/mol.
-From the release after 2026.11.4 the default is \opt{dipole3}~$=1$, which
-gives a total of 489.20~km/mol (see the variations below); add
-\opt{dipole3}~$=0$ to \file{inp} to reproduce the numbers of this chapter.
+These numbers and the figure come from a run of \file{run.sh} with
+2026.11.5 on a laptop, with the default \opt{dipole3}~$=1$: all the terms
+of the third-order transformed dipole (no \file{dmu3file} here, so its
+third derivatives are taken as zero). The lines are at the same
+wavenumbers with the other settings of the third-order dipole; only the
+intensities change. With \opt{dipole3}~$=0$ (the default of 2026.11.3
+and 2026.11.4) the total is 481.69~km/mol, and with
+\opt{dipole3balance}~$=0$, no third-order dipole (2026.11.2 and earlier),
+446.06~km/mol. The third-order dipole takes intensity back to the
+fundamentals from the overtones and combinations it was lent to at
+second order, mostly to the CH stretches (from 96.4 to 138.8~km/mol
+between 2700 and 3200~cm$^{-1}$), while the band between 1000 and
+2000~cm$^{-1}$ loses 5.6~km/mol. Add \opt{dipole3}~$=0$ to \file{inp} to
+compare with results of 2026.11.3 and 2026.11.4.
 
 \subsection*{Choice of the eigensolver}
 
@@ -158,8 +160,8 @@ phase 2b:
 \item \texttt{1}, ScaLAPACK \texttt{pdsyevr}: same spectra;
 \item \texttt{0}, SLEPc: the lines it finds agree with ScaLAPACK, but
   some weak lines are missing, most of them above 3200~cm$^{-1}$ (on this
-  tutorial 2319 lines instead of 4245, and 463.60~km/mol instead of
-  481.69, $-3.8$\%); the reason is being investigated;
+  tutorial 2319 lines instead of 4245, and 471.11~km/mol instead of
+  489.20, $-3.7$\%); the reason is being investigated;
 \item \texttt{3}, ELPA: same spectra (relative L1 distance below
   $10^{-10}$, the same transition energies), and the fastest. Its two-stage
   solver (\opt{elpasolver}~=~2) needs blocks of at most 64
@@ -168,7 +170,8 @@ phase 2b:
 \end{itemize}
 
 Wall time of phase 2b of this tutorial on a laptop, with 2026.11.3
-(\texttt{git 47d1c5f}); the three runs give the same total, 481.69~km/mol:
+(\texttt{git 47d1c5f}); the three runs give the same total (with
+2026.11.5, 489.20~km/mol):
 \begin{center}
 \begin{tabular}{lrr}
 \hline
@@ -191,29 +194,32 @@ the spectrum agrees with the other solvers within its resolution
 \section{Variations}\label{sec:tut-pyrene-var}
 
 The same run with the options of Chapter~\ref{ch:inputs}, all with
-2026.11.3 (\texttt{git 47d1c5f}) on a laptop; the totals they quote refer
-to 481.69~km/mol:
+2026.11.5 on a laptop; the totals they quote refer to 489.20~km/mol:
 \begin{itemize}
 \item \opt{shiftgeometry}: lines below 3000~cm$^{-1}$ shift by up to about
   4~cm$^{-1}$, some intensities change by up to about 20\%, and the total
-  goes to 477.06~km/mol;
+  goes to 488.64~km/mol (477.06 instead of 481.69 with
+  \opt{dipole3}~$=0$);
 \item \opt{closureterms}~$=0$ (the default up to 2026.11.2): 57 fewer
   resonances and 112 couplings change, by up to 6~cm$^{-1}$. The total
   and every band below 3000~cm$^{-1}$ stay the same; the strongest CH
-  stretch line moves from 3034.57 to 3035.46~cm$^{-1}$, the shoulder near
+  stretch line moves from 3034.58 to 3035.46~cm$^{-1}$, the shoulder near
   3043~cm$^{-1}$ moves to 3042.34, and the relative L1 distance between
-  the two spectra at 5~cm$^{-1}$ resolution is 8.2\%; phase 2b takes half
+  the two spectra at 5~cm$^{-1}$ resolution is 8.3\%; phase 2b takes half
   the time;
-\item \opt{dipole3}~$=1$, all the terms of the third-order dipole (no
-  \file{dmu3file} here): the total goes from 481.69 to 489.20~km/mol, the
-  CH stretches from 135.40 to 138.79 and the band between 1000 and
-  2000~cm$^{-1}$ from 111.08 to 112.27; \opt{dipole3balance}~$=0$, no
-  third-order dipole: 446.06, 96.40 and 117.82~km/mol.
+\item \opt{dipole3}~$=0$, only the balancing terms of the third-order
+  dipole (the default of 2026.11.3 and 2026.11.4): the total goes from
+  489.20 to 481.69~km/mol, the CH stretches (2700--3200~cm$^{-1}$) from
+  138.79 to 135.40, the band between 1000 and 2000~cm$^{-1}$ from 112.27
+  to 111.08 and the one between 600 and 1000~cm$^{-1}$ from 186.44 to
+  183.98; \opt{dipole3balance}~$=0$, no third-order dipole: 446.06,
+  96.40, 117.82 and 181.19~km/mol. The lines are at the same wavenumbers
+  in the three runs.
 \item \opt{fermithres}~$=$~\opt{ddthres}~$=0.1$, the default: phase 1
   finds 3078 resonances (2700 E4, 183 B3, 185 D4, 10 G2), the largest
   polyad has 7179 states instead of 3094, and phase 2b takes about nine
-  times longer (4 processes). The total goes from 481.69 to
-  481.01~km/mol, the CH stretch band at 5~cm$^{-1}$ resolution peaks at
+  times longer (4 processes). The total goes from 489.20 to
+  488.54~km/mol, the CH stretch band at 5~cm$^{-1}$ resolution peaks at
   3041.7 instead of 3035.0~cm$^{-1}$, and the relative L1 distance between
-  the two spectra at 5~cm$^{-1}$ resolution is 36\%. The tutorial uses 0.2 only because it is cheaper.
+  the two spectra at 5~cm$^{-1}$ resolution is 35.5\%. The tutorial uses 0.2 only because it is cheaper.
 \end{itemize}
