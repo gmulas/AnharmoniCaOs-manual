@@ -1113,6 +1113,37 @@ with \texttt{-{}-per-bin}, the blocks \file{PREFIX\_quanta\_block000},
 \ldots{} in the \file{quantafile} format; with \texttt{-{}-require}, also
 \file{PREFIX\_require.dat} (Section~\ref{sec:thermal-sample}).
 
+\paragraph{Blocks of draws (optional, changes the sampling).} Without
+options, block $k$ takes the next \texttt{-{}-per-bin} states $K$ of every
+energy cell, so the blocks can be computed one after the other; a cell
+with fewer than $B K$ states runs out, and the weight its states should
+have depends on how many blocks are computed in the end. With
+\texttt{-{}-draws} every block is an estimate of the cells by itself:
+\begin{itemize}
+\item \file{PREFIX\_quanta\_block000} (block 0) has every state of each
+  enumerated cell (upper edge $\le$ E$_\mathrm{enum}$) with at most
+  \texttt{-{}-complete-max} states (default $K$), with weight 1;
+\item \file{PREFIX\_quanta\_block001} to \file{\ldots block}$B$ (blocks
+  $k \ge 1$) have $K$ draws with replacement from every other cell:
+  uniform over the enumerated states below E$_\mathrm{enum}$, and above it
+  from snapshots of the Wang--Landau walks in their final ($1/t$) stage,
+  spaced by twice the measured autocorrelation time of the energy bin of
+  the walk (or by \texttt{-{}-snapshot-every} steps). A state drawn $c$
+  times is written once with $c$ repeats, and every line has the weight
+  $N_b/K$ after the repeats, with $N_b$ the number of states of the cell
+  (exact below E$_\mathrm{enum}$, from the walks above);
+\item each block has a file \file{PREFIX\_quanta\_blockNNN.block} with
+  its number, which \prog{anh\_jobs.py} records and \prog{anh\_assemble.py}
+  uses to combine block 0 with the mean of the blocks $k \ge 1$
+  (Section~\ref{sec:run-assemble}).
+\end{itemize}
+More blocks can be computed later: the combination only changes its
+factor $1/B$. The output gives the number of snapshots per cell; a cell
+with fewer than $B K$ snapshots gets a warning, since its blocks then
+share states. Phase~2b must read the weights (the column after the
+repeats, Section~\ref{sec:files-in}). \texttt{-{}-draws} does not yet
+work with \texttt{-{}-require} or \texttt{-{}-stratify}.
+
 \paragraph{Symmetry species (optional).} With \texttt{-{}-species FILE},
 the species file of \prog{anh\_symm.py} (one line per mode, with its
 characters $\pm1$ under the operations of an Abelian group such as
