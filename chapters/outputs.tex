@@ -37,7 +37,8 @@
 \item[\file{dir\_nNNNNN}] One directory per starting state, with the
   polyad structures and Hamiltonians.
 \item[\file{processedquantas}, \file{processeddirs}] The starting states
-  and their directories.
+  (with their weights, if \opt{modepopfile} gives them) and their
+  directories. Phase~2b reads the weights from \file{processedquantas}.
 \item[\file{polyadsizes}] The polyad sizes.
 \item[\file{processedquantas.stopped}] Written only if \opt{maxqueued}
   stopped the growth of some starting states: their quantum numbers and
@@ -100,7 +101,10 @@
 \item[\file{hist\_anh\_*}] The same, binned in the anharmonic energy of the
   starting state.
 \item[\file{hist\_energy}, \file{hist\_anhenergy}] Number of starting
-  states per energy bin.
+  states per energy bin, each counted with its repetitions and its weight
+  (so not always an integer when \opt{modepopfile} gives weights). In a
+  run with weights both files have the comment line
+  \texttt{\# weighted starting states (stateweight)}.
 \item[\file{proclog\_n*}] Logs of each process, with the truncation
   estimates when \opt{residualcheck} is on. What else they contain is set by
   \opt{verbosity} (Table~\ref{tab:verbosity}). Whatever \opt{verbosity}, for

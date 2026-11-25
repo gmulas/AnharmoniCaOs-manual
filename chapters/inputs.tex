@@ -68,7 +68,11 @@ rescandthres = thres/20  # an expression
 \item[\file{dmu3file}] Optional, read only with \opt{dipole3}~$=1$: lines
   \texttt{i j k dx dy dz}. Missing entries are taken as zero.
 \item[\opt{modepopfile}] Starting states: the quantum numbers of all modes,
-  then the repetition count.
+  then the repetition count and, optionally, a real weight of the state
+  (for a stratified sample, the number of states of its energy cell over
+  the number of draws from it). Phase~2b multiplies everything the state
+  adds to the histograms by the repetition count times the weight; without
+  the weight it is 1.
 \item[\opt{gradientfile}] Optional: the classical gradient at the reference
   geometry, lines \texttt{i g\_i} (written by \opt{shiftgeometry}).
 \item[\opt{bandlistfile}, \opt{resonanceoverrides}] Edited copies of
