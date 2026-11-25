@@ -411,10 +411,20 @@ $e^{-E/k_BT}$. Which energy $E$ is used is chosen with \texttt{--scheme}:
 \item[\texttt{anharmonic} (default)] The bins are those of the
 anharmonic energy of the eigenstates reached from the starting states.
 Their number of states is the harmonic one shifted by the anharmonic
-energy shifts that phase~2b records (\file{hist\_err}). Only the bins
+energy shifts that phase~2b records (\file{hist\_dos}; with runs of an
+older phase~2b, \file{hist\_err}, with a warning). Only the bins
 whose number of states is known at least to \texttt{--min-complete}
 (0.99 by default) are used: near E$_\mathrm{max}$ of the sampling, states
 shifted down from above it are missing.
+For each harmonic bin the tool prints the sum of \file{hist\_dos} over
+the shifts divided by the number of states of \texttt{--lng}, writes it in
+the fifth column of \file{dos\_anh.dat}. The states that reach a bin
+all lie at or below it, so this ratio is 1, within the noise of the draws,
+in every bin up to E$_\mathrm{max}$, and drops above it, where it lowers
+the completeness of the anharmonic bins that bin contributes to; the tool warns
+when a bin below E$_\mathrm{max}$ has no starting states (the bins above it
+are then not completely covered) or when the ratio of a bin up to
+E$_\mathrm{max}$ is outside 0.8--1.25.
 \item[\texttt{harmonic}] The bins of the harmonic energy of the starting
 states, with the number of states of \file{s\_dos.dat}. This is the
 simpler choice, and the one of the previous versions.
