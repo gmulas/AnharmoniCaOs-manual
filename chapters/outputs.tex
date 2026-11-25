@@ -117,12 +117,16 @@
 \item[\file{hist\_dos}] The same layout, for the anharmonic density of
   states of \prog{anh\_assemble.py}. For each starting state $s$ it
   holds the local densities of states of its targets $T_0(s)$: $s$ itself
-  and the states $s \pm v$ of its bands (every fundamental, and the other
-  bands of \file{bandlist} that are not \texttt{off}), with no negative quanta, each with total weight
-  $n_\mathrm{rep}\,w/d_t$, where $d_t$ is the number of states of $T_0(t)$:
-  the number of states that have $t$ among their targets. Summed over a
-  sample with the right weights, it estimates without bias the sum of the
-  local densities of states of the states of each harmonic bin. The
+  and the states $s + v$ of its bands (every fundamental, and the other
+  bands of \file{bandlist} that are not \texttt{off}), each band taken
+  in the direction that raises the harmonic energy (at equal energy, the
+  one whose first changed quantum number increases), each with total weight
+  $n_\mathrm{rep}\,w/d_t$, where $d_t$ is the number of states that have
+  $t$ among their targets: $t$ itself and the states $t - v$ with no
+  negative quanta, all at or below the harmonic energy of $t$. Summed over
+  a sample with the right weights, it estimates without bias the sum of
+  the local densities of states of the states of each harmonic bin, in
+  every bin up to the top of the sample. The
   second header line gives the weight of these targets, the part with a
   shift outside \opt{danharmhistmin}..\opt{danharmhistmax}, the part in
   eigenvectors not converged (eigenvector paths) and the number of targets
