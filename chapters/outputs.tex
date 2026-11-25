@@ -139,8 +139,8 @@
   below \opt{dosemax}) that have $t$ among their targets. It is an
   unbiased estimate of the same sum in every bin below \opt{dosemax}, and
   it also uses the targets below each starting state, which the growth of
-  the polyads truncates less. For comparisons with \file{hist\_dos}
-  (\prog{anh\_assemble.py} \texttt{-{}-dos-table both}).
+  the polyads truncates less. \prog{anh\_assemble.py} uses it by default
+  when every run has it.
 \item[\file{proclog\_n*}] Logs of each process, with the truncation
   estimates when \opt{residualcheck} is on. What else they contain is set by
   \opt{verbosity} (Table~\ref{tab:verbosity}). Whatever \opt{verbosity}, for

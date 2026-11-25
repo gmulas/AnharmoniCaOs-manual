@@ -1261,7 +1261,8 @@ refused. One job never holds states of two blocks. The value of the
 files with different values are refused. With \file{.block} files, an
 energy cell below the highest one with starting states that contains
 vibrational states but none of the sample stops the program
-(\texttt{-{}-allow-empty-cells}: a warning instead).
+(\texttt{-{}-allow-empty-cells}: a warning instead); without
+\file{.block} files it only warns.
 
 \section{\prog{anh\_assemble.py}}\label{sec:run-assemble}
 
@@ -1311,9 +1312,12 @@ are added bin by bin, each run multiplied by a factor:
   (Section~\ref{sec:out-2b}); otherwise its phase~2b ignored the
   weights, and the program stops. With \texttt{-{}-dirs} the same check is
   made on the quantafile of each directory.
-\item \texttt{-{}-dos-table both} builds the anharmonic density of
-  states from \file{hist\_dos2} instead of \file{hist\_dos}
-  (\texttt{up}, the default); every run must have it.
+\item \texttt{-{}-dos-table} chooses the table of the anharmonic
+  density of states: \texttt{auto} (the default) takes \file{hist\_dos2}
+  when every run has it (a sample of \prog{anh\_sample.py}
+  \texttt{-{}-draws} through \prog{anh\_jobs.py}) and \file{hist\_dos}
+  otherwise, and prints which; \texttt{both} and \texttt{up} force one
+  (\texttt{both} needs \file{hist\_dos2} in every run).
 \item \texttt{-{}-stratum-weights} is for samples written before the
   weight column, with the states of one energy bin per directory (for
   example one state per directory): every directory is multiplied by
