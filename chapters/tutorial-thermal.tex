@@ -418,10 +418,10 @@ whose number of states is known at least to \texttt{--min-complete}
 shifted down from above it are missing.
 For each harmonic bin the tool prints the sum of \file{hist\_dos} over
 the shifts divided by the number of states of \texttt{--lng}, writes it in
-the fifth column of \file{dos\_anh.dat}, and lowers the completeness of
-the anharmonic bins that bin contributes to. The states that reach a bin
+the fifth column of \file{dos\_anh.dat}. The states that reach a bin
 all lie at or below it, so this ratio is 1, within the noise of the draws,
-in every bin up to E$_\mathrm{max}$, and drops above it; the tool warns
+in every bin up to E$_\mathrm{max}$, and drops above it, where it lowers
+the completeness of the anharmonic bins that bin contributes to; the tool warns
 when a bin below E$_\mathrm{max}$ has no starting states (the bins above it
 are then not completely covered) or when the ratio of a bin up to
 E$_\mathrm{max}$ is outside 0.8--1.25.
