@@ -38,7 +38,11 @@
   polyad structures and Hamiltonians.
 \item[\file{processedquantas}, \file{processeddirs}] The starting states
   (with their weights, if \opt{modepopfile} gives them) and their
-  directories. Phase~2b reads the weights from \file{processedquantas}.
+  directories. Phase~2b reads the weights from \file{processedquantas},
+  one line for each line of \file{processeddirs}: it stops if the file is
+  shorter, or if a line is not the starting state of the polyads of that
+  directory (same quantum numbers and repeats). Without the file, every
+  state has weight 1.
 \item[\file{polyadsizes}] The polyad sizes.
 \item[\file{processedquantas.stopped}] Written only if \opt{maxqueued}
   stopped the growth of some starting states: their quantum numbers and

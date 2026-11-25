@@ -1288,9 +1288,11 @@ are added bin by bin, each run multiplied by a factor:
   plus the mean of the blocks $k \ge 1$: every run of block 0 has factor
   1, every run of a block $k \ge 1$ factor $1/B$, with $B$ the number of
   blocks $k \ge 1$ whose jobs have all finished. A block with unfinished
-  jobs is left out whole, with a note; an unfinished job of block 0 gives
-  a warning, since its cells are then missing. A harmonic energy bin with
-  starting states both in block 0 and in a block $k \ge 1$ is refused.
+  jobs is left out whole, with a note. An unfinished job of block 0
+  stops the program, since its cells would be missing, unless
+  \texttt{-{}-allow-incomplete-block0} is given (then a warning). A
+  harmonic energy bin with starting states both in block 0 and in a
+  block $k \ge 1$ is refused.
 \item A job that \file{manifest.json} lists as weighted must have the
   line \texttt{\# weighted starting states} in its \file{hist\_energy}
   (Section~\ref{sec:out-2b}); otherwise its phase~2b ignored the
