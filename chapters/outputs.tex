@@ -132,6 +132,15 @@
   eigenvectors not converged (eigenvector paths) and the number of targets
   without a Hamiltonian matrix. With \opt{dostargets}~$=0$ only the
   starting state is counted (its own local density of states).
+\item[\file{hist\_dos2}] Only with \opt{dosemax}~$>0$: the same as
+  \file{hist\_dos}, but with the targets in both directions, $s$ and the
+  states $s \pm v$ of its bands, each with weight $n_\mathrm{rep}\,w/d_t^S$,
+  where $d_t^S$ counts the states of the sampled region (harmonic energy
+  below \opt{dosemax}) that have $t$ among their targets. It is an
+  unbiased estimate of the same sum in every bin below \opt{dosemax}, and
+  it also uses the targets below each starting state, which the growth of
+  the polyads truncates less. \prog{anh\_assemble.py} uses it by default
+  when every run has it.
 \item[\file{proclog\_n*}] Logs of each process, with the truncation
   estimates when \opt{residualcheck} is on. What else they contain is set by
   \opt{verbosity} (Table~\ref{tab:verbosity}). Whatever \opt{verbosity}, for

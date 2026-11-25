@@ -1137,6 +1137,13 @@ have depends on how many blocks are computed in the end. With
   uses to combine block 0 with the mean of the blocks $k \ge 1$
   (Section~\ref{sec:run-assemble}).
 \end{itemize}
+Each \file{.block} file also has a line \texttt{emax E}, the upper edge
+of the highest cell of the sample (with \texttt{-{}-energy harmonic}
+only): \prog{anh\_jobs.py} passes it to phase~2b, which then also writes
+\file{hist\_dos2} (Section~\ref{sec:out-2b}). A cell below the highest
+one that has states but no snapshot stops the program, since the target
+states above it would not be completely covered; a longer walk gives it
+snapshots, and \texttt{-{}-allow-empty-cells} goes on with a warning.
 More blocks can be computed later: the combination only changes its
 factor $1/B$. The output gives the number of snapshots per cell; a cell
 with fewer than $B K$ snapshots gets a warning, since its blocks then
@@ -1248,7 +1255,14 @@ writes it for every job in \file{manifest.json}:
   with the weights that make it an estimate of their sum.
 \end{itemize}
 Give a \file{.block} file to every quantafile or to none: a mixture is
-refused. One job never holds states of two blocks.
+refused. One job never holds states of two blocks. The value of the
+\texttt{emax} lines of the \file{.block} files is written in the
+\file{inp} of every job as \opt{dosemax} and in \file{manifest.json};
+files with different values are refused. With \file{.block} files, an
+energy cell below the highest one with starting states that contains
+vibrational states but none of the sample stops the program
+(\texttt{-{}-allow-empty-cells}: a warning instead); without
+\file{.block} files it only warns.
 
 \section{\prog{anh\_assemble.py}}\label{sec:run-assemble}
 
@@ -1298,6 +1312,12 @@ are added bin by bin, each run multiplied by a factor:
   (Section~\ref{sec:out-2b}); otherwise its phase~2b ignored the
   weights, and the program stops. With \texttt{-{}-dirs} the same check is
   made on the quantafile of each directory.
+\item \texttt{-{}-dos-table} chooses the table of the anharmonic
+  density of states: \texttt{auto} (the default) takes \file{hist\_dos2}
+  when every run has it (a sample of \prog{anh\_sample.py}
+  \texttt{-{}-draws} through \prog{anh\_jobs.py}) and \file{hist\_dos}
+  otherwise, and prints which; \texttt{both} and \texttt{up} force one
+  (\texttt{both} needs \file{hist\_dos2} in every run).
 \item \texttt{-{}-stratum-weights} is for samples written before the
   weight column, with the states of one energy bin per directory (for
   example one state per directory): every directory is multiplied by
