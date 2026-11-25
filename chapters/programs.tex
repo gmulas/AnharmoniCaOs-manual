@@ -1203,6 +1203,22 @@ and leave \texttt{bindir} empty:
 Add \texttt{-{}-bind} for the file systems of the jobs and of the phase~1
 directory if they are not mounted by default.
 
+\paragraph{Weights and sampling blocks.} A line of a quantafile may end
+with a weight after the number of repeats (Section~\ref{sec:files-in});
+\prog{anh\_jobs.py} copies it into the quantafile of the job and marks
+the job as weighted in \file{manifest.json}. If a file
+\file{QUANTAFILE.block} is next to a quantafile, its first number is the
+sampling block of the states of that file, and \prog{anh\_jobs.py}
+writes it for every job in \file{manifest.json}:
+\begin{itemize}
+\item block 0 holds complete energy cells: every state of each of its
+  cells, with weight 1;
+\item every block $k \ge 1$ holds a set of draws from the other cells,
+  with the weights that make it an estimate of their sum.
+\end{itemize}
+Give a \file{.block} file to every quantafile or to none: a mixture is
+refused. One job never holds states of two blocks.
+
 \section{\prog{anh\_assemble.py}}\label{sec:run-assemble}
 
 \paragraph{Where.} Anywhere: \texttt{-{}-jobs} is the directory written by
@@ -1233,6 +1249,38 @@ are:
 \end{itemize}
 The totals are those of \file{thermal\_T<T>.dat}, and the components add
 up to them.
+
+\paragraph{Weights of the starting states.} The histograms of the runs
+are added bin by bin, each run multiplied by a factor:
+\begin{itemize}
+\item With sampling blocks in \file{manifest.json}, the result is block 0
+  plus the mean of the blocks $k \ge 1$: every run of block 0 has factor
+  1, every run of a block $k \ge 1$ factor $1/B$, with $B$ the number of
+  blocks $k \ge 1$ whose jobs have all finished. A block with unfinished
+  jobs is left out whole, with a note; an unfinished job of block 0 gives
+  a warning, since its cells are then missing. A harmonic energy bin with
+  starting states both in block 0 and in a block $k \ge 1$ is refused.
+\item A job that \file{manifest.json} lists as weighted must have the
+  line \texttt{\# weighted starting states} in its \file{hist\_energy}
+  (Section~\ref{sec:out-2b}); otherwise its phase~2b ignored the
+  weights, and the program stops. With \texttt{-{}-dirs} the same check is
+  made on the quantafile of each directory.
+\item \texttt{-{}-stratum-weights} is for samples written before the
+  weight column, with the states of one energy bin per directory (for
+  example one state per directory): every directory is multiplied by
+  $N_b/n_b$, with $N_b$ the number of states of its harmonic energy bin,
+  read from \texttt{-{}-lng}, and $n_b$ the sum of the repeats of all the
+  directories in that bin. A directory with states in more than one bin,
+  or already weighted by phase~2b, is refused.
+\end{itemize}
+The harmonic scheme does not depend on these factors, since all the runs
+of one bin share the same factor and the spectrum of a bin is divided by
+the sum of its weights. The anharmonic scheme does: one anharmonic energy
+bin collects eigenstates of starting states from several harmonic bins,
+which must enter with the weight of their bins. When any weight was
+applied, the summed \file{hist\_energy} and \file{hist\_anhenergy} carry
+the weighted mark, and \file{thermal\_T<T>.dat} says in its header how
+the runs were combined.
 
 \paragraph{Spectra per principal axis.} Phase~2b writes one histogram per
 component of the dipole (\file{hist\_abs\_0}, \file{\_1}, \file{\_2}).
