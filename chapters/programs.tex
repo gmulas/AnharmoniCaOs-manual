@@ -1435,6 +1435,87 @@ from the rotational constants that \prog{anh\_symm.py} reports: an a-,
 b- or c-type band of an asymmetric top at the temperature of the
 experiment, exported as a profile against the offset from the band origin.
 
+\paragraph{Spectra at a given internal energy.} An isolated molecule, such
+as an interstellar PAH after the absorption of a UV photon, has a fixed
+internal energy, not a temperature: its emission is that of the
+microcanonical ensemble. \texttt{-{}-E E1 E2 \ldots} (cm$^{-1}$ above the
+ground state) writes, for each energy, \file{microcanonical\_E<E>.dat}:
+the average spectrum of the states with energy in $[E - W/2, E + W/2]$,
+with $W$ given by \texttt{-{}-Ewindow} (default: one energy bin,
+\opt{Ehiststep}).
+\begin{itemize}
+\item \textbf{Weights:} each energy bin of the window weighs its number
+  of states times the fraction of the bin inside the window (the states
+  are taken as uniform within a bin), so the average is uniform over the
+  states of the window.
+\item \textbf{Energy scale:} it follows \texttt{-{}-scheme}, as for the
+  thermal spectra. With \texttt{anharmonic} (the default) the bins are
+  those of \file{spectra\_by\_anh\_energy.dat}, weighted by the anharmonic
+  density of states of \file{dos\_anh.dat}, and only the bins complete to
+  \texttt{-{}-min-complete} enter; with \texttt{harmonic}, those of
+  \file{spectra\_by\_energy.dat}, weighted by the $g(E)$ of
+  \texttt{-{}-lng}. Both need \texttt{-{}-lng}.
+\item \textbf{Columns:} as \file{thermal\_T<T>.dat} (wavenumber,
+  absorption in km/mol, emission in s$^{-1}$). When the jobs come in
+  sampling blocks (two or more blocks $k \ge 1$ finished, no
+  \texttt{-{}-block}), two more columns give the standard error of the
+  absorption and of the emission in each wavenumber bin: the spread of
+  the one-block estimates (block 0 plus block $k$, as
+  \texttt{-{}-block}~$k$) divided by $\sqrt{B}$. Without blocks the header
+  says that there is no error estimate.
+\item \textbf{Header:} $E$, $W$, the scheme, the bins used with their
+  weights, the number of starting states of those bins and how many of
+  them are distinct (from the quantafiles), the fraction of the window
+  weight in bins without computed states or incomplete, and the totals.
+\item \textbf{Other files:} \file{microcanonical\_E<E>\_components.dat},
+  as the thermal \file{\_components} file, and, with
+  \texttt{-{}-envelope}, \file{microcanonical\_E<E>\_envelope.dat}, where
+  \texttt{\{E\}} in an envelope file name is replaced by the energy.
+  \texttt{-{}-plot} also writes \file{microcanonical.png}.
+\end{itemize}
+The thermal spectrum at $T$ is the average of these spectra over the
+energy bins with the Boltzmann weights $N(E)\,e^{-E/kT}$. An energy
+outside the bins with computed states, or a window without computed
+states, stops the program; a window narrower than one bin gives a
+warning, since the energy grid cannot resolve it.
+\paragraph{Example.} The jobs of Tutorial~3 (Chapter~\ref{ch:tut-thermal},
+four blocks of draws), in the same directory as Step~3
+(Section~\ref{sec:thermal-assemble}):
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out res_E --lng s_dos.dat \
+  --E 500 1000 2000 --Ewindow 500
+\end{lstlisting}
+It takes about 7~minutes and 4.5~GB of memory on a laptop. With the jobs
+of the development version that follows 2026.11.5 (\texttt{git 925b5e0})
+and \prog{anh\_assemble.py} of \texttt{git 64850ba}, the headers give
+($\pm$ from the four blocks):
+\begin{center}
+\footnotesize
+\begin{tabular}{rlll}
+\toprule
+$E$ (cm$^{-1}$) & absorption (km/mol) & emission (s$^{-1}$) & 3.3~$\mu$m band: centroid, width (cm$^{-1}$) \\
+\midrule
+500 & $497.2\pm1.0$ & $0.040\pm0.006$ & 3045.9, 23.9 \\
+1000 & $503.6\pm0.8$ & $0.20\pm0.04$ & 3045.3, 24.7 \\
+2000 & $514.5\pm1.4$ & $0.70\pm0.09$ & 3044.6, 27.0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The centroid and the width (standard deviation) of the 3.3~$\mu$m band
+are taken between 2950 and 3150~cm$^{-1}$, in absorption: the band moves
+down and broadens with the internal energy. Only modes below $E$ can emit,
+so at these energies the emission is all below 2000~cm$^{-1}$, most of it
+in the CH out-of-plane bend near 840~cm$^{-1}$ and in the bands near
+700~cm$^{-1}$; its relative error is larger than that of the absorption,
+for the reason given in Section~\ref{sec:thermal-assemble}. The energy
+1000~cm$^{-1}$ is the mean energy of the molecule at 248.5~K: the
+microcanonical spectrum and \file{thermal\_T248.5.dat} have the same
+absorption within 0.4\,\% and the same emission within its error (a ratio
+of 1.08). At 500~cm$^{-1}$ (191.3~K) the emission of the thermal spectrum
+is 1.5 times larger: the Boltzmann distribution spreads over several
+hundred cm$^{-1}$, and the states above $E$ emit much more than those
+below.
+
 \paragraph{Example.} Tutorial~1 pyrene. Its files come without the
 harmonic output, so \prog{anh\_symm.py} cannot check their frame. Compared
 with another calculation of pyrene, the frame is already principal: the
