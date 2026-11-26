@@ -13,8 +13,10 @@ Section~\ref{sec:thermal-jobs});
 (\prog{anh\_assemble.py}, Section~\ref{sec:thermal-assemble}).
 \end{enumerate}
 The tools need Python~3 with numpy; they are in \file{tools/} of the code.
-The example of this chapter takes about one hour on a 4-core laptop, or a
-few minutes on a cluster.
+The example of this chapter is a cluster calculation: 701 starting states
+of pyrene in 177 jobs, about 23 hours of jobs of 8 threads, which took
+about 1~hour and a quarter on six 64-core nodes. Steps~1 and~3 run on a
+laptop in a few minutes; step~2 is the heavy one.
 
 \section{What is computed}\label{sec:thermal-what}
 
@@ -50,23 +52,38 @@ exactly.
 quantum numbers. Each step adds or removes one quantum in a random mode.
 The walks visit every energy bin equally often, and inside a bin every
 state is equally likely. At the same time they give the number of states
-of each bin.
-\item \textbf{Merging.} It merges the enumerated and the visited states,
-one entry per state, and sorts them by energy. It assigns them to the
-same bins as phase~2b and shuffles each bin.
-\item \textbf{Blocks.} It writes \emph{blocks} of starting states in the
-\file{quantafile} format. Each block takes up to K (\flag{--per-bin})
-states from every bin. Each block gives a complete spectrum, so the
-blocks can be computed one after the other: later blocks add sampling.
+of each bin. They are needed only where the states are too many to list:
+in this example the enumeration reaches E$_\mathrm{max}$, and no walk is
+run.
+\item \textbf{Blocks of draws.} It writes \emph{blocks} of starting
+states in the \file{quantafile} format (\flag{--draws},
+Section~\ref{sec:run-sample}). Block~0 holds every state of the bins
+with at most K (\flag{--per-bin}) states. Each of the blocks
+1 to B (\flag{--blocks}) holds K draws with replacement from every
+other bin, each with the weight $N_b/K$ ($N_b$ the number of states of
+the bin), so that every block is an estimate of the whole sample by
+itself. The spread between the blocks is then the statistical error of
+the result.
+\item \textbf{Strata of the emission rate.} The thermal emission of a bin
+comes mostly from its few states with a quantum in a strongly emitting
+mode: in pyrene mode~67, the CH out-of-plane bend at 860~cm$^{-1}$, emits
+10~s$^{-1}$ per quantum, and only 2--10\,\% of the states of a bin
+excite it. With uniform draws some blocks catch such a state and others
+do not, and the emission changes by tens of per cent from block to
+block. With \flag{--hstrata 2} every bin is split into the states whose
+harmonic emission rate $h=\sum_k n_kA_k$ is below 2~s$^{-1}$ and those
+above it; every block draws at least one state of each, with the weight
+$N_s/n_s$ of its stratum, so that the strong emitters are in every block
+in their exact proportion.
 \end{enumerate}
 
 \paragraph{Example.} The example uses the inputs of
 Tutorial~1 (\file{examples/pyrene/}):
 \begin{itemize}
-\item every state up to 1000~cm$^{-1}$;
-\item Wang--Landau up to 2500~cm$^{-1}$, with two walkers;
-\item bins of 100~cm$^{-1}$, centred on multiples of 100 (\opt{Ehistmin}~$=-50$);
-\item two states per bin in one block.
+\item every state up to 2550~cm$^{-1}$ (979\,641 states);
+\item bins of 100~cm$^{-1}$, centred on multiples of 100
+(\opt{Ehistmin}~$=-50$), up to E$_\mathrm{max}=2500$~cm$^{-1}$;
+\item four blocks of eight draws per bin, in two strata of $h$.
 \end{itemize}
 From an empty directory:
 \begin{lstlisting}
@@ -76,36 +93,54 @@ where \file{CODEDIR} is the source tree of \ac{} (it contains
 \file{tools/}). The script runs
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_sample.py --inp inp --freqsfile freqsfile \
-  --enum 1000 --emax 2500 --ehistmin -50 --ehiststep 100 \
-  --walkers 2 --per-bin 2 --blocks 1 --prefix s
+  --enum 2550 --emax 2500 --ehistmin -50 --ehiststep 100 \
+  --per-bin 8 --blocks 4 --draws --hstrata 2 --seed 20261126 --prefix s
 \end{lstlisting}
-It takes about 15~seconds on a laptop and prints, with AnharmoniCaOs
-2026.11.1 (\texttt{git 88b3b13}):
+It takes about 20~seconds on a laptop and prints, with the development
+version that follows 2026.11.5 (\texttt{git 925b5e0}):
 \begin{lstlisting}
-enumerated 839 states with E <= 1000 cm-1
-walker 0: 1900000 steps, 15 stages, final ln f 1.00e-05, 52280 states visited
-walker 1: 1900000 steps, 15 stages, final ln f 1.00e-05, 51624 states visited
-s_quanta_block000: 51 states
+enumerated 979641 states with E <= 2550 cm-1
+s_quanta_block000: 13 states, the 4 complete cells of at most 8 states (block 0, weight 1)
+s_quanta_block001: 176 draws from 22 cells (172 lines), weight N_s/n_s of each stratum of h
+s_quanta_block002: 176 draws from 22 cells (173 lines), weight N_s/n_s of each stratum of h
+s_quanta_block003: 176 draws from 22 cells (171 lines), weight N_s/n_s of each stratum of h
+s_quanta_block004: 176 draws from 22 cells (172 lines), weight N_s/n_s of each stratum of h
 \end{lstlisting}
+followed by one line per bin, such as
+\begin{lstlisting}
+  cell 14 (1350 cm-1): N_b 3281, enumerated, strata of h: N_s/n_s 3161/7 120/1 (3281)
+\end{lstlisting}
+The bins below 350~cm$^{-1}$ have at most 8 states and go whole into
+block~0; the bins from 350 to 550~cm$^{-1}$ have no state with
+$h\ge2$~s$^{-1}$, so their 8 draws per block are all in one stratum; from
+650~cm$^{-1}$ up each block draws 7 states with $h<2$ and 1 with $h\ge2$
+(proportional allocation, at least one per stratum). A state drawn twice
+in a block is one line with two repeats, hence 172 lines for 176 draws.
 The random numbers have a fixed seed (\flag{--seed}), so the output is the
 same at every run.
 
 \paragraph{The output files.}
 \begin{description}
-\item[\file{s\_quanta\_block000}] The starting states of the block, in
-\file{quantafile} format, each with weight~1. There are 51 of them: the
-ground state, which is alone in its bin, and two states in each of the 25
-other bins.
+\item[\file{s\_quanta\_block000} \ldots\ \file{s\_quanta\_block004}] The
+starting states of each block, in \file{quantafile} format: block~0 with
+weight~1, the others with the weight $N_s/n_s$ after the number of
+repeats. Next to each, \file{.block} gives its number and the line
+\texttt{emax 2550.0}, which \prog{anh\_jobs.py} passes to phase~2b.
 \item[\file{s\_dos.dat}] The number of states of each bin. Its columns are:
 \begin{enumerate}
 \item the bin;
 \item its lower and upper edge (cm$^{-1}$);
 \item the exact count from the enumeration, complete only for bins that
-end below E$_\mathrm{enum}$;
-\item the Wang--Landau $\ln g$ and its error;
+end below E$_\mathrm{enum}$ (here all of them up to 2450--2550~cm$^{-1}$);
+\item the Wang--Landau $\ln g$ and its error (\texttt{nan} here: no walk);
 \item the number of distinct states found in the bin.
 \end{enumerate}
-\item[\file{s\_states.dat}] All the states found. Its columns are:
+\item[\file{s\_hstrata.dat}] For every drawn bin, its number of states
+and, for each stratum, $N_s$, $n_s$, the weight and the mean $h$: in the
+bin at 1350~cm$^{-1}$ 3161 states with $h<2$ (mean 0.10~s$^{-1}$) and 120
+with $h\ge2$ (mean 5.1~s$^{-1}$).
+\item[\file{s\_states.dat}] All the states, one per line (150~MB here).
+Its columns are:
 \begin{enumerate}
 \item the energy;
 \item the bin;
@@ -115,8 +150,13 @@ end below E$_\mathrm{enum}$;
 \end{enumerate}
 \end{description}
 
-\paragraph{How good the counts are.} In this example the Wang--Landau
-$\ln g$ can be compared with an exact count:
+\paragraph{How good the Wang--Landau counts are.} For a larger molecule,
+or a higher E$_\mathrm{max}$, the enumeration is not possible and the
+number of states of the bins above E$_\mathrm{enum}$ comes from the walks
+(in that case \flag{--hstrata} cannot be used). With \flag{--enum 1000
+--walkers 2} instead of \flag{--enum 2550} (and 2026.11.1,
+\texttt{git 88b3b13}) the Wang--Landau $\ln g$ can be compared with the
+exact count:
 
 \begin{center}
 \begin{tabular}{rrrrr}
@@ -161,9 +201,20 @@ More walkers mean less correlated samples and an error estimate on
 $\ln g$.
 \item[\flag{--lnf-final}] When the walks stop, by default $10^{-5}$.
 Smaller values give more accurate counts, at a cost in time proportional
-to their inverse.
+to their inverse, and more snapshots to draw from: with \flag{--draws}
+the tool warns when a bin has fewer than $10\,BK$ of them, and
+$10^{-6}$ is then a good choice.
 \item[\flag{--per-bin}, \flag{--blocks}] K states per bin in each block, and
 the number of blocks.
+\item[\flag{--draws}] Blocks of draws with replacement, each an estimate
+by itself (Section~\ref{sec:run-sample}). Use it: the spread between the
+blocks is the statistical error of the result.
+\item[\flag{--hstrata}, \flag{--hstrata-sigma}] Strata of the harmonic
+emission rate in every bin (with \flag{--draws}; every drawn bin must be
+enumerated). \flag{--hstrata 2} is a good start for molecules whose
+strongest band emits a few s$^{-1}$ per quantum. In this example it also
+reduces the spread of the absorption between blocks, by a factor of 4
+at 200~K.
 \item[\flag{--require}] Modes (numbers from 1, as \texttt{37-41,45}): the
 blocks take only states with at least one quantum in one of them. This is
 for a band that only such states emit, for example the CH stretches at
@@ -283,15 +334,24 @@ them write their histograms on the same energy and wavenumber grid, so
 that they can be added up exactly.
 
 \paragraph{Example.} Phase~1 must have been run, with the same \file{inp},
-in a directory: here the one of Tutorial~1, \file{../t1}. From the
-directory of step~1:
+in a directory: here the one of Tutorial~1, \file{../t1}. With
+\texttt{--blocks} every file given is one job, and keeps the block of its
+\file{.block} file; to make jobs of 4 states, split each block first
+(the script \file{examples/pyrene-thermal/split\_blocks.sh} does the
+same). From the directory of step~1:
 \begin{lstlisting}
-python3 CODEDIR/tools/anh_jobs.py --base ../t1 --profile laptop --out jobs \
-  --states s_quanta_block000 --Ehiststep 100 --Emax 2500
+mkdir jq
+for f in s_quanta_block00?; do
+  split -l 4 -d -a 2 $f jq/${f}_
+  for p in jq/${f}_*; do cp $f.block $p.block; done
+done
+python3 CODEDIR/tools/anh_jobs.py --base ../t1 --profile cluster.json --out jobs \
+  --blocks jq/s_quanta_block00?_?? --Ehiststep 100 --Emax 2500
 \end{lstlisting}
-It prints
+where \file{cluster.json} is the profile of your cluster
+(Section~\ref{sec:thermal-profiles}). It prints
 \begin{lstlisting}
-3 jobs, 51 starting states, energies 0.0-2549.4 cm-1, grid: 26 energy bins x 140000 wavenumber bins
+177 jobs, 701 starting states, energies 0.0-2549.7 cm-1, grid: 26 energy bins x 140000 wavenumber bins
 \end{lstlisting}
 and writes, in \file{jobs/}:
 \begin{description}
@@ -334,24 +394,16 @@ default.
 \end{description}
 
 \paragraph{How long it takes.} With the development version that follows
-2026.11.2 (\texttt{git d257363}: \opt{closureterms}~$=1$,
-\opt{startnorm}~$=1$ and \opt{spectralborder}~$=0$ by default):
-\begin{itemize}
-\item on the cluster of the authors, as 13 jobs of 4 states with 8
-threads each, all running at the same time, they take 10~min (the
-slowest job), 48~minutes of jobs in all. With \opt{spectralborder}~$=1$
-and \opt{startnorm}~$=0$, the defaults up to \texttt{git 86430f8}, the
-same jobs on the same nodes take 5~min~32~s, 25~minutes in all: without
-the border phase~2b uses all the energy windows, and the jobs take about
-twice as long;
-\item on a 4-core laptop, with \texttt{git 86430f8}, they took about an
-hour and a quarter (about one hour with 2026.11.1, which left out the
-closure terms); with the new defaults expect about twice as long.
-\end{itemize}
+2026.11.5 (\texttt{git 925b5e0}), on the cluster of the authors (nodes of
+64 cores), as 177 jobs of 4 states with 8 threads and 4~GB each, eight
+jobs per node on six nodes: 1~hour and 16~minutes from the first job to
+the last, 1386 minutes of jobs in all (about 185 core-hours). Most jobs
+take a few minutes; the slowest took 63~minutes. On a 4-core laptop the
+same jobs would take about two days: this is a cluster calculation.
 The cost is uneven: the polyads grow quickly with the energy of the
-starting state, and one of these 51 states has a polyad of 26498 states
-(22320 without the closure terms).
-Its job is the slowest even though it is not the highest in energy.
+starting state, and the largest polyad of these 701 states has 47\,397
+states. A job finishes in a time set by its slowest state, so the jobs
+of the highest bins decide the end of the run.
 
 \paragraph{Profiles.}\label{sec:thermal-profiles} A profile is a JSON file
 in \file{tools/profiles/}, or anywhere else given by its path:
@@ -387,7 +439,20 @@ spectra:
 python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out res --T 0 100 200 \
   --lng s_dos.dat
 \end{lstlisting}
-It prints, for each temperature, how many energy bins enter and how much
+With sampling blocks the result is block~0 plus the mean of the blocks
+1 to 4. For its statistical error, assemble each block alone
+(\texttt{--block K}: block~0 and block~K), with the same options:
+\begin{lstlisting}
+for k in 1 2 3 4; do
+  python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out res_b$k --T 0 100 200 \
+    --lng s_dos.dat --block $k
+done
+\end{lstlisting}
+The error of a quantity of \file{res/} is the standard deviation of its
+four values in \file{res\_b1/} \ldots\ \file{res\_b4/}, divided by
+$\sqrt4$. With only four blocks this error is itself uncertain by about
+40\,\%.
+The tool prints, for each temperature, how many energy bins enter and how much
 of the Boltzmann weight is left out, and writes in \file{res/}:
 \begin{description}
 \item[\file{hist\_*}] The histograms of all the jobs added up, in the
@@ -431,11 +496,88 @@ states, with the number of states of \file{s\_dos.dat}. This is the
 simpler choice, and the one of the previous versions.
 \end{description}
 
-\paragraph{Results.} The absorption totals (\texttt{absorption total} in
-the header of \file{thermal\_T*.dat}), in km/mol, with the same version
-(\texttt{git d257363}), and in parentheses with \opt{startnorm}~$=0$ and
-\opt{spectralborder}~$=1$, which give back exactly the results of
-\texttt{git 86430f8}:
+\paragraph{Results.} The totals in the headers of \file{thermal\_T*.dat}
+(\texttt{absorption total}, km/mol, and \texttt{emission total},
+s$^{-1}$), with the development version that follows 2026.11.5
+(\texttt{git 925b5e0}; \texttt{--block} needs a later one), in the
+anharmonic and the harmonic scheme; $\pm$ is the error from the four
+blocks. With \opt{dipole3}~$=1$ (all the third-order terms of the dipole,
+the default since 2026.11.5) and with \opt{dipole3}~$=0$ (the default of
+2026.11.3 and 2026.11.4). \opt{dipole3} is an option of phase~1, which
+the jobs do not run again: for the second column, run phase~1 of
+Tutorial~1 with \opt{dipole3}~$=0$ and use that directory as
+\texttt{--base}, with the same blocks:
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{rllll}
+\toprule
+ & \multicolumn{2}{c}{\opt{dipole3}~$=1$ (default)} & \multicolumn{2}{c}{\opt{dipole3}~$=0$} \\
+$T$ (K) & \texttt{anharmonic} & \texttt{harmonic} & \texttt{anharmonic} & \texttt{harmonic} \\
+\midrule
+\multicolumn{5}{l}{absorption (km/mol)} \\
+0 & 489.201 & 489.201 & 481.697 & 481.697 \\
+100 & $490.586\pm0.024$ & $490.514\pm0.011$ & $482.916\pm0.024$ & $482.845\pm0.011$ \\
+200 & $496.85\pm0.20$ & $496.26\pm0.17$ & $488.56\pm0.19$ & $488.01\pm0.16$ \\
+\midrule
+\multicolumn{5}{l}{emission (s$^{-1}$)} \\
+100 & $0.00374\pm0.00010$ & $0.00327\pm0.00003$ & $0.00374\pm0.00010$ & $0.00328\pm0.00003$ \\
+200 & $0.0753\pm0.0069$ & $0.0656\pm0.0039$ & $0.0738\pm0.0069$ & $0.0643\pm0.0039$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+At 0~K both schemes give the spectrum of Tutorial~1. At 200~K the two
+schemes differ by 0.12\,\% in absorption and by 13\,\% in emission (about
+one error). The emission has a much larger relative error than the
+absorption: it comes from fewer states, those with strongly emitting
+quanta. The strata of step~1 make it smaller: with four blocks of two
+uniform draws per bin (\flag{--draws} without \flag{--hstrata}) the error
+of the emission at 200~K was 0.025~s$^{-1}$.
+
+\paragraph{Differences between runs.} The two columns come from the same
+starting states, so the difference of two runs can be computed block by
+block (the difference of \file{res\_b1/} of one run and of the other, and
+so on): its error is much smaller than that of each run, because most of
+the sampling noise is common to both. In this way:
+\begin{itemize}
+\item \opt{dipole3}~$=1$ raises the absorption by $7.670\pm0.001$~km/mol at
+100~K and $8.30\pm0.01$ at 200~K (1.59 and 1.70\,\%), and the emission
+at 200~K by $2.0\pm0.1$\,\%. At 200~K the 3.3~$\mu$m band,
+2700--3200~cm$^{-1}$, holds $139.59\pm0.02$~km/mol ($135.98\pm0.01$ with
+\opt{dipole3}~$=0$), the region 1000--2000~cm$^{-1}$ $112.57\pm0.02$
+($111.27\pm0.02$), the region 600--1000~cm$^{-1}$ $188.36\pm0.09$
+($185.58\pm0.09$). The 3.3~$\mu$m band peaks at 3032.5~cm$^{-1}$ at 200~K
+(5~cm$^{-1}$ bins), and its width, the standard deviation between 2950
+and 3150~cm$^{-1}$, is $24.08\pm0.05$~cm$^{-1}$ ($24.12\pm0.05$).
+\item \opt{emissiondestinations}~$=0$ (phase~2a, so it can be given with
+\texttt{--inp-extra "emissiondestinations = 0"} to \prog{anh\_jobs.py},
+on the same blocks) leaves the absorption as it is (within
+0.001~km/mol), and lowers the emission. The default,
+\opt{emissiondestinations}~$=1$, adds the band destinations below every
+state of each starting polyad (Section~\ref{sec:options}), and gives
+$15\pm4$\,\% more emission at 200~K in the anharmonic scheme ($13\pm3$\,\%
+in the harmonic one: 0.0753 against 0.0653~s$^{-1}$, and 0.0656 against
+0.0582), $40\pm12$\,\% more between 1000 and 2000~cm$^{-1}$, and only
+$0.06\pm0.02$\,\% more at 100~K.
+\end{itemize}
+The \file{masterlog} of each job reports no emission term skipped; the
+absorption terms still skipped (destinations above the starting polyad,
+Chapter~\ref{ch:trouble}) are, for the 177 jobs, between 0 and 3.8\,\%
+of their absorption. With \opt{dipole3balance}~$=0$ (another option of
+phase~1) the absorption at 0~K is 9.7\,\% lower (Tutorial~1).
+With the harmonic scheme the tool also warns that
+about 0.14\,\% of the population at 200~K lies above 2550~cm$^{-1}$
+(Section~\ref{sec:thermal-howhigh}); for higher temperatures the
+sampling must go higher.
+
+\paragraph{Earlier versions.} Up to 2026.11.5 this tutorial used one
+block of two uniform states per bin (51 states, \flag{--enum 1000
+--walkers 2 --per-bin 2 --blocks 1}, without \flag{--draws}). Its
+absorption totals, with \texttt{git d257363} and in parentheses with
+\opt{startnorm}~$=0$ and \opt{spectralborder}~$=1$, which give back
+exactly the results of \texttt{git 86430f8} (all before
+\opt{dipole3balance}~$=1$; to reproduce them run phase~1 with
+\opt{dipole3balance}~$=0$):
 \begin{center}
 \begin{tabular}{rrr}
 \toprule
@@ -447,57 +589,6 @@ $T$ (K) & \texttt{anharmonic} & \texttt{harmonic} \\
 \bottomrule
 \end{tabular}
 \end{center}
-At 0~K both are the spectrum of Tutorial~1. At 200~K the two schemes
-differ by 0.03\,\%. These runs predate \opt{dipole3balance}~$=1$, the
-default since \texttt{git 966942c}. \opt{dipole3balance} is an option of
-phase~1, which the jobs do not run again, so \texttt{--inp-extra} cannot
-change it: to reproduce the table, run phase~1 of Tutorial~1 with
-\opt{dipole3balance}~$=0$ and use that directory as \texttt{--base} (with
-2026.11.3, \texttt{git 47d1c5f}, this gives back the values outside the
-parentheses to the last digit; from 2026.11.4 the anharmonic scheme gives
-455.366 at 200~K, see below, and \texttt{--inp-extra
-"emissiondestinations = 0"} gives back 455.360). With \opt{dipole3}~$=1$
-(all the third-order terms of the dipole, again set in phase~1; the
-default since 2026.11.5) and with \opt{dipole3}~$=0$ (the default of
-2026.11.3 and 2026.11.4), the same jobs give, with 2026.11.5 (anharmonic
-and harmonic scheme; 2026.11.4 gives the same files, byte for byte):
-\begin{center}
-\begin{tabular}{rrr}
-\toprule
-$T$ (K) & \opt{dipole3}~$=1$ (default) & \opt{dipole3}~$=0$ \\
-\midrule
-0 & 489.201, 489.201 & 481.697, 481.697 \\
-100 & 491.149, 491.149 & 483.484, 483.484 \\
-200 & 497.825, 497.805 & 489.541, 489.533 \\
-\bottomrule
-\end{tabular}
-\end{center}
-With \opt{emissiondestinations}~$=0$ (phase~2a, so it can be given with
-\texttt{--inp-extra}) the jobs give the files of 2026.11.3 byte for
-byte: 497.821 and 489.539 in the
-anharmonic scheme at 200~K, the rest as in the table. The default,
-\opt{emissiondestinations}~$=1$, adds the band destinations below every
-state of each starting polyad (Section~\ref{sec:options}), which shifts
-the anharmonic energies of a few states and so the bins of the
-anharmonic scheme; the harmonic scheme does not change. What it changes
-is the emission: at 200~K the \texttt{emission total} in the header of
-\file{thermal\_T200.dat} is 0.0547~s$^{-1}$ (anharmonic scheme) and
-0.0500~s$^{-1}$ (harmonic). With \opt{dipole3}~$=0$ it is 0.0534 and
-0.0489~s$^{-1}$, 7.5\,\% and 5.0\,\% more than the 0.0497 and
-0.0466~s$^{-1}$ of \opt{emissiondestinations}~$=0$; at 100~K the two
-differ by less than 0.02\,\%. The \file{masterlog} of each job now
-reports no emission term skipped; the absorption terms still skipped
-(destinations above the starting polyad, Chapter~\ref{ch:trouble})
-are, for the 13 jobs, between 0 and 1.65\,\% of their absorption.
-The third-order dipole (\opt{dipole3}~$=1$ against
-\opt{dipole3balance}~$=0$) raises the totals by 9.7\,\% at 0~K and
-9.3\,\% at 200~K. At 200~K, as at 0~K (Tutorial~1), the change is in the
-3.3~$\mu$m band, 2700--3200~cm$^{-1}$, from 96.4 to 139.6~km/mol (136.0
-with \opt{dipole3}~$=0$), and between 1000 and 2000~cm$^{-1}$, from 118.5
-to 112.5~km/mol (111.2). The band still peaks at
-3034.0~cm$^{-1}$ at 200~K, and its shape changes little: its width, the
-standard deviation between 2950 and 3150~cm$^{-1}$, goes from 24.4 to
-24.1~cm$^{-1}$ (with either value of \opt{dipole3}).
 \begin{itemize}
 \item \textbf{The normalisation.} With the border, some starting states
 lost part of their weight, and in the harmonic scheme their spectra
@@ -507,19 +598,16 @@ binned in each energy bin, so it was hardly affected (0.02\,\%).
 \item \textbf{The shapes.} Once the totals are divided out, the spectra at
 200~K differ from those with the border by 0.7\,\% (harmonic scheme)
 and 0.3\,\% (anharmonic), in relative L1 distance at a resolution of
-2~cm$^{-1}$. The 3.3~$\mu$m band peaks at 3034.0~cm$^{-1}$ at 200~K, at
-5~cm$^{-1}$ resolution, in both.
+2~cm$^{-1}$.
+\item \textbf{The closure terms} (\opt{closureterms}~$=1$, the default
+since 2026.11.3) changed these totals by less than 0.2~km/mol; they left
+the bands below 3000~cm$^{-1}$ as they were and moved the 3.3~$\mu$m band
+about 1~cm$^{-1}$ lower and made it a little wider.
 \end{itemize}
-With the harmonic scheme the tool also warns that
-about 0.14\,\% of the population at 200~K lies above 2500~cm$^{-1}$
-(Section~\ref{sec:thermal-howhigh}); for higher temperatures the
-sampling must go higher.
-
-The closure terms (\opt{closureterms}~$=1$, the default since 2026.11.3)
-change these totals by less than 0.2~km/mol; they leave the bands below
-3000~cm$^{-1}$ as they are and move the 3.3~$\mu$m band about
-1~cm$^{-1}$ lower (3034.0 instead of 3035.1~cm$^{-1}$ at 200~K) and make
-it a little wider.
+With that sample the emission was dominated by sampling noise: two
+states per bin catch the few strong emitters of a bin by chance, and the
+values of those versions (0.0547~s$^{-1}$ at 200~K) differ from the
+present ones by about three times the present error.
 
 \section{Where the temperature enters}
 
