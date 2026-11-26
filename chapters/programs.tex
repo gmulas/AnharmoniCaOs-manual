@@ -1478,7 +1478,43 @@ energy bins with the Boltzmann weights $N(E)\,e^{-E/kT}$. An energy
 outside the bins with computed states, or a window without computed
 states, stops the program; a window narrower than one bin gives a
 warning, since the energy grid cannot resolve it.
-%MICROEXAMPLE
+\paragraph{Example.} The jobs of Tutorial~3 (Chapter~\ref{ch:tut-thermal},
+four blocks of draws), in the same directory as Step~3
+(Section~\ref{sec:thermal-assemble}):
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out res_E --lng s_dos.dat \
+  --E 500 1000 2000 --Ewindow 500
+\end{lstlisting}
+It takes about 7~minutes and 4.5~GB of memory on a laptop. With the jobs
+of the development version that follows 2026.11.5 (\texttt{git 925b5e0})
+and \prog{anh\_assemble.py} of \texttt{git 64850ba}, the headers give
+($\pm$ from the four blocks):
+\begin{center}
+\footnotesize
+\begin{tabular}{rlll}
+\toprule
+$E$ (cm$^{-1}$) & absorption (km/mol) & emission (s$^{-1}$) & 3.3~$\mu$m band: centroid, width (cm$^{-1}$) \\
+\midrule
+500 & $497.2\pm1.0$ & $0.040\pm0.006$ & 3045.9, 23.9 \\
+1000 & $503.6\pm0.8$ & $0.20\pm0.04$ & 3045.3, 24.7 \\
+2000 & $514.5\pm1.4$ & $0.70\pm0.09$ & 3044.6, 27.0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The centroid and the width (standard deviation) of the 3.3~$\mu$m band
+are taken between 2950 and 3150~cm$^{-1}$, in absorption: the band moves
+down and broadens with the internal energy. Only modes below $E$ can emit,
+so at these energies the emission is all below 2000~cm$^{-1}$, most of it
+in the CH out-of-plane bend near 840~cm$^{-1}$ and in the bands near
+700~cm$^{-1}$; its relative error is larger than that of the absorption,
+for the reason given in Section~\ref{sec:thermal-assemble}. The energy
+1000~cm$^{-1}$ is the mean energy of the molecule at 248.5~K: the
+microcanonical spectrum and \file{thermal\_T248.5.dat} have the same
+absorption within 0.4\,\% and the same emission within its error (a ratio
+of 1.08). At 500~cm$^{-1}$ (191.3~K) the emission of the thermal spectrum
+is 1.5 times larger: the Boltzmann distribution spreads over several
+hundred cm$^{-1}$, and the states above $E$ emit much more than those
+below.
 
 \paragraph{Example.} Tutorial~1 pyrene. Its files come without the
 harmonic output, so \prog{anh\_symm.py} cannot check their frame. Compared
