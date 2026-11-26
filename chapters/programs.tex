@@ -1147,9 +1147,51 @@ snapshots, and \texttt{-{}-allow-empty-cells} goes on with a warning.
 More blocks can be computed later: the combination only changes its
 factor $1/B$. The output gives the number of snapshots per cell; a cell
 with fewer than $B K$ snapshots gets a warning, since its blocks then
-share states. Phase~2b must read the weights (the column after the
-repeats, Section~\ref{sec:files-in}). \texttt{-{}-draws} does not yet
-work with \texttt{-{}-require} or \texttt{-{}-stratify}.
+share states, and so does a cell with fewer than $10\,B K$ (noted in the
+\file{.block} files as \texttt{\# few snapshots}): the blocks then draw
+the same few states again, and the spread between blocks underestimates
+the error. A longer walk (a smaller \texttt{-{}-lnf-final}, e.g.\
+$10^{-6}$) gives more snapshots. Phase~2b must read the weights (the
+column after the repeats, Section~\ref{sec:files-in}). \texttt{-{}-draws}
+does not yet work with \texttt{-{}-require} or \texttt{-{}-stratify}.
+
+\paragraph{Strata of the emission rate (optional, with \texttt{-{}-draws};
+changes the sampling).} The thermal emission of an energy cell comes
+mostly from its few states with quanta in strongly emitting modes (in
+pyrene the CH out-of-plane bend at 860~cm$^{-1}$, which emits
+10~s$^{-1}$ per quantum and is excited in 2--10\,\% of the states of a
+cell). $K$ uniform draws catch such a state in some blocks and not in
+others, and the emission then differs a lot from block to block. With
+\texttt{-{}-hstrata EDGES} every drawn cell is split by the harmonic
+spontaneous emission rate of its states,
+\[
+h(s) = \sum_k n_k A_k,\qquad
+A_k = \frac{64\pi^4\,\tilde\nu_k^3\,|\partial\mu/\partial q_k|^2}{6h},
+\]
+with the dipole derivatives of \file{freqsfile} (those below
+\opt{fundthres} set to zero, as in phase~1) and the same constant as
+\prog{anh\_assemble.py}. \texttt{EDGES} are the limits of the strata in
+s$^{-1}$, ascending and separated by commas: \texttt{2} gives two strata,
+$h<2$ and $h\ge2$~s$^{-1}$. In every block, stratum $s$ of a cell, with
+$N_s$ states, gets $n_s\ge1$ draws with replacement (if it has states),
+each with the weight $N_s/n_s$, so that every block still weighs $N_b$ in
+the cell and estimates it without bias. The other draws of the $K$ go
+where they reduce the variance of the cell most: in proportion to $N_s$
+by default, or by Neyman allocation, in proportion to $N_s\sigma_s$, with
+the relative standard deviations $\sigma_s$ of
+\texttt{-{}-hstrata-sigma} (one per stratum, separated by commas). $K$
+must be at least the number of strata. Most of the gain comes from the
+draw that every block takes in the small stratum of the strong emitters,
+so the default is usually enough. The strata are counted exactly, so
+every drawn cell must be enumerated: \texttt{-{}-enum} must reach the
+upper edge of the highest cell (for \texttt{-{}-emax 2500} and cells of
+100~cm$^{-1}$ starting at $-50$, \texttt{-{}-enum 2550}), and no
+Wang--Landau walk is run; \file{PREFIX\_dos.dat} then has exact counts in
+every cell. \file{PREFIX\_hstrata.dat} gives, for each drawn cell, $N_s$,
+$n_s$, the weight and the mean $h$ of every stratum. The enumeration must
+fit in memory, about 2 bytes per mode and state, and
+\file{PREFIX\_states.dat} lists every state: for pyrene up to
+2550~cm$^{-1}$, 979\,641 states, 20~s and a file of 150~MB.
 
 \paragraph{Symmetry species (optional).} With \texttt{-{}-species FILE},
 the species file of \prog{anh\_symm.py} (one line per mode, with its
