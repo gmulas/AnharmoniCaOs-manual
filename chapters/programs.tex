@@ -508,7 +508,19 @@ then a JSON file with the settings, for example
 \end{lstlisting}
 (the defaults are listed by \texttt{python3 anh\_fd\_pyscf.py}; note that
 PySCF's \texttt{b3lyp} uses the VWN functional of Gaussian, and
-\texttt{b3lyp5} that of ORCA). The Hessians must include the response of
+\texttt{b3lyp5} that of ORCA). An empirical dispersion correction is
+given with \texttt{"disp"}, as PySCF names it: \texttt{"d3bj:b3lyp"} is
+D3(BJ) with the parameters of B3LYP, which \texttt{b3lyp5} needs since it
+has none of its own; without the suffix \texttt{atm} it is two-body
+only, as ORCA's D3BJ. It enters the energy and the Hessians, not the
+dipole derivatives. A basis that is not in PySCF's library is given per
+element, by name or as its text in NWChem format, which goes into the job
+files:
+\begin{lstlisting}
+{"xc": "b3lyp5", "disp": "d3bj:b3lyp",
+ "basis": {"C": "C    S\n   ...", "H": "H    S\n   ...", "N": "6-31g*"}}
+\end{lstlisting}
+The Hessians must include the response of
 the integration grid (\texttt{grid\_response}, the default, available in
 gpu4pyscf only): without it the sum rule of the dipole derivatives is
 broken and the semi-quartic constants carry errors of tenths of
