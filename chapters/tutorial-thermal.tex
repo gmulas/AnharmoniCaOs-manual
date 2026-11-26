@@ -96,8 +96,8 @@ python3 CODEDIR/tools/anh_sample.py --inp inp --freqsfile freqsfile \
   --enum 2550 --emax 2500 --ehistmin -50 --ehiststep 100 \
   --per-bin 8 --blocks 4 --draws --hstrata 2 --seed 20261126 --prefix s
 \end{lstlisting}
-It takes about 20~seconds on a laptop and prints, with the development
-version that follows 2026.11.5 (\texttt{git 925b5e0}):
+It takes about 20~seconds on a laptop and prints, with version
+2026.11.6:
 \begin{lstlisting}
 enumerated 979641 states with E <= 2550 cm-1
 s_quanta_block000: 13 states, the 4 complete cells of at most 8 states (block 0, weight 1)
@@ -393,8 +393,8 @@ default.
 \file{inp} of every job.
 \end{description}
 
-\paragraph{How long it takes.} With the development version that follows
-2026.11.5 (\texttt{git 925b5e0}), on the cluster of the authors (nodes of
+\paragraph{How long it takes.} With the phases of version 2026.11.6
+(these runs: \texttt{git 925b5e0}, the same code), on the cluster of the authors (nodes of
 64 cores), as 177 jobs of 4 states with 8 threads and 4~GB each, eight
 jobs per node on six nodes: 1~hour and 16~minutes from the first job to
 the last, 1386 minutes of jobs in all (about 185 core-hours). Most jobs
@@ -498,8 +498,8 @@ simpler choice, and the one of the previous versions.
 
 \paragraph{Results.} The totals in the headers of \file{thermal\_T*.dat}
 (\texttt{absorption total}, km/mol, and \texttt{emission total},
-s$^{-1}$), with the development version that follows 2026.11.5
-(\texttt{git 925b5e0}; \texttt{--block} of \file{anh\_assemble.py} since \texttt{git d1c0592}), in the
+s$^{-1}$), with version 2026.11.6 (phases run with \texttt{git 925b5e0}, the
+same code; spectra assembled with 2026.11.6), in the
 anharmonic and the harmonic scheme; $\pm$ is the error from the four
 blocks. With \opt{dipole3}~$=1$ (all the third-order terms of the dipole,
 the default since 2026.11.5) and with \opt{dipole3}~$=0$ (the default of

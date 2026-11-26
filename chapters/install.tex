@@ -44,7 +44,7 @@ output of \texttt{docker version}) are welcome.
 (Chapter~\ref{ch:tut-pyrene}) inside the image, with two MPI processes, in
 about a minute, and ends with \texttt{anh-selftest: OK}:
 \begin{verbatim}
-docker run --rm ghcr.io/gmulas/anharmonicaos:2026.11.5 anh-selftest
+docker run --rm ghcr.io/gmulas/anharmonicaos:2026.11.6 anh-selftest
 \end{verbatim}
 \texttt{anh-selftest~N} uses N processes; N must not exceed the physical
 cores.
@@ -52,9 +52,9 @@ cores.
 \paragraph{Running on your own files.} Mount the working directory as
 \file{/work}:
 \begin{verbatim}
-docker run --rm -v $PWD:/work ghcr.io/gmulas/anharmonicaos:2026.11.5 \
+docker run --rm -v $PWD:/work ghcr.io/gmulas/anharmonicaos:2026.11.6 \
        thermal_anharmonicity_fase1
-docker run --rm -v $PWD:/work ghcr.io/gmulas/anharmonicaos:2026.11.5 \
+docker run --rm -v $PWD:/work ghcr.io/gmulas/anharmonicaos:2026.11.6 \
        mpirun -np 4 thermal_anharmonicity_fase2b
 \end{verbatim}
 \begin{itemize}
@@ -80,15 +80,15 @@ a single \file{.sif} file (about 0.5~GB) once, and run the programs with
 installed). The files written belong to you, and the current directory is
 visible inside the container:
 \begin{verbatim}
-apptainer pull anharmonicaos-2026.11.5.sif \
-       docker://ghcr.io/gmulas/anharmonicaos:2026.11.5
-apptainer exec anharmonicaos-2026.11.5.sif anh-selftest
-apptainer exec anharmonicaos-2026.11.5.sif thermal_anharmonicity_fase1
+apptainer pull anharmonicaos-2026.11.6.sif \
+       docker://ghcr.io/gmulas/anharmonicaos:2026.11.6
+apptainer exec anharmonicaos-2026.11.6.sif anh-selftest
+apptainer exec anharmonicaos-2026.11.6.sif thermal_anharmonicity_fase1
 \end{verbatim}
 Where the machine cannot reach \file{ghcr.io}, the same image is in the
 Files section of the SourceForge project as
-\file{AnharmoniCaOs-2026.11.5-amd64.sif} (x86\_64) and
-\file{AnharmoniCaOs-2026.11.5-arm64.sif} (aarch64; \texttt{uname -m}
+\file{AnharmoniCaOs-2026.11.6-amd64.sif} (x86\_64) and
+\file{AnharmoniCaOs-2026.11.6-arm64.sif} (aarch64; \texttt{uname -m}
 tells which one), with their checksums in \file{SHA256SUMS}: download the
 one for the processor, copy it to the cluster and use it in place of the
 file made by \prog{apptainer pull}.
