@@ -8,7 +8,7 @@ Table~\ref{tab:programs} is the index. What the programs compute is in
 Chapter~\ref{ch:workflow} and in the tutorials; their options in the
 input file are in Chapter~\ref{ch:inputs}.
 
-\begin{table}[ht]
+\begin{table}[htbp]
 \centering\small
 \caption{The programs and scripts of \ac{}.}\label{tab:programs}
 \begin{tabular}{lp{0.36\textwidth}r}
@@ -215,7 +215,7 @@ destinations of its bands.}\label{fig:flow-fase2a}
 and histograms.}\label{fig:flow-fase2b}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.55\textwidth]{figures/flow-tools.png}
 \caption{The tools: input files from a quantum-chemistry calculation
@@ -592,18 +592,14 @@ and one NVIDIA A40 GPU of such a node (with 8 of its cores). Times on
 different machines are not directly comparable, and no other kind of
 machine was measured.
 
-{\small
-\begin{longtable}{p{0.13\textwidth}p{0.15\textwidth}p{0.34\textwidth}p{0.11\textwidth}p{0.17\textwidth}}
+\begin{table}[htbp]
+\small
 \caption{Codes for \prog{anh\_fd.py}, fastest first: the time of one job
-as measured with the settings of this section.}\label{tab:fd-codes}\\
+as measured with the settings of this section.}\label{tab:fd-codes}
+\begin{tabular}{p{0.13\textwidth}p{0.15\textwidth}p{0.34\textwidth}p{0.11\textwidth}p{0.17\textwidth}}
 \toprule
 \raggedright code & \raggedright runs on, licence & \raggedright time of one job & \raggedright memory & \raggedright main caveat \tabularnewline
 \midrule
-\endfirsthead
-\toprule
-\raggedright code & \raggedright runs on, licence & \raggedright time of one job & \raggedright memory & \raggedright main caveat \tabularnewline
-\midrule
-\endhead
 \raggedright gpu4pyscf 1.9 &
   \raggedright GPU; Apache 2.0 &
   \raggedright benzene B3LYP/6-31G, grid (150,\,974): 62--91~s, mean 71~s (one A40);
@@ -641,7 +637,8 @@ as measured with the settings of this section.}\label{tab:fd-codes}\\
   \raggedright not measured &
   \raggedright \texttt{nosymm} required \tabularnewline
 \bottomrule
-\end{longtable}}
+\end{tabular}
+\end{table}
 
 With a GPU, use gpu4pyscf: it is the fastest by far and computes the
 response of the grid. With CPUs only, use ORCA with the product grid
