@@ -1115,6 +1115,7 @@ anh python3 TOOLS/anh_sample.py --inp inp --freqsfile freqsfile \
 \end{lstlisting}
 A second run with the same \texttt{-{}-prefix} in the same directory
 overwrites the files of the first.
+\texttt{-{}-walkers N --procs N} runs N Wang--Landau walkers in parallel.
 
 \paragraph{E$_\mathrm{enum}$ from a number of states (optional).}
 \texttt{-{}-enum-states N}, instead of \texttt{-{}-enum}, gives the number
@@ -1147,7 +1148,6 @@ chooses E$_\mathrm{enum} = 1950$~cm$^{-1}$, with 83\,554 states
 \texttt{-{}-enum 1950}. With bins of 10~cm$^{-1}$, N = 10$^3$, 10$^4$,
 10$^5$ and 10$^6$ give E$_\mathrm{enum}$ = 1020, 1480, 1990 and
 2550~cm$^{-1}$ for pyrene.
-\texttt{-{}-walkers N --procs N} runs N Wang--Landau walkers in parallel.
 
 \paragraph{Result.} \file{PREFIX\_states.dat}, \file{PREFIX\_dos.dat} and,
 with \texttt{-{}-per-bin}, the blocks \file{PREFIX\_quanta\_block000},
