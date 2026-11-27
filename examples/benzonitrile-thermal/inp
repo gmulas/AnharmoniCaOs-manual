@@ -1,0 +1,38 @@
+## Variables ##
+# Tutorial 3, light version: benzonitrile (C6H5CN, 33 modes), phase 1 for the thermal jobs.
+# Force field: B3LYP-D3(BJ)/N07D by finite differences of analytic Hessians (gpu4pyscf, through
+# tools/anh_fd_pyscf.py), symmetrised in C2v with anh_symm.py --zero --principal-axes: the
+# dipole components of freqsfile, dmu2file and dmu3file are along the principal axes a, b, c.
+## System definition ##
+nmodes = 33
+
+verbosity = 27
+
+## Limits ##
+vectolerance3 = 5.e-2
+fermithres = 0.20
+ddthres = 0.20
+hsizescalepar = 8
+maxtothops = 4
+maxfhops = 4
+maxddhops = 4
+diophantineiter = 0
+eigensolver = 2
+bandthres = 1e-3
+ltokeep=1
+computeground=1
+
+## Histograms ##
+#histoutprefix = hist
+Ehistmin = -12.5
+Ehistmax = 12.5
+Ehiststep = 5
+wnumhistmin = 0
+wnumhistmax = 9000
+wnumhiststep = 0.01
+danharmhistmin = -1000
+danharmhistmax = 1000
+danharmhiststep = 5.
+
+
+modepopfile = "quantafile"

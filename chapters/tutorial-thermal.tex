@@ -17,6 +17,128 @@ The example of this chapter is a cluster calculation: 701 starting states
 of pyrene in 177 jobs, about 23 hours of jobs of 8 threads, which took
 about 1~hour and a quarter on six 64-core nodes. Steps~1 and~3 run on a
 laptop in a few minutes; step~2 is the heavy one.
+Section~\ref{sec:thermal-light} first runs the three steps on a smaller
+molecule, benzonitrile, in about five minutes on a laptop.
+
+\section{A light version: benzonitrile on a laptop}\label{sec:thermal-light}
+
+Benzonitrile (C$_6$H$_5$CN) has 33 modes, and its states are few enough
+to take \emph{all} of them up to an energy E$_\mathrm{max}$, with no
+sampling. Below 1012.5~cm$^{-1}$ there are 118 harmonic states, and at
+300~K they hold more than 99\,\% of the population. The inputs are in
+\file{examples/benzonitrile-thermal/}:
+\begin{itemize}
+\item the force field (\file{freqsfile}, \file{phi3file},
+\file{phi4file}, \file{dmu2file}, \file{dmu3file}, the last four
+compressed with xz). It was computed at the B3LYP-D3(BJ)/N07D level by
+finite differences of analytic Hessians with \prog{anh\_fd.py} and PySCF
+(Section~\ref{sec:run-fd}), then symmetrised in C$_{2v}$ by
+\prog{anh\_symm.py --zero --principal-axes}
+(Section~\ref{sec:run-symm}), so the three dipole components are along
+the principal axes a, b, c of the molecule;
+\item \file{species} (the symmetry species of the modes) and
+\file{principal\_axes} (the axes and rotational constants), both written
+by \prog{anh\_symm.py};
+\item \file{inp}, the settings of Tutorial~1 with 33 modes
+(\opt{fermithres}~$=$~\opt{ddthres}~$=0.20$), and \file{quantafile}
+with the ground state;
+\item \file{run.sh}, which runs everything.
+\end{itemize}
+From an empty directory:
+\begin{lstlisting}
+sh .../examples/benzonitrile-thermal/run.sh CODEDIR BINDIR
+\end{lstlisting}
+where \file{CODEDIR} is the source tree of \ac{} (with \file{tools/})
+and \file{BINDIR} the directory of the three programs. The script runs
+phase~1 in \file{base/}, then the three steps of this chapter:
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_sample.py --inp base/inp \
+  --freqsfile base/freqsfile --enum 1012.5 --emax 1012.5 \
+  --ehistmin -12.5 --ehiststep 25 --per-bin 100000 --blocks 1 \
+  --species species --prefix bn
+python3 CODEDIR/tools/anh_jobs.py --base base --profile laptop \
+  --out jobs --states bn_quanta_block000 --Ehistmin -12.5 \
+  --Ehiststep 25 --Emax 1012.5 --wnumstep 0.5 \
+  --inp-extra "spectral = 0" "eigensolver = 2"
+ANHBIN=BINDIR jobs/submit_all.sh
+python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out spectra \
+  --T 0 100 200 300 --lng bn_dos.dat --axes principal_axes
+\end{lstlisting}
+\begin{itemize}
+\item \prog{anh\_sample.py} enumerates the 118 states
+(\flag{--per-bin} larger than any bin: one block with all of them) and
+writes their exact number per bin in \file{bn\_dos.dat}.
+\item \prog{anh\_jobs.py} splits them into six jobs of about 20
+states, with a wavenumber grid of 0.5~cm$^{-1}$. The two
+\flag{--inp-extra} lines choose the diagonalisation of the polyads
+instead of the spectral method; for polyads of a few hundred to a few
+thousand states it is much faster.
+\item \file{submit\_all.sh} runs the jobs one after the other, 4
+threads each.
+\item \prog{anh\_assemble.py} gives the spectra at 0, 100, 200 and
+300~K, with \file{thermal\_T*\_components.dat} along a, b, c.
+\end{itemize}
+With version 2026.11.6 the whole script took 286~s on a laptop. At 200
+and 300~K \prog{anh\_assemble.py} warns that 0.14\,\% and 0.71\,\% of
+the Boltzmann weight is in energy bins near E$_\mathrm{max}$ that are
+incomplete, and leaves them out.
+
+\paragraph{Results.} The totals of the headers of
+\file{thermal\_T*.dat}, and, for comparison, the same calculation with
+every state up to 2512.5~cm$^{-1}$ (15595 states in 312 jobs of 8
+threads, about 160 hours of jobs on a cluster, version 2026.11.5 with
+later changes, git \texttt{925b5e0}):
+\begin{center}
+\small
+\begin{tabular}{lrrrr}
+\hline
+E$_\mathrm{max}$ (cm$^{-1}$) & 0~K & 100~K & 200~K & 300~K \\
+\hline
+absorption (km/mol), 1012.5 & 235.200 & 236.041 & 239.342 & 242.185 \\
+absorption (km/mol), 2512.5 & 235.179 & & & 245.747 \\
+emission (s$^{-1}$), 1012.5 & 0 & 0.0024 & 0.0331 & 0.0852 \\
+emission (s$^{-1}$), 2512.5 & 0 & & & 0.2253 \\
+\hline
+\end{tabular}
+\end{center}
+At 300~K the components a, b, c of the absorption are 89.85, 52.69 and
+99.64~km/mol (90.41, 53.54 and 101.79 with E$_\mathrm{max}$ =
+2512.5). The strong bands, integrated over a window, at 300~K:
+\begin{center}
+\begin{tabular}{lrrrr}
+\hline
+window (cm$^{-1}$) & \multicolumn{2}{c}{E$_\mathrm{max}$ = 1012.5} &
+\multicolumn{2}{c}{E$_\mathrm{max}$ = 2512.5} \\
+ & km/mol & centroid & km/mol & centroid \\
+\hline
+530--575 & 14.23 & 552.99 & 14.18 & 552.81 \\
+670--700 & 32.06 & 687.14 & 32.17 & 687.24 \\
+740--775 & 44.37 & 758.14 & 44.36 & 758.08 \\
+1440--1510 & 13.81 & 1475.12 & 13.69 & 1475.23 \\
+2200--2320 (C$\equiv$N) & 36.73 & 2295.39 & 36.53 & 2294.50 \\
+3000--3150 (CH) & 31.87 & 3076.78 & 31.62 & 3076.76 \\
+\hline
+\end{tabular}
+\end{center}
+\begin{itemize}
+\item From 0 to 300~K the bands widen and move to lower wavenumbers by
+up to 3~cm$^{-1}$, most for the C$\equiv$N stretch. Their integrated
+intensities change by less than 10\,\%.
+\item Up to 1012.5~cm$^{-1}$ the strong bands at 300~K are within 1\,\%
+in intensity and 0.9~cm$^{-1}$ in centroid of the complete calculation:
+the states that the light version leaves out have a small weight.
+\item The total absorption grows with temperature mostly below
+800~cm$^{-1}$, where the modes at 142 and 164~cm$^{-1}$ and their hot
+bands are populated. The intensities are gross absorption, without
+subtracting stimulated emission.
+\item The \emph{emission} needs higher states: up to 1012.5~cm$^{-1}$ it
+is less than half of the complete value at 300~K, because the strong
+emitters (the CH and C$\equiv$N stretches) are above E$_\mathrm{max}$.
+For emission, or above 300~K, E$_\mathrm{max}$ must be raised
+(Section~\ref{sec:thermal-howhigh}); above about 2500~cm$^{-1}$ the states
+are too many to take them all, and they are sampled as in the rest of
+this chapter.
+\end{itemize}
 
 \section{What is computed}\label{sec:thermal-what}
 

@@ -1,0 +1,12 @@
+# anh_symm.py: principal axes of inertia of fd_pyscf/ref (a, b, c: I_a <= I_b <= I_c)
+# principal moments of inertia (amu angstrom^2): I_a 89.616825, I_b 328.052169, I_c 417.668995
+# rotational constants (cm-1): A 0.18810786, B 0.05138704, C 0.04036122
+# asymmetry parameter kappa = (2B - A - C)/(A - C) = -0.850747
+# inertia defect I_c - I_a - I_b = 0.000000 amu angstrom^2 (planar: c is perpendicular to the plane)
+# the frame of the dipole derivatives is the principal-axis frame: a = z, b = y, c = x
+rotation  # rows: a, b, c in the frame of SOURCE
+  0.000000000000 0.000000000000 1.000000000000
+  0.000000000000 1.000000000000 0.000000000000
+  1.000000000000 0.000000000000 0.000000000000
+input components: c b a  # axis of components 0 1 2 of the files of ff_pyscf (x/y/z: not a principal axis)
+output components: a b c  # of the files written in this directory
