@@ -1115,6 +1115,38 @@ anh python3 TOOLS/anh_sample.py --inp inp --freqsfile freqsfile \
 \end{lstlisting}
 A second run with the same \texttt{-{}-prefix} in the same directory
 overwrites the files of the first.
+
+\paragraph{E$_\mathrm{enum}$ from a number of states (optional).}
+\texttt{-{}-enum-states N}, instead of \texttt{-{}-enum}, gives the number
+of states to enumerate rather than E$_\mathrm{enum}$: the tool takes as
+E$_\mathrm{enum}$ the highest bin edge
+(\texttt{-{}-ehistmin}~$+\,k\,$\texttt{-{}-ehiststep}, not below~0) with
+at most N harmonic states of energy $\le$ E$_\mathrm{enum}$, so that no
+bin is partly enumerated and partly sampled by Wang--Landau. It first
+estimates the edge from Beyer--Swinehart counts (frequencies rounded to
+\texttt{-{}-bs-grain}, 0.1~cm$^{-1}$ by default), then checks it on the
+exact enumeration, moving down one edge while there are more than N states
+and up one edge while the next edge still has at most N. N may be written
+as \texttt{1e5}; it cannot exceed \texttt{-{}-maxenum} (5\,000\,000 by
+default; a whole run takes about 1.2~GB and 30~s per million states of
+pyrene, 72 modes, and 0.65~GB and 13~s for benzonitrile, 33 modes), and the option works with harmonic energies only. The
+log gives E$_\mathrm{enum}$, the number of states up to it (exact, and the
+Beyer--Swinehart estimate) and the number at the next edge, and then the
+equivalent \texttt{-{}-enum}: the run is the same, file by file, as one
+with \texttt{-{}-enum E$_\mathrm{enum}$} and the same seed. If
+E$_\mathrm{enum}$ comes out above \texttt{-{}-emax}, the tool stops: lower
+N, raise \texttt{-{}-emax}, or give \texttt{-{}-enum}. With the bins of
+Tutorial~3:
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_sample.py --inp inp --freqsfile freqsfile \
+  --enum-states 1e5 --emax 2500 --ehistmin -50 --ehiststep 100 \
+  --per-bin 2 --blocks 1 --prefix s
+\end{lstlisting}
+chooses E$_\mathrm{enum} = 1950$~cm$^{-1}$, with 83\,554 states
+(128\,385 at the next edge, 2050~cm$^{-1}$): the same run as
+\texttt{-{}-enum 1950}. With bins of 10~cm$^{-1}$, N = 10$^3$, 10$^4$,
+10$^5$ and 10$^6$ give E$_\mathrm{enum}$ = 1020, 1480, 1990 and
+2550~cm$^{-1}$ for pyrene.
 \texttt{-{}-walkers N --procs N} runs N Wang--Landau walkers in parallel.
 
 \paragraph{Result.} \file{PREFIX\_states.dat}, \file{PREFIX\_dos.dat} and,
