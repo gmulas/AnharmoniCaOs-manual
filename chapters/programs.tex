@@ -75,7 +75,7 @@ The function below mounts the current directory at the same path inside
 the container and starts there, passes the number of OpenMP threads
 (the image sets it to 1 otherwise; Section~\ref{sec:run-resources}), and runs the command given:
 \begin{lstlisting}
-IMG=ghcr.io/gmulas/anharmonicaos:2026.11.5
+IMG=ghcr.io/gmulas/anharmonicaos:2026.11.6
 anh() { docker run --rm -v "$PWD":"$PWD" -w "$PWD" \
           -e OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" "$IMG" "$@"; }
 \end{lstlisting}
@@ -93,7 +93,7 @@ it (Section~\ref{sec:container}).
 \paragraph{Apptainer and Singularity.} With the \file{.sif} file of
 Section~\ref{sec:container}:
 \begin{lstlisting}
-SIF=$HOME/anharmonicaos-2026.11.5.sif
+SIF=$HOME/anharmonicaos-2026.11.6.sif
 anh() { apptainer exec --env OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}" "$SIF" "$@"; }
 \end{lstlisting}
 Use \prog{singularity} where \prog{apptainer} is not installed
@@ -1289,7 +1289,7 @@ host and each job starts the container. Write the container in the
 \texttt{mpirun} entry of the profile, with the threads of the profile,
 and leave \texttt{bindir} empty:
 \begin{lstlisting}
-"mpirun": "apptainer exec --cleanenv --env OMP_NUM_THREADS=8 /path/anharmonicaos-2026.11.5.sif mpirun -np 1 --bind-to none",
+"mpirun": "apptainer exec --cleanenv --env OMP_NUM_THREADS=8 /path/anharmonicaos-2026.11.6.sif mpirun -np 1 --bind-to none",
 "bindir": ""
 \end{lstlisting}
 Add \texttt{-{}-bind} for the file systems of the jobs and of the phase~1
@@ -1486,8 +1486,8 @@ python3 CODEDIR/tools/anh_assemble.py --jobs jobs --out res_E --lng s_dos.dat \
   --E 500 1000 2000 --Ewindow 500
 \end{lstlisting}
 It takes about 7~minutes and 4.5~GB of memory on a laptop. With the jobs
-of the development version that follows 2026.11.5 (\texttt{git 925b5e0})
-and \prog{anh\_assemble.py} of \texttt{git 64850ba}, the headers give
+of Chapter~\ref{ch:tut-thermal} (phases of version 2026.11.6) and
+\prog{anh\_assemble.py} of 2026.11.6, the headers give
 ($\pm$ from the four blocks):
 \begin{center}
 \footnotesize
@@ -1525,7 +1525,7 @@ phase~2b:
 \begin{lstlisting}
 python3 CODEDIR/tools/anh_assemble.py --dirs . --out res --T 0 --axes c,b,a
 \end{lstlisting}
-\file{res/thermal\_T0\_components.dat} gives, with version 2026.11.5, 153.5~km/mol of a-type
+\file{res/thermal\_T0\_components.dat} gives, with version 2026.11.6, 153.5~km/mol of a-type
 absorption, 142.9 of b-type and 192.8 of c-type (out-of-plane modes),
 489.20 in all (151.3, 140.4, 190.1 and 481.70 with \opt{dipole3}~$=0$). Adding
 \texttt{-{}-envelope a=A.dat b=B.dat c=C.dat}, with contours computed for
@@ -1558,8 +1558,8 @@ temporary directory, in about a minute, with N MPI processes (default 2,
 at most the physical cores), and end with \texttt{OK}:
 \begin{lstlisting}
 CODEDIR/tests/selftest.sh CODEDIR 4         # from anywhere
-docker run --rm ghcr.io/gmulas/anharmonicaos:2026.11.5 anh-selftest 4
-apptainer exec anharmonicaos-2026.11.5.sif anh-selftest 4
+docker run --rm ghcr.io/gmulas/anharmonicaos:2026.11.6 anh-selftest 4
+apptainer exec anharmonicaos-2026.11.6.sif anh-selftest 4
 \end{lstlisting}
 The first argument of \prog{selftest.sh} is the directory of the
 programs. The numerical checks of \file{tests/checks} are described in
