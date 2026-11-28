@@ -1682,10 +1682,25 @@ wavenumber:
 \end{itemize}
 With \texttt{-{}-plot}, \file{assign\_T<T>\_W1-W2.png}: the computed
 spectrum (\file{thermal\_T<T>\_envelope.dat} when \prog{anh\_assemble.py}
-was run with \texttt{-{}-envelope}, otherwise \file{thermal\_T<T>.dat}
-convolved with a Gaussian of FWHM \texttt{-{}-fwhm}, default
-2~cm$^{-1}$), the transitions as sticks on the right axis, and a dotted
-line with the label above each one.
+was run with \texttt{-{}-envelope}, otherwise \file{thermal\_T<T>.dat}),
+convolved with a Gaussian of FWHM \texttt{-{}-fwhm} (by default
+2~cm$^{-1}$ without envelopes and none with them), the transitions as
+sticks on the right axis, and the labels in a row above the spectrum,
+each joined to its transition by a dotted line.
+
+\paragraph{Bands.} At $T>0$ a band is made of its fundamental (or
+combination, overtone) from the ground state and of many hot bands: the
+same transition with other modes, mostly the lowest ones, already
+excited, a fraction of a wavenumber apart. With \texttt{-{}-by band} the
+table and the plot have one line per band instead of one per transition:
+the transitions of the window with the same change of quanta between the
+main components of their initial and final states (e.g.\ $\nu_{10}$:
+$0\to\nu_{10}$, $\nu_1\to\nu_1+\nu_{10}$, \ldots), with their summed
+intensity, their intensity-weighted wavenumber, their number and range,
+the initial states with their share of the band
+(\texttt{-{}-initial-states}, default 4), and the strongest transition.
+A band written with a minus sign, e.g.\ \texttt{$\nu$18-$\nu$4}, is a
+difference band, from a state with $\nu_4$ excited to one with $\nu_{18}$.
 
 The intensities are those that \prog{anh\_assemble.py} puts in the
 thermal spectrum (anharmonic scheme, the default; the harmonic scheme is
