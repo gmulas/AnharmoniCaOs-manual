@@ -149,3 +149,45 @@ border leaves a state less than \opt{startnormwmin} of its weight, the
 state is binned without the border, exactly as with
 \opt{spectralborder}~$=0$; the \texttt{startnorm:} line of the log says
 so.
+
+\paragraph{The width in the destination polyads.}\label{sec:destwidth}
+\opt{spectraldelta} enters the spectral method twice: as the width of the
+energy windows of the starting state, which decides which of its
+eigenstates are summed coherently, and as the width of the kernel of the
+local densities of states in the destination polyads, which only
+broadens the lines. The second is the expensive part, and it can be made
+wider on its own with \opt{spectraldeltadest}, optionally growing with
+the energy of the destination (\opt{spectraldeltadestslope}) or with the
+wavenumber of the transition (\opt{spectralresolvingpower}). The starting
+polyad keeps \opt{spectraldelta}, and so do the totals. When any of the
+three is set, each \file{proclog\_n*} has a line
+\texttt{spectral destination widths:} with the smallest and the largest
+width used. By default the three options give \opt{spectraldelta}
+everywhere, as before they existed.
+
+Pyrene, four strongly mixed starting states at 4000--5000~cm$^{-1}$
+(\opt{fermithres}~$=0.2$, \opt{hsizescalepar}~$=8$, \opt{maxtothops}~$=4$,
+\opt{spectraldelta}~$=0.1$), compared with the same states at 0.1
+everywhere; L1 is the relative distance of the band shapes after
+re-binning to the resolution given:
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\hline
+destination width & L1 at 5 cm$^{-1}$ & L1 at 10 cm$^{-1}$ & cost of the destinations \\
+\hline
+\opt{spectraldeltadest}~$=0.3$ & $\le 0.5$\,\% & $\le 0.2$\,\% & 2--5 times less \\
+\opt{spectraldeltadest}~$=1$ & 3--4\,\% & about 1\,\% & 6--17 times less \\
+\opt{spectralresolvingpower}~$=3000$ & $\le 0.5$\,\% & $\le 0.2$\,\% & as 0.3, or more \\
+\opt{spectralresolvingpower}~$=10000$ & about 0.1\,\% & about 0.1\,\% & little saved \\
+\hline
+\end{tabular}
+\end{center}
+The totals agree within 0.1\,\% in every case. A constant
+\opt{spectraldeltadest} of 0.3 is the best compromise for spectra to be
+compared at a resolution of 5~cm$^{-1}$ or more, and 1 is enough at
+10~cm$^{-1}$. The constant resolving power moves the error to the CH
+stretches, whose lines are narrower than 1~cm$^{-1}$ even at these
+energies, and it saves little, since the expensive destinations are the
+ones close in energy to the starting state, where it keeps the fine
+width.
