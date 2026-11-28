@@ -1382,6 +1382,23 @@ vibrational states but none of the sample stops the program
 (\texttt{-{}-allow-empty-cells}: a warning instead); without
 \file{.block} files it only warns.
 
+\paragraph{Jobs for the assignment of the bands.} With
+\texttt{-{}-assign-emax E}, the jobs with a starting state of harmonic
+energy up to $E$ (cm$^{-1}$) are written so that their logs contain the
+transitions that \prog{anh\_assign.py} reads
+(Section~\ref{sec:run-assign}): explicit diagonalisation
+(\opt{spectral}~$=0$, with the \opt{eigensolver} of the base \file{inp},
+1 if it sets none), \opt{verbosity} with the bits \texttt{polyadlevels}
+and \texttt{components} added to that of the base \file{inp}, and
+\opt{cutintensity} equal to \texttt{-{}-assign-cutintensity} (default
+$10^{-6}$). \file{manifest.json} marks these jobs with
+\texttt{"assign": true}; the other jobs do not change. Their
+\file{proclog\_n00000} grows to tens or hundreds of MB, and explicit
+diagonalisation is slower than the spectral method for large polyads:
+keep $E$ to the starting states that matter at the temperatures of
+interest. The spectra of the two methods agree within the resolution of
+the spectral method.
+
 \section{\prog{anh\_assemble.py}}\label{sec:run-assemble}
 
 \paragraph{Where.} Anywhere: \texttt{-{}-jobs} is the directory written by
@@ -1594,6 +1611,124 @@ absorption, 142.9 of b-type and 192.8 of c-type (out-of-plane modes),
 489.20 in all (151.3, 140.4, 190.1 and 481.70 with \opt{dipole3}~$=0$). Adding
 \texttt{-{}-envelope a=A.dat b=B.dat c=C.dat}, with contours computed for
 the experiment, writes \file{res/thermal\_T0\_envelope.dat}.
+
+\section{\prog{anh\_assign.py}}\label{sec:run-assign}
+
+\prog{anh\_assign.py} tells which transitions make up the bands of a
+thermal spectrum: for each wavenumber window, its strongest transitions
+between anharmonic eigenstates, each with a label, its wavenumber, its
+intensity at the temperature $T$, and the initial and final eigenstates
+described by their largest harmonic components. With \texttt{-{}-plot}
+it draws the spectrum with the transitions marked and labelled, as in
+Fig.~1 of \cite{debentzmann2026}, which does this for pyrene at 0~K.
+
+\paragraph{Where.} Anywhere: \texttt{-{}-jobs} (or \texttt{-{}-dirs}) are
+the phase~2b runs, \texttt{-{}-assembled} the directory that
+\prog{anh\_assemble.py} wrote from them with the same \texttt{-{}-T}
+(Section~\ref{sec:run-assemble}).
+
+\paragraph{What the runs need.} The transitions are read from the log of
+phase~2b, \file{proclog\_n00000} of each run (also compressed,
+\file{.xz} or \file{.gz}). They are there only if the run used
+\begin{itemize}
+\item explicit diagonalisation, \opt{spectral}~$=0$: the spectral method
+  computes no eigenstates of the destination polyads;
+\item \opt{verbosity} with the bits \texttt{polyadlevels} (the levels of
+  every polyad, with their energies) and \texttt{components} (one line per
+  transition, with the largest components of the final state), e.g.
+  \texttt{verbosity = polyadlevels + components};
+\item a small \opt{cutintensity}: a transition is written only when one of
+  its band terms has a squared harmonic amplitude above it, and the
+  default $10^{-3}$ leaves out the weak ones; $10^{-6}$ keeps practically
+  all of them.
+\end{itemize}
+\texttt{anh\_jobs.py -{}-assign-emax} sets all this
+(Section~\ref{sec:run-jobs}). The program can also start from runs that
+log nothing, see below.
+
+\paragraph{Command.}
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_assign.py --jobs jobs --assembled res --T 300 \
+  --window 2200 2260 --window 665 705 --top 10 --plot
+anhp python3 TOOLS/anh_assign.py --jobs jobs --assembled res --T 300 \
+  --window 2200 2260 --window 665 705 --top 10 --plot
+\end{lstlisting}
+\texttt{-{}-window W1 W2} can be repeated; \texttt{-{}-top N} (default 10)
+is the number of transitions listed per window, \texttt{-{}-min-share}
+leaves out those below a share of the window. \texttt{-{}-reference FILE}
+adds a measured spectrum to the plot (two columns, or JCAMP-DX as
+downloaded from the NIST Chemistry WebBook), scaled to the computed one
+over the window; \texttt{-{}-invert-x} draws the wavenumber decreasing to
+the right; \texttt{-{}-format pdf} writes PDF plots. \texttt{-{}-ascii}
+writes \texttt{nu} instead of $\nu$ in the table.
+
+\paragraph{Result.} For each window, \file{assign\_T<T>\_W1-W2.txt}
+(\texttt{-{}-out} changes the prefix): header lines beginning with
+\texttt{\#}, then one tab-separated line per label, in order of
+wavenumber:
+\begin{itemize}
+\item the label and the wavenumber (cm$^{-1}$);
+\item $I_T$, the contribution of the transition to the absorption of
+  \file{thermal\_T<T>.dat} (km/mol), and its share of the window;
+\item $P$, the population of the initial state at $T$, and $I = I_T/P$,
+  the intensity of the transition from that state (km/mol);
+\item the energies of the initial and final states above the anharmonic
+  ground state (cm$^{-1}$);
+\item the two states, each as its largest harmonic components with their
+  weights, e.g.\ \texttt{$\nu$7+$\nu$12(0.86) 2$\nu$4+$\nu$12(0.09)};
+  \texttt{ground} is the vibrational ground state. The modes are numbered
+  as in \file{freqsfile}, and the header gives the harmonic wavenumber of
+  each mode that appears.
+\end{itemize}
+With \texttt{-{}-plot}, \file{assign\_T<T>\_W1-W2.png}: the computed
+spectrum (\file{thermal\_T<T>\_envelope.dat} when \prog{anh\_assemble.py}
+was run with \texttt{-{}-envelope}, otherwise \file{thermal\_T<T>.dat}
+convolved with a Gaussian of FWHM \texttt{-{}-fwhm}, default
+2~cm$^{-1}$), the transitions as sticks on the right axis, and a dotted
+line with the label above each one.
+
+The intensities are those that \prog{anh\_assemble.py} puts in the
+thermal spectrum (anharmonic scheme, the default; the harmonic scheme is
+not supported): each eigenstate weighs as in the anharmonic energy bin it
+falls in. One transition between the same two eigenstates can come from
+several starting states, and the tool adds them up; transitions of a
+window with the same main components of the two states and wavenumbers
+within \texttt{-{}-merge-tol} (default 0.5~cm$^{-1}$) count as one.
+
+\paragraph{Coverage.} The header of each table gives the
+\emph{coverage} of the window: the sum of the intensities of all the
+transitions read from the logs over the absorption of
+\file{thermal\_T<T>.dat} in the same wavenumber bins. It is 1 within
+about $10^{-3}$ when every starting state logged all its transitions; it
+is lower when some runs have no log (spectral runs, logs removed), and
+slightly lower with a large \opt{cutintensity}. The header also gives the
+coverage over the whole spectrum and the Boltzmann weight of the
+eigenstates found in the logs.
+
+\paragraph{Runs without logs.} The labels of a window need the logs only
+of the starting states that matter for it. When a window has a coverage
+below $1-{}$\texttt{-{}-suggest-above} (default 0.05), the table ends
+with the starting states to recompute: the program estimates, from the
+histograms of each run, which runs and which harmonic energy bins give
+the absorption that is not assigned, and lists the bins that give
+\texttt{-{}-rerun-share} (default 0.9) of it. Their states are written
+to \file{assign\_T<T>\_W1-W2\_rerun.quanta}, with the command that makes
+jobs of them:
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_jobs.py --base ../t1 --profile laptop \
+  --out assign_T300_665-705_rerun --states assign_T300_665-705_rerun.quanta \
+  --Ehistmin -12.5 --Ehiststep 25 --Emax 1012.5 --wnummin 0 \
+  --wnummax 7000 --wnumstep 0.5 --assign-emax 1e9
+ANHBIN=CODEDIR sh assign_T300_665-705_rerun/submit_all.sh
+python3 CODEDIR/tools/anh_assign.py --jobs jobs --assembled res --T 300 \
+  --window 665 705 --logs assign_T300_665-705_rerun --plot
+\end{lstlisting}
+Add the \texttt{-{}-inp-extra} lines of the original jobs, if any. With
+\texttt{-{}-logs} the transitions of a starting state are taken from those
+runs, with the weight the state has in the original jobs; the spectrum is
+still that of \texttt{-{}-assembled}. Each starting state is used once.
+Only the states that matter for the window are recomputed, and only once:
+the logs serve any later run of \prog{anh\_assign.py} on those windows.
 
 \section{\prog{anh\_hopball.py}}\label{sec:run-hopball}
 
