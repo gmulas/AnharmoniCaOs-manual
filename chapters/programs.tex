@@ -655,7 +655,8 @@ python3 CODEDIR/tools/anh_fd.py prepare REF --code CODE --template TEMPLATE \
         [--gridtol 0.1] [--gridref D000_RESULT] [--orient]] \
         [--refout FILE | --ref-time SECONDS] [--jobs-at-once K]
   ... run the jobs ...
-python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR] [--gridtol 0.1]
+python3 CODEDIR/tools/anh_fd.py collect [--dir DIR] [--outdir DIR] [--gridtol 0.1] \
+        [--harmonic-from-ref [--ref REF]]
 \end{lstlisting}
 (\texttt{anh python3 TOOLS/anh\_fd.py ...} in the container). REF is the
 \file{.fchk}, \file{.hess} or \file{.fd\_ddipole} file, CODE is
@@ -870,6 +871,40 @@ jobs agree within a few $10^{-3}$~cm$^{-1}$ and the dipoles within a few
 $10^{-5}$~a.u., while a job on another state differs by hundreds of
 cm$^{-1}$. Jobs without these values are only skipped, and the check never
 changes the files.
+
+\paragraph{Hybrid force fields.} The harmonic part of the spectrum (the
+wavenumbers and the first dipole derivatives) can come from a better and
+more expensive method than the cubic and quartic constants, for example a
+double-hybrid functional for the harmonic part and a hybrid one for the
+rest. Compute the reference with the better method (optimisation and
+harmonic frequencies: REF), and run \texttt{prepare} on it with the
+TEMPLATE of the cheaper method. The jobs are then displaced along the
+normal modes of REF, around its geometry, so the derivatives of the
+cheaper surface are computed directly in the normal coordinates of the
+spectrum and no change of mode basis is needed (\prog{anh\_ffcompare.py
+-{}-write} cannot transform the semi-quartic constants exactly when the
+modes of the two methods mix). Then
+\begin{lstlisting}
+python3 CODEDIR/tools/anh_fd.py collect --dir DIR --outdir DIR --harmonic-from-ref
+\end{lstlisting}
+writes \file{freqsfile} with the wavenumbers and dipole derivatives of
+REF (without the option the dipole derivatives come from \file{d000}, the
+cheaper method), and the other four files as without the option. The
+reference is not a stationary point of the cheaper method: \texttt{collect}
+prints its gradient along each mode, $F_k=\partial E/\partial q_k$ in
+cm$^{-1}$ (from the energies of the jobs at $\pm$step), a first estimate
+$-F_k/\omega_k$ of the distance to the minimum of the cheaper method, and
+its harmonic wavenumbers along the modes of REF. The linear term is left
+out of the force field, since the better surface is stationary at the
+reference; a large $|F_k/\omega_k|$ (several tenths) means that the two
+methods disagree on the geometry, and the cubic and quartic constants
+taken at REF then differ noticeably from those at the minimum of the
+cheaper method. The state check uses the cheaper surface (its gradient,
+its Hessian at the reference and its dipole derivatives); since $F_k$
+comes from the pair of jobs at $\pm$step, a job on another state is
+named together with its partner. \texttt{-{}-ref REF} gives the reference
+when it is no longer at the path that \texttt{prepare} stored (another
+machine).
 
 \section{\prog{anh\_ffcompare.py}}\label{sec:run-ffcompare}
 
